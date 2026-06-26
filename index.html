@@ -140,48 +140,6 @@ let html5QrcodeScanner;
 
 iniciarScanner();
 
-setInterval(() => {
-
-  document.querySelectorAll("#reader *").forEach(el => {
-
-    const txt = el.textContent.trim();
-
-    if (txt === "Request Camera Permissions") {
-      el.textContent = "Solicitar Permisos de Cámara";
-    }
-
-    if (txt === "Requesting camera permissions...") {
-      el.textContent = "Solicitando permisos de cámara...";
-    }
-
-    if (txt === "Select Camera") {
-      el.textContent = "Seleccionar Cámara";
-    }
-
-    if (txt === "Start Scanning") {
-      el.textContent = "Iniciar Escáner";
-    }
-
-    if (txt === "Stop Scanning") {
-      el.textContent = "Detener Escáner";
-    }
-
-    if (txt === "Scan an Image File") {
-      el.textContent = "Escanear Imagen";
-    }
-
-    if (txt === "Choose Image") {
-      el.textContent = "Seleccionar Imagen";
-    }
-
-    if (txt === "No Cameras Found") {
-      el.textContent = "No se encontraron cámaras";
-    }
-
-  });
-
-}, 500);
-
 function iniciarScanner(){
 
   html5QrcodeScanner =
@@ -197,6 +155,29 @@ function iniciarScanner(){
     onScanSuccess
   );
 }
+  setTimeout(() => {
+
+  const labels = document.querySelectorAll("span");
+  labels.forEach(el => {
+    if (el.innerText === "Select Camera")
+      el.innerText = "Seleccionar Cámara";
+  });
+
+  const buttons = document.querySelectorAll("button");
+  buttons.forEach(el => {
+
+    if (el.innerText === "Start Scanning")
+      el.innerText = "Iniciar Escáner";
+
+    if (el.innerText === "Stop Scanning")
+      el.innerText = "Detener Escáner";
+
+    if (el.innerText === "Scan an Image File")
+      el.innerText = "Escanear Imagen";
+
+  });
+
+}, 500);
 
 function reiniciarScanner(){
 
