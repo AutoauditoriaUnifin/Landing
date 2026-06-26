@@ -140,64 +140,62 @@ let html5QrcodeScanner;
 
 iniciarScanner();
 
-setInterval(traducirScanner, 1000);
-  function iniciarScanner(){
+setInterval(() => {
+
+  document.querySelectorAll("#reader *").forEach(el => {
+
+    const txt = el.textContent.trim();
+
+    if (txt === "Request Camera Permissions") {
+      el.textContent = "Solicitar Permisos de Cámara";
+    }
+
+    if (txt === "Requesting camera permissions...") {
+      el.textContent = "Solicitando permisos de cámara...";
+    }
+
+    if (txt === "Select Camera") {
+      el.textContent = "Seleccionar Cámara";
+    }
+
+    if (txt === "Start Scanning") {
+      el.textContent = "Iniciar Escáner";
+    }
+
+    if (txt === "Stop Scanning") {
+      el.textContent = "Detener Escáner";
+    }
+
+    if (txt === "Scan an Image File") {
+      el.textContent = "Escanear Imagen";
+    }
+
+    if (txt === "Choose Image") {
+      el.textContent = "Seleccionar Imagen";
+    }
+
+    if (txt === "No Cameras Found") {
+      el.textContent = "No se encontraron cámaras";
+    }
+
+  });
+
+}, 500);
+
+function iniciarScanner(){
 
   html5QrcodeScanner =
     new Html5QrcodeScanner(
       "reader",
       {
-        fps: 10,
-        qrbox: 250
+        fps:10,
+        qrbox:250
       }
     );
 
   html5QrcodeScanner.render(
     onScanSuccess
   );
-}
-
-function traducirScanner() {
-
-  document.querySelectorAll("*").forEach(el => {
-
-    if (el.innerText === "Request Camera Permissions") {
-      el.innerText = "Solicitar Permisos de Cámara";
-    }
-
-    if (el.innerText === "Requesting camera permissions...") {
-      el.innerText = "Solicitando permisos de cámara...";
-    }
-
-    if (el.innerText === "Select Camera") {
-      el.innerText = "Seleccionar Cámara";
-    }
-
-    if (el.innerText === "Start Scanning") {
-      el.innerText = "Iniciar Escáner";
-    }
-
-    if (el.innerText === "Stop Scanning") {
-      el.innerText = "Detener Escáner";
-    }
-
-    if (el.innerText === "Scan an Image File") {
-      el.innerText = "Escanear Imagen";
-    }
-
-    if (el.innerText === "Choose Image") {
-      el.innerText = "Seleccionar Imagen";
-    }
-
-    if (el.innerText === "No Cameras Found") {
-      el.innerText = "No se encontraron cámaras";
-    }
-
-    if (el.innerText === "Camera access denied") {
-      el.innerText = "Acceso a la cámara denegado";
-    }
-  });
-
 }
 
 function reiniciarScanner(){
