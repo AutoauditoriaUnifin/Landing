@@ -1,36 +1,37 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+
 <title>Consulta QR UNIFIN</title>
 
 <script src="https://unpkg.com/html5-qrcode"></script>
 
 <style>
+
 body{
   font-family:Arial;
-  background:#f5f5f5;
-  padding:20px;
+  background:#020724;
   margin:0;
+  padding:20px;
 }
 
 .container{
-  max-width:800px;
+  max-width:850px;
   margin:auto;
   background:white;
-  padding:20px;
-  border-radius:10px;
-  box-shadow:0 2px 10px rgba(0,0,0,.1);
+  padding:30px;
+  border-radius:15px;
 }
 
 .logo{
   text-align:center;
-  margin-bottom:20px;
 }
 
 .logo img{
-  max-width:280px;
+  max-width:300px;
 }
 
 h2{
@@ -40,13 +41,14 @@ h2{
 
 #reader{
   width:100%;
+  margin-top:20px;
 }
 
 .card{
-  background:#f8f8f8;
+  background:#f5f5f5;
   padding:20px;
-  margin-top:20px;
   border-radius:10px;
+  margin-top:20px;
 }
 
 .btn{
@@ -54,20 +56,41 @@ h2{
   background:#0033cc;
   color:white;
   padding:12px 20px;
-  text-decoration:none;
   border-radius:8px;
+  text-decoration:none;
   margin-top:15px;
 }
 
 .btn:hover{
-  background:#002299;
+  background:#001f8c;
 }
 
-.error{
-  color:red;
-  text-align:center;
+input{
+  width:100%;
+  padding:12px;
+  box-sizing:border-box;
+  margin-top:10px;
+}
+
+button{
+  width:100%;
+  padding:14px;
+  background:#0033cc;
+  color:white;
+  border:none;
+  border-radius:8px;
+  margin-top:10px;
+  cursor:pointer;
+}
+
+button:hover{
+  background:#001f8c;
+}
+
+#resultado{
   margin-top:20px;
 }
+
 </style>
 
 </head>
@@ -82,7 +105,27 @@ h2{
 
   <h2>Consulta de Activos UNIFIN</h2>
 
+  <h3>Escanear QR</h3>
+
   <div id="reader"></div>
+
+  <button onclick="reiniciarScanner()">
+    Volver a Escanear
+  </button>
+
+  <hr>
+
+  <h3>Buscar Manualmente</h3>
+
+  <input
+    type="text"
+    id="txtID"
+    placeholder="Ingrese el ID del activo"
+  >
+
+  <button onclick="buscarManual()">
+    Buscar Activo
+  </button>
 
   <div id="resultado"></div>
 
@@ -93,17 +136,92 @@ h2{
 const API_URL =
 "https://script.google.com/macros/s/AKfycbws2MwDZEN_VPQqYOVJgGijhHW5lyo5WZXL7gD2LizaXRcxC82LOiCDOgjPrEav6D3o/exec";
 
+let html5QrcodeScanner;
+
+iniciarScanner();
+
+function iniciarScanner(){
+
+  html5QrcodeScanner =
+    new Html5QrcodeScanner(
+      "reader",
+      {
+        fps:10,
+        qrbox:250
+      }
+    );
+
+  html5QrcodeScanner.render(
+    onScanSuccess
+  );
+}
+
+function reiniciarScanner(){
+
+  document.getElementById(
+    "resultado"
+  ).innerHTML = "";
+
+  document.getElementById(
+    "reader"
+  ).innerHTML = "";
+
+  iniciarScanner();
+}
+
+function onScanSuccess(decodedText){
+
+  html5QrcodeScanner.clear();
+
+  consultarActivo(
+    decodedText
+  );
+}
+
+function buscarManual(){
+
+  const id =
+    document.getElementById(
+      "txtID"
+    ).value.trim();
+
+  if(!id){
+
+    alert(
+      "Ingrese un ID."
+    );
+
+    return;
+  }
+
+  consultarActivo(id);
+}
+
 function consultarActivo(id){
 
+  document.getElementById(
+    "resultado"
+  ).innerHTML =
+  "<p>Consultando activo...</p>";
+
   fetch(
-    API_URL + "?id=" + encodeURIComponent(id)
+    API_URL +
+    "?id=" +
+    encodeURIComponent(id)
   )
-  .then(response => response.json())
+
+  .then(response =>
+    response.json()
+  )
+
   .then(data => {
 
     if(!data.encontrado){
 
-      document.getElementById("resultado").innerHTML =
+      document.getElementById(
+        "resultado"
+      ).innerHTML =
+
       `
       <div class="card">
         <h3>Activo no encontrado</h3>
@@ -113,54 +231,64 @@ function consultarActivo(id){
       return;
     }
 
-    document.getElementById("resultado").innerHTML =
+    document.getElementById(
+      "resultado"
+    ).innerHTML =
+
     `
     <div class="card">
-      <p><b>Cliente:</b> ${data.cliente}</p>
-      <p><b>Contrato:</b> ${data.contrato}</p>
-      <p><b>Activo:</b> ${data.activo}</p>
-      <p><b>ID:</b> ${data.id}</p>
-      <p><b>Estatus:</b> ${data.estatus}</p>
 
-      <a class="btn"
-         href="${data.linkAuditoria}"
-         target="_blank">
-         Abrir Autoauditoría
+      <p>
+      <b>Cliente:</b>
+      ${data.cliente}
+      </p>
+
+      <p>
+      <b>Contrato:</b>
+      ${data.contrato}
+      </p>
+
+      <p>
+      <b>Activo:</b>
+      ${data.activo}
+      </p>
+
+      <p>
+      <b>ID:</b>
+      ${data.id}
+      </p>
+
+      <p>
+      <b>Estatus:</b>
+      ${data.estatus}
+      </p>
+
+      <a
+        class="btn"
+        href="${data.linkAuditoria}"
+        target="_blank"
+      >
+        Abrir Autoauditoría
       </a>
+
     </div>
     `;
   })
+
   .catch(error => {
 
-    document.getElementById("resultado").innerHTML =
+    document.getElementById(
+      "resultado"
+    ).innerHTML =
+
     `
     <div class="card">
-      <h3>Error al consultar el activo</h3>
-      <p>${error}</p>
+      Error:
+      ${error}
     </div>
     `;
   });
 }
-
-function onScanSuccess(decodedText){
-
-  html5QrcodeScanner.clear();
-
-  consultarActivo(decodedText);
-}
-
-let html5QrcodeScanner =
-new Html5QrcodeScanner(
-  "reader",
-  {
-    fps:10,
-    qrbox:250
-  }
-);
-
-html5QrcodeScanner.render(
-  onScanSuccess
-);
 
 </script>
 
