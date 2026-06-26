@@ -140,14 +140,15 @@ let html5QrcodeScanner;
 
 iniciarScanner();
 
-function iniciarScanner(){
+setInterval(traducirScanner, 1000);
+  function iniciarScanner(){
 
   html5QrcodeScanner =
     new Html5QrcodeScanner(
       "reader",
       {
-        fps:10,
-        qrbox:250
+        fps: 10,
+        qrbox: 250
       }
     );
 
@@ -155,29 +156,49 @@ function iniciarScanner(){
     onScanSuccess
   );
 }
-  setTimeout(() => {
 
-  const labels = document.querySelectorAll("span");
-  labels.forEach(el => {
-    if (el.innerText === "Select Camera")
+function traducirScanner() {
+
+  document.querySelectorAll("*").forEach(el => {
+
+    if (el.innerText === "Request Camera Permissions") {
+      el.innerText = "Solicitar Permisos de Cámara";
+    }
+
+    if (el.innerText === "Requesting camera permissions...") {
+      el.innerText = "Solicitando permisos de cámara...";
+    }
+
+    if (el.innerText === "Select Camera") {
       el.innerText = "Seleccionar Cámara";
-  });
+    }
 
-  const buttons = document.querySelectorAll("button");
-  buttons.forEach(el => {
-
-    if (el.innerText === "Start Scanning")
+    if (el.innerText === "Start Scanning") {
       el.innerText = "Iniciar Escáner";
+    }
 
-    if (el.innerText === "Stop Scanning")
+    if (el.innerText === "Stop Scanning") {
       el.innerText = "Detener Escáner";
+    }
 
-    if (el.innerText === "Scan an Image File")
+    if (el.innerText === "Scan an Image File") {
       el.innerText = "Escanear Imagen";
+    }
 
+    if (el.innerText === "Choose Image") {
+      el.innerText = "Seleccionar Imagen";
+    }
+
+    if (el.innerText === "No Cameras Found") {
+      el.innerText = "No se encontraron cámaras";
+    }
+
+    if (el.innerText === "Camera access denied") {
+      el.innerText = "Acceso a la cámara denegado";
+    }
   });
 
-}, 500);
+}
 
 function reiniciarScanner(){
 
