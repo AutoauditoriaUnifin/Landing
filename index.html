@@ -115,16 +115,16 @@ button:hover{
 
   <hr>
 
-  <h3>Buscar Manualmente</h3>
+  <h3>Buscar Manualmente(Ingrese el GpsId que tiene abajo del Qr)</h3>
 
   <input
     type="text"
     id="txtID"
-    placeholder="Ingrese el ID del activo"
+    placeholder="Ingrese el ID del GPD"
   >
 
   <button onclick="buscarManual()">
-    Buscar Activo
+    Buscar GPS
   </button>
 
   <div id="resultado"></div>
@@ -249,8 +249,8 @@ function consultarActivo(id){
       </p>
 
       <p>
-      <b>Activo:</b>
-      ${data.activo}
+      <b>GPS ID:</b>
+      ${data.id}
       </p>
 
       <p>
