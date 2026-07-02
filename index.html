@@ -111,16 +111,16 @@ button:hover{
 
   <hr>
 
-  <h3>Buscar Manualmente (Ingrese el GPSId que tiene abajo del Qr)</h3>
+  <h3>Buscar Manualmente (Ingrese el numero del Qr)</h3>
 
   <input
     type="text"
     id="txtID"
-    placeholder="Ingrese el ID del GPS"
+    placeholder="Ingrese el número del QR"
   >
 
   <button onclick="buscarManual()">
-    Buscar GPS
+    Buscar Activo
   </button>
 
   <div id="resultado"></div>
@@ -130,7 +130,7 @@ button:hover{
 <script>
 
 const API_URL =
-"https://script.google.com/macros/s/AKfycbwcB6SHyiRVw6RYEFCznPuNRPi2oisDkBvcxBwqmWp8nW9-eqvRJQ5TFGkpnJrfYIg/exec";
+"https://script.google.com/macros/s/AKfycbw7OfcTuSAMvmbAvhaAk2_-dQ0kk4nn0y0p0_8yrWcHUQhKnPdgJlfXLobqhFIZu8L7/exec";
 
 let html5QrcodeScanner;
 
@@ -228,47 +228,47 @@ function consultarActivo(id){
     }
 
     document.getElementById(
-      "resultado"
-    ).innerHTML =
+  "resultado"
+).innerHTML =
 
-    `
-    <div class="card">
+`
+<div class="card">
 
-      <p>
-      <b>Cliente:</b>
-      ${data.cliente}
-      </p>
+  <p>
+  <b>Cliente:</b>
+  ${data.cliente}
+  </p>
 
-      <p>
-      <b>Contrato:</b>
-      ${data.contrato}
-      </p>
+  <p>
+  <b>Anexo:</b>
+  ${data.Annex}
+  </p>
 
-      <p>
-      <b>Activo:</b>
-      ${data.activo}
-      </p>
+  <p>
+  <b>Activo:</b>
+  ${data.activo}
+  </p>
 
-     <p>
-     <b>GPSID:</b>
-     ${data.gpsId}
-     </p>
+  <p>
+  <b>QR Number:</b>
+  ${data.QrNumber}
+  </p>
 
-      <p>
-      <b>Estatus:</b>
-      ${data.estatus}
-      </p>
+  <p>
+  <b>Estatus:</b>
+  ${data.estatus}
+  </p>
 
-      <a
-        class="btn"
-        href="${data.linkAuditoria}"
-        target="_blank"
-      >
-        Abrir Autoauditoría
-      </a>
+  <a
+    class="btn"
+    href="${data.linkAuditoria}"
+    target="_blank"
+  >
+    Abrir Autoauditoría
+  </a>
 
-    </div>
-    `;
+</div>
+`;
   })
 
   .catch(error => {
