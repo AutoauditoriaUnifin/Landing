@@ -18,6 +18,24 @@ body{
   padding:20px;
 }
 
+ /* LOGO */
+.logo{
+
+  text-align:center;
+  margin-bottom:25px;
+
+}
+
+.logo img{
+
+  width:260px;
+  max-width:90%;
+  height:auto;
+  display:block;
+  margin:auto;
+
+}
+
 /* CONTENEDOR PRINCIPAL */
 .container{
   max-width:850px;
@@ -119,7 +137,15 @@ button:hover{
 
 <div class="container">
 
-  <h2>Consulta de Activos UNIFIN</h2>
+<div class="logo">
+
+  <img
+    src="https://autoauditoriaunifin.github.io/Landing/logoo.png"
+    alt="UNIFIN">
+
+</div>
+
+<h2>Consulta de Activos UNIFIN</h2>
 
   <h3>Escanear QR</h3>
 
@@ -150,7 +176,7 @@ button:hover{
 <script>
 
 const API_URL =
-"https://script.google.com/macros/s/AKfycbwdU2SkDyHz3W0wsNLqjr22pQRUtVj86r-px1_qPhFY0etJ21OsLL5bDIx9APBdQ4G4/exec";
+"https://script.google.com/macros/s/AKfycbw73LmkxeUuUYbPhwMgObRdRsX_rxnilffmRtBZc4h5h_9BlfQyb1Sfj7HNqbfH5nE3/exec";
 
 let html5QrcodeScanner;
 
