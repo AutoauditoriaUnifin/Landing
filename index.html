@@ -12,7 +12,8 @@
 <style>
 
 body{
-  font-family:Arial;
+  font-family:Arial, sans-serif;
+  font-size:22px;
   background:#F4F6F8;
   margin:0;
   padding:20px;
@@ -50,14 +51,18 @@ body{
 h2{
   text-align:center;
   color:#1F3557;
-  font-size:32px;
-  margin-bottom:10px;
+  font-size:42px;
+  line-height:1.25;
+  margin-bottom:18px;
 }
 
 /* SUBTITULOS */
 h3{
   color:#118AB2;
-  margin-top:25px;
+  font-size:28px;
+  line-height:1.35;
+  margin-top:30px;
+  margin-bottom:15px;
 }
 
 /* SCANNER */
@@ -71,24 +76,37 @@ h3{
 /* TARJETA INFO */
 .card{
   background:#EEF2F5;
-  padding:22px;
+  padding:28px;
   border-radius:14px;
-  margin-top:20px;
-  border-left:6px solid #118AB2;
+  margin-top:25px;
+  border-left:7px solid #118AB2;
   color:#374757;
-  font-size:18px;
+  font-size:24px;
+  line-height:1.55;
+}
+
+.card p{
+  margin:16px 0;
+}
+
+.card b{
+  font-size:25px;
 }
 
 /* BOTÓN */
 .btn{
-  display:inline-block;
+  display:block;
+  width:100%;
+  box-sizing:border-box;
+  text-align:center;
   background:#118AB2;
   color:white;
-  padding:14px 20px;
-  border-radius:10px;
+  padding:20px 24px;
+  border-radius:12px;
   text-decoration:none;
-  margin-top:15px;
-  font-weight:600;
+  margin-top:22px;
+  font-size:25px;
+  font-weight:700;
   transition:.3s;
 }
 
@@ -99,24 +117,38 @@ h3{
 /* INPUT */
 input{
   width:100%;
-  padding:14px;
+  padding:20px;
   box-sizing:border-box;
-  margin-top:10px;
-  border:1px solid #ccc;
-  border-radius:10px;
+  margin-top:12px;
+  border:2px solid #118AB2;
+  border-radius:12px;
+  font-size:24px;
+  color:#374757;
+}
+
+input::placeholder{
+  font-size:21px;
+  color:#7A8793;
+}
+
+input:focus{
+  outline:none;
+  border-color:#1F3557;
+  box-shadow:0 0 0 4px rgba(17,138,178,.18);
 }
 
 /* BOTONES */
 button{
   width:100%;
-  padding:14px;
+  padding:20px;
   background:#118AB2;
   color:white;
   border:none;
-  border-radius:10px;
-  margin-top:10px;
+  border-radius:12px;
+  margin-top:15px;
   cursor:pointer;
-  font-weight:600;
+  font-size:24px;
+  font-weight:700;
   transition:.3s;
 }
 
@@ -176,7 +208,7 @@ button:hover{
 <script>
 
 const API_URL =
-"https://script.google.com/macros/s/AKfycbyunYs5Nqzb0z1tGQJMzgI8h0TUbR5LP6rQW35EtPnVYkgNNgjC87KziamALZgY3qT2ng/exec";
+"https://script.google.com/macros/s/AKfycbw7YnklUhfAKc_7juRMrC2lOjslv3EXDpb-kPRex6llHFrUyQSAu1cXDHj4kmtoHwjaXw/exec";
 
 let html5QrcodeScanner;
 
