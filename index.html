@@ -220,11 +220,114 @@ hr{
 
   <h3>Escanear QR</h3>
 
-  <div id="reader"></div>
+<button
+  type="button"
+  onclick="mostrarSelectorCamaras()">
+  📷 Seleccionar cámara
+</button>
 
-  <button onclick="reiniciarScanner()">
-    🔄 Volver a Escanear
-  </button>
+<div id="reader"></div>
+
+<button
+  type="button"
+  onclick="reiniciarScanner()">
+  🔄 Volver a Escanear
+</button>
+
+<!-- =========================
+     SELECCIONAR CÁMARA
+========================= -->
+
+<div
+  id="modalCamara"
+  style="
+    display:none;
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,.65);
+    z-index:9999;
+    align-items:center;
+    justify-content:center;
+    padding:25px;
+    box-sizing:border-box;
+  ">
+
+  <div style="
+    width:100%;
+    max-width:650px;
+    background:#FFFFFF;
+    border-radius:18px;
+    padding:30px;
+    box-shadow:0 10px 35px rgba(0,0,0,.35);
+    text-align:center;
+  ">
+
+    <div style="
+      color:#1F3557;
+      font-size:32px;
+      font-weight:700;
+      margin-bottom:20px;
+    ">
+      📷 Seleccione una cámara
+    </div>
+
+    <div style="
+      color:#374757;
+      font-size:23px;
+      line-height:1.5;
+      margin-bottom:20px;
+    ">
+      La cámara no se abrirá hasta que presione
+      <b>Abrir cámara</b>.
+    </div>
+
+    <select
+      id="selectorCamara"
+      style="
+        width:100%;
+        padding:18px;
+        border:2px solid #118AB2;
+        border-radius:12px;
+        background:#FFFFFF;
+        color:#374757;
+        font-size:22px;
+        box-sizing:border-box;
+      ">
+
+      <option value="">
+        Buscando cámaras...
+      </option>
+
+    </select>
+
+    <div
+      id="mensajeCamara"
+      style="
+        color:#C0392B;
+        font-size:20px;
+        margin-top:15px;
+      ">
+    </div>
+
+    <button
+      type="button"
+      onclick="abrirCamaraSeleccionada()">
+      Abrir cámara
+    </button>
+
+    <button
+      type="button"
+      onclick="cerrarSelectorCamaras()"
+      style="
+        background:#374757;
+        margin-top:12px;
+      ">
+      Cancelar
+    </button>
+
+  </div>
+
+</div>
 
   <hr>
 
@@ -249,37 +352,278 @@ hr{
 const API_URL =
 "https://script.google.com/macros/s/AKfycbw7YnklUhfAKc_7juRMrC2lOjslv3EXDpb-kPRex6llHFrUyQSAu1cXDHj4kmtoHwjaXw/exec";
 
-let html5QrcodeScanner;
+/* =========================================
+   CONTROL DEL ESCÁNER QR
+========================================= */
 
-iniciarScanner();
+let lectorQR = null;
+let camaraActiva = false;
 
-function iniciarScanner(){
 
-  html5QrcodeScanner =
-    new Html5QrcodeScanner(
-      "reader",
+/* =========================================
+   MOSTRAR SELECTOR DE CÁMARAS
+========================================= */
+
+async function mostrarSelectorCamaras() {
+
+  const modal =
+    document.getElementById("modalCamara");
+
+  const selector =
+    document.getElementById("selectorCamara");
+
+  const mensaje =
+    document.getElementById("mensajeCamara");
+
+  modal.style.display = "flex";
+
+  selector.innerHTML =
+    '<option value="">Buscando cámaras...</option>';
+
+  mensaje.textContent = "";
+
+  try {
+
+    /*
+      El navegador puede solicitar permiso,
+      pero todavía no iniciará la transmisión.
+    */
+
+    const camaras =
+      await Html5Qrcode.getCameras();
+
+    if (!camaras || camaras.length === 0) {
+
+      selector.innerHTML =
+        '<option value="">No se encontraron cámaras</option>';
+
+      mensaje.textContent =
+        "No se encontró ninguna cámara disponible.";
+
+      return;
+    }
+
+    selector.innerHTML =
+      '<option value="">Seleccione una cámara</option>';
+
+    camaras.forEach(function(camara, indice) {
+
+      const opcion =
+        document.createElement("option");
+
+      opcion.value =
+        camara.id;
+
+      opcion.textContent =
+        camara.label ||
+        "Cámara " + (indice + 1);
+
+      selector.appendChild(opcion);
+
+    });
+
+    /*
+      Intentar seleccionar automáticamente
+      la cámara trasera en la lista, sin abrirla.
+    */
+
+    const opciones =
+      Array.from(selector.options);
+
+    const camaraTrasera =
+      opciones.find(function(opcion) {
+
+        const nombre =
+          opcion.textContent.toLowerCase();
+
+        return (
+          nombre.includes("back") ||
+          nombre.includes("rear") ||
+          nombre.includes("trasera") ||
+          nombre.includes("environment")
+        );
+
+      });
+
+    if (camaraTrasera) {
+      selector.value = camaraTrasera.value;
+    }
+
+  } catch (error) {
+
+    selector.innerHTML =
+      '<option value="">No fue posible consultar las cámaras</option>';
+
+    mensaje.textContent =
+      "Debe permitir el acceso a la cámara para continuar.";
+
+  }
+
+}
+
+
+/* =========================================
+   CERRAR SELECTOR
+========================================= */
+
+function cerrarSelectorCamaras() {
+
+  const modal =
+    document.getElementById("modalCamara");
+
+  modal.style.display = "none";
+
+}
+
+
+/* =========================================
+   ABRIR LA CÁMARA SELECCIONADA
+========================================= */
+
+async function abrirCamaraSeleccionada() {
+
+  const selector =
+    document.getElementById("selectorCamara");
+
+  const mensaje =
+    document.getElementById("mensajeCamara");
+
+  const cameraId =
+    selector.value;
+
+  if (!cameraId) {
+
+    mensaje.textContent =
+      "Seleccione una cámara antes de continuar.";
+
+    return;
+  }
+
+  cerrarSelectorCamaras();
+
+  try {
+
+    await detenerScanner();
+
+    document.getElementById("reader").innerHTML = "";
+
+    lectorQR =
+      new Html5Qrcode("reader");
+
+    await lectorQR.start(
+
+      cameraId,
+
       {
-        fps:10,
-        qrbox:250
+        fps: 10,
+
+        qrbox: {
+          width: 250,
+          height: 250
+        },
+
+        aspectRatio: 1
+      },
+
+      onScanSuccess,
+
+      function() {
+        /*
+          Los intentos sin QR se ignoran.
+        */
       }
+
     );
 
-  html5QrcodeScanner.render(onScanSuccess);
+    camaraActiva = true;
+
+  } catch (error) {
+
+    camaraActiva = false;
+
+    document.getElementById("resultado").innerHTML = `
+      <div class="card">
+        ❌ No fue posible abrir la cámara seleccionada.
+        <br><br>
+        Verifique los permisos de la cámara.
+      </div>
+    `;
+
+  }
+
 }
 
-function reiniciarScanner(){
+
+/* =========================================
+   DETENER CÁMARA
+========================================= */
+
+async function detenerScanner() {
+
+  if (!lectorQR) {
+    return;
+  }
+
+  try {
+
+    if (camaraActiva) {
+      await lectorQR.stop();
+    }
+
+    lectorQR.clear();
+
+  } catch (error) {
+
+    console.log(
+      "El lector ya estaba detenido."
+    );
+
+  }
+
+  lectorQR = null;
+  camaraActiva = false;
+
+}
+
+
+/* =========================================
+   VOLVER A ESCANEAR
+========================================= */
+
+async function reiniciarScanner() {
 
   document.getElementById("resultado").innerHTML = "";
+
+  await detenerScanner();
+
   document.getElementById("reader").innerHTML = "";
 
-  iniciarScanner();
+  /*
+    Volver a mostrar la lista.
+    No abre automáticamente ninguna cámara.
+  */
+
+  mostrarSelectorCamaras();
+
 }
 
-function onScanSuccess(decodedText){
 
-  html5QrcodeScanner.clear();
+/* =========================================
+   QR DETECTADO
+========================================= */
+
+async function onScanSuccess(decodedText) {
+
+  if (!camaraActiva) {
+    return;
+  }
+
+  camaraActiva = false;
+
+  await detenerScanner();
 
   consultarActivo(decodedText);
+
 }
 
 function buscarManual(){
