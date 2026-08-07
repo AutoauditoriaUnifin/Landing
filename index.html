@@ -209,6 +209,8 @@ hr{
 
 <div class="container">
 
+<div id="zonaBusqueda">
+
 <div class="logo">
 
   <img
@@ -340,11 +342,15 @@ hr{
     placeholder="Ingrese el número del QR"
   >
 
-  <button onclick="buscarManual()">
-    🔍 Buscar Activo
-  </button>
+  <button
+  type="button"
+  onclick="buscarManual()">
+  🔍 Buscar Activo
+</button>
 
-  <div id="resultado"></div>
+</div>
+
+<div id="resultado"></div>
 
 </div>
 
@@ -661,21 +667,32 @@ async function reiniciarScanner() {
 
   escaneoProcesado = false;
 
+  await detenerScanner();
+
   document.getElementById("resultado")
     .innerHTML = "";
 
-  await detenerScanner();
+  const zonaBusqueda =
+    document.getElementById("zonaBusqueda");
+
+  if (zonaBusqueda) {
+    zonaBusqueda.style.display = "block";
+  }
 
   const reader =
     document.getElementById("reader");
 
-  reader.innerHTML = "";
-  reader.style.display = "block";
+  if (reader) {
+    reader.innerHTML = "";
+    reader.style.display = "block";
+  }
 
-  /*
-    Muestra el selector, pero no abre
-    automáticamente ninguna cámara.
-  */
+  const campoManual =
+    document.getElementById("txtID");
+
+  if (campoManual) {
+    campoManual.value = "";
+  }
 
   await mostrarSelectorCamaras();
 
@@ -753,28 +770,73 @@ function consultarActivo(id){
       return;
     }
 
-    document.getElementById("resultado").innerHTML =
+    const zonaBusqueda =
+  document.getElementById("zonaBusqueda");
 
-`
-<div class="card">
+if (zonaBusqueda) {
+  zonaBusqueda.style.display = "none";
+}
 
-  <p><b>Cliente:</b> ${data.cliente}</p>
+    document.getElementById("resultado").innerHTML = `
+  <div class="card">
 
-  <p><b>Anexo:</b> ${data.Annex}</p>
+    <h3 style="
+      margin-top:0;
+      color:#374757;
+      text-align:center;
+    ">
+      ✅ Activo encontrado
+    </h3>
 
-  <p><b>Activo:</b> ${data.activo}</p>
+    <p>
+      <b>Cliente:</b>
+      ${data.cliente || "Sin información"}
+    </p>
 
-  <p><b>No. Serie:</b> ${data.NoSerie}</p>
+    <p>
+      <b>Anexo:</b>
+      ${data.Annex || "Sin información"}
+    </p>
 
-  <p><b>QR Number:</b> ${data.QrNumber}</p>
+    <p>
+      <b>Activo:</b>
+      ${data.activo || "Sin información"}
+    </p>
 
-  <p><b>Estatus:</b> ${data.estatus}</p>
+    <p>
+      <b>No. Serie:</b>
+      ${data.NoSerie || "Sin información"}
+    </p>
 
-  <a class="btn" href="${data.linkAuditoria}" target="_blank">
-    Abrir Autoauditoría
-  </a>
+    <p>
+      <b>QR Number:</b>
+      ${data.QrNumber || "Sin información"}
+    </p>
 
-</div>
+    <p>
+      <b>Estatus:</b>
+      ${data.estatus || "Sin información"}
+    </p>
+
+    <a
+      class="btn"
+      href="${data.linkAuditoria}"
+      target="_blank"
+      rel="noopener noreferrer">
+      Abrir Autoauditoría
+    </a>
+
+    <button
+      type="button"
+      onclick="reiniciarScanner()"
+      style="
+        background:#374757;
+        margin-top:15px;
+      ">
+      🔄 Volver a Escanear
+    </button>
+
+  </div>
 `;
   })
 
