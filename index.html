@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head> 
@@ -350,7 +351,7 @@ hr{
 <script>
 
 const API_URL =
-"https://script.google.com/macros/s/AKfycbw7YnklUhfAKc_7juRMrC2lOjslv3EXDpb-kPRex6llHFrUyQSAu1cXDHj4kmtoHwjaXw/exec";
+"https://script.google.com/macros/s/AKfycbzpX-8cxaZM9E4jMYOZt0YJ4XESppjdkBlftuZnFQYOlrfTsWxIux5_Tai53tO71HZPmw/exec";
 
 /* =========================================
    CONTROL DEL ESCÁNER QR
@@ -358,6 +359,7 @@ const API_URL =
 
 let lectorQR = null;
 let camaraActiva = false;
+let escaneoProcesado = false;
 
 
 /* =========================================
@@ -501,7 +503,14 @@ async function abrirCamaraSeleccionada() {
 
   cerrarSelectorCamaras();
 
-  try {
+escaneoProcesado = false;
+
+const reader =
+  document.getElementById("reader");
+
+reader.style.display = "block";
+
+try {
 
     await detenerScanner();
 
@@ -553,38 +562,96 @@ async function abrirCamaraSeleccionada() {
 
 }
 
-
 /* =========================================
-   DETENER CÁMARA
+   DETENER CÁMARA COMPLETAMENTE
 ========================================= */
 
 async function detenerScanner() {
 
   if (!lectorQR) {
+
+    camaraActiva = false;
     return;
+
   }
 
   try {
 
+    /*
+      Primero detener la transmisión.
+      No cambiar camaraActiva antes de stop().
+    */
+
     if (camaraActiva) {
+
       await lectorQR.stop();
+
     }
+
+  } catch (error) {
+
+    console.warn(
+      "La cámara ya estaba detenida:",
+      error
+    );
+
+  }
+
+  try {
 
     lectorQR.clear();
 
   } catch (error) {
 
-    console.log(
-      "El lector ya estaba detenido."
+    console.warn(
+      "No fue posible limpiar el lector:",
+      error
     );
 
   }
 
+  /*
+    Liberación adicional de cualquier video
+    que haya quedado dentro del lector.
+  */
+
+  const videos =
+    document.querySelectorAll(
+      "#reader video"
+    );
+
+  videos.forEach(function(video) {
+
+    if (video.srcObject) {
+
+      video.srcObject
+        .getTracks()
+        .forEach(function(track) {
+
+          track.stop();
+
+        });
+
+      video.srcObject = null;
+
+    }
+
+  });
+
   lectorQR = null;
   camaraActiva = false;
 
-}
+  const reader =
+    document.getElementById("reader");
 
+  if (reader) {
+
+    reader.innerHTML = "";
+    reader.style.display = "none";
+
+  }
+
+}
 
 /* =========================================
    VOLVER A ESCANEAR
@@ -592,35 +659,59 @@ async function detenerScanner() {
 
 async function reiniciarScanner() {
 
-  document.getElementById("resultado").innerHTML = "";
+  escaneoProcesado = false;
+
+  document.getElementById("resultado")
+    .innerHTML = "";
 
   await detenerScanner();
 
-  document.getElementById("reader").innerHTML = "";
+  const reader =
+    document.getElementById("reader");
+
+  reader.innerHTML = "";
+  reader.style.display = "block";
 
   /*
-    Volver a mostrar la lista.
-    No abre automáticamente ninguna cámara.
+    Muestra el selector, pero no abre
+    automáticamente ninguna cámara.
   */
 
-  mostrarSelectorCamaras();
+  await mostrarSelectorCamaras();
 
 }
-
-
 /* =========================================
    QR DETECTADO
 ========================================= */
 
 async function onScanSuccess(decodedText) {
 
-  if (!camaraActiva) {
+  if (
+    !camaraActiva ||
+    escaneoProcesado
+  ) {
     return;
   }
 
-  camaraActiva = false;
+  /*
+    Bloquea nuevas lecturas, pero no cambia
+    camaraActiva antes de detener el lector.
+  */
 
-  await detenerScanner();
+  escaneoProcesado = true;
+
+  try {
+
+    await detenerScanner();
+
+  } catch (error) {
+
+    console.warn(
+      "No fue posible detener el lector:",
+      error
+    );
+
+  }
 
   consultarActivo(decodedText);
 
