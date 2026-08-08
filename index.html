@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head> 
@@ -200,6 +199,361 @@ hr{
   border:none;
   border-top:2px solid #D9E3EA;
 }
+
+/* =========================================
+   LANDING RESPONSIVA UNIFIN
+========================================= */
+
+:root {
+  --unifin-charcoal: #374757;
+  --unifin-dark-blue: #1F3557;
+  --unifin-blue: #118AB2;
+  --unifin-blue-hover: #0D6E8C;
+  --unifin-light-blue: #EEF7FB;
+  --unifin-gray: #EEF2F5;
+  --unifin-green: #8EDD65;
+  --unifin-light-green: #EFFBE9;
+  --unifin-salmon: #FF8E72;
+  --unifin-yellow: #FFD071;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  padding:
+    max(14px, env(safe-area-inset-top))
+    max(12px, env(safe-area-inset-right))
+    max(25px, env(safe-area-inset-bottom))
+    max(12px, env(safe-area-inset-left));
+
+  background: #F4F6F8;
+  color: var(--unifin-charcoal);
+  font-family: Arial, sans-serif;
+  font-size: 18px;
+  line-height: 1.45;
+}
+
+/* Contenedor principal */
+.container {
+  width: 100%;
+  max-width: 850px;
+  margin: 0 auto;
+  padding: clamp(16px, 4vw, 30px);
+  background: #FFFFFF;
+  border-radius: 18px;
+  box-shadow: 0 8px 24px rgba(55, 71, 87, 0.10);
+  overflow: hidden;
+}
+
+/* Logo */
+.logo {
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.logo img {
+  display: block;
+  width: min(260px, 75%);
+  height: auto;
+  margin: 0 auto;
+}
+
+/* Títulos */
+h2 {
+  margin: 0 0 22px;
+  color: var(--unifin-dark-blue);
+  text-align: center;
+  font-size: clamp(30px, 8vw, 42px);
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+
+h3 {
+  margin: 25px 0 14px;
+  color: var(--unifin-blue);
+  font-size: clamp(23px, 6vw, 28px);
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+
+/* Tarjeta del activo */
+.card {
+  width: 100%;
+  min-width: 0;
+  margin-top: 20px;
+  padding: clamp(18px, 5vw, 28px);
+  background: var(--unifin-gray);
+  color: var(--unifin-charcoal);
+  border-left: 7px solid var(--unifin-blue);
+  border-radius: 14px;
+  box-shadow: 0 5px 16px rgba(55, 71, 87, 0.08);
+  font-size: clamp(18px, 4.8vw, 24px);
+  line-height: 1.5;
+  overflow: hidden;
+}
+
+.card h3 {
+  margin-top: 0;
+  color: var(--unifin-charcoal);
+  text-align: center;
+  font-size: clamp(26px, 7vw, 34px);
+}
+
+.card p {
+  width: 100%;
+  min-width: 0;
+  margin: 16px 0;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  white-space: normal;
+}
+
+.card b {
+  color: var(--unifin-dark-blue);
+  font-size: inherit;
+}
+
+/* Evita que serie, QR y datos largos se salgan */
+.dato-activo {
+  display: inline;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+/* Botones */
+button,
+.btn {
+  display: flex;
+  width: 100%;
+  min-height: 58px;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 16px;
+  margin-top: 15px;
+  background: var(--unifin-blue);
+  color: #FFFFFF;
+  border: none;
+  border-radius: 12px;
+  font-family: inherit;
+  font-size: clamp(19px, 5vw, 24px);
+  font-weight: 700;
+  line-height: 1.25;
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+  overflow-wrap: anywhere;
+  box-shadow: 0 4px 10px rgba(17, 138, 178, 0.17);
+  transition:
+    background-color 0.2s ease,
+    transform 0.15s ease;
+  touch-action: manipulation;
+}
+
+button:active,
+.btn:active {
+  transform: scale(0.985);
+}
+
+/* Campo manual */
+input {
+  width: 100%;
+  min-height: 58px;
+  padding: 15px;
+  margin-top: 12px;
+  color: var(--unifin-charcoal);
+  background: #FFFFFF;
+  border: 2px solid var(--unifin-blue);
+  border-radius: 12px;
+  font-size: clamp(18px, 4.8vw, 23px);
+}
+
+input::placeholder {
+  color: #7A8793;
+  font-size: inherit;
+  opacity: 1;
+}
+
+/* Lector */
+#reader {
+  width: 100%;
+  min-width: 0;
+  margin-top: 18px;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+#reader video,
+#reader img,
+#reader canvas {
+  max-width: 100% !important;
+}
+
+/* =========================================
+   ANIMACIÓN DE BÚSQUEDA
+========================================= */
+
+.estado-consulta {
+  display: none;
+  width: 100%;
+  margin-top: 22px;
+  padding: 25px 18px;
+  background: var(--unifin-light-blue);
+  color: var(--unifin-charcoal);
+  border-left: 7px solid var(--unifin-blue);
+  border-radius: 14px;
+  text-align: center;
+  font-size: clamp(20px, 5.5vw, 27px);
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.spinner-unifin {
+  width: 54px;
+  height: 54px;
+  margin: 0 auto 16px;
+  border: 6px solid #D6E8F0;
+  border-top-color: var(--unifin-blue);
+  border-right-color: var(--unifin-green);
+  border-radius: 50%;
+  animation: girarUnifin 0.85s linear infinite;
+}
+
+.puntos-carga::after {
+  content: "";
+  display: inline-block;
+  width: 32px;
+  text-align: left;
+  animation: puntosUnifin 1.4s steps(4, end) infinite;
+}
+
+@keyframes girarUnifin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes puntosUnifin {
+  0% {
+    content: "";
+  }
+
+  25% {
+    content: ".";
+  }
+
+  50% {
+    content: "..";
+  }
+
+  75%,
+  100% {
+    content: "...";
+  }
+}
+
+/* Teléfonos pequeños */
+@media (max-width: 480px) {
+
+  body {
+    padding: 10px;
+  }
+
+  .container {
+    padding: 16px;
+    border-radius: 14px;
+  }
+
+  .card {
+    padding: 18px 16px;
+    border-left-width: 6px;
+  }
+
+  .card p {
+    font-size: 19px;
+    line-height: 1.5;
+  }
+
+  .card h3 {
+    font-size: 27px;
+  }
+
+  button,
+  .btn {
+    font-size: 20px;
+  }
+}
+
+/* Teléfonos muy angostos */
+@media (max-width: 360px) {
+
+  body {
+    padding: 7px;
+  }
+
+  .container {
+    padding: 13px;
+  }
+
+  .card {
+    padding: 16px 13px;
+  }
+
+  .card p {
+    font-size: 18px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+  .spinner-unifin {
+    animation-duration: 1.8s;
+  }
+
+  button,
+  .btn {
+    transition: none;
+  }
+}
+
+/* Modal adaptable a teléfonos */
+#modalCamara {
+  overflow-y: auto;
+}
+
+#modalCamara > div {
+  width: 100% !important;
+  max-width: 650px !important;
+  max-height: calc(100vh - 30px);
+  padding: clamp(18px, 5vw, 30px) !important;
+  overflow-y: auto;
+}
+
+#selectorCamara {
+  width: 100%;
+  min-height: 58px;
+  font-size: clamp(18px, 4.8vw, 22px) !important;
+}
+
+@media (max-width: 480px) {
+
+  #modalCamara {
+    padding: 12px !important;
+  }
+
+  #modalCamara > div > div:first-child {
+    font-size: 25px !important;
+  }
+}
  
 </style>
 
@@ -347,6 +701,20 @@ hr{
   onclick="buscarManual()">
   🔍 Buscar Activo
 </button>
+
+</div>
+
+<div
+  id="estadoConsulta"
+  class="estado-consulta"
+  role="status"
+  aria-live="polite">
+
+  <div class="spinner-unifin"></div>
+
+  <div id="textoEstadoConsulta">
+    Buscando activo<span class="puntos-carga"></span>
+  </div>
 
 </div>
 
@@ -667,6 +1035,8 @@ async function reiniciarScanner() {
 
   escaneoProcesado = false;
 
+  ocultarCargando();
+
   await detenerScanner();
 
   document.getElementById("resultado")
@@ -734,121 +1104,240 @@ async function onScanSuccess(decodedText) {
 
 }
 
-function buscarManual(){
+async function buscarManual() {
+
+  const campo =
+    document.getElementById("txtID");
 
   const id =
-    document.getElementById("txtID").value.trim();
+    campo.value.trim();
 
-  if(!id){
-    alert("Ingrese un ID.");
+  if (!id) {
+
+    campo.focus();
+
+    alert(
+      "Ingrese el número del código QR."
+    );
+
     return;
   }
 
+  escaneoProcesado = true;
+
+  await detenerScanner();
+
   consultarActivo(id);
+
 }
 
-function consultarActivo(id){
+function mostrarCargando(texto) {
 
-  document.getElementById("resultado").innerHTML =
-  "<p style='color:#118AB2;font-weight:bold;'>Consultando activo...</p>";
+  const estado =
+    document.getElementById("estadoConsulta");
 
-  fetch(API_URL + "?id=" + encodeURIComponent(id))
+  const textoEstado =
+    document.getElementById("textoEstadoConsulta");
 
-  .then(response => response.json())
+  if (textoEstado) {
 
-  .then(data => {
+    textoEstado.innerHTML =
+      texto +
+      '<span class="puntos-carga"></span>';
 
-    if(!data.encontrado){
+  }
 
-      document.getElementById("resultado").innerHTML =
-      `
-      <div class="card">
-        <h3>❌ Activo no encontrado</h3>
-      </div>
+  if (estado) {
+    estado.style.display = "block";
+  }
+
+}
+
+
+function ocultarCargando() {
+
+  const estado =
+    document.getElementById("estadoConsulta");
+
+  if (estado) {
+    estado.style.display = "none";
+  }
+
+}
+
+async function consultarActivo(id) {
+
+  const resultado =
+    document.getElementById("resultado");
+
+  const zonaBusqueda =
+    document.getElementById("zonaBusqueda");
+
+  resultado.innerHTML = "";
+
+  if (zonaBusqueda) {
+    zonaBusqueda.style.display = "none";
+  }
+
+  mostrarCargando(
+    "Buscando información del activo"
+  );
+
+  try {
+
+    const respuesta =
+      await fetch(
+        API_URL +
+        "?id=" +
+        encodeURIComponent(id)
+      );
+
+    if (!respuesta.ok) {
+
+      throw new Error(
+        "El servidor no respondió correctamente."
+      );
+
+    }
+
+    const data =
+      await respuesta.json();
+
+    ocultarCargando();
+
+    if (!data.encontrado) {
+
+      resultado.innerHTML = `
+        <div class="card">
+
+          <h3>
+            ⚠️ Activo no encontrado
+          </h3>
+
+          <p style="text-align:center;">
+            Verifique el número del código QR e intente nuevamente.
+          </p>
+
+          <button
+            type="button"
+            onclick="reiniciarScanner()"
+            style="background:#374757;">
+
+            🔄 Volver a escanear
+
+          </button>
+
+        </div>
       `;
 
       return;
     }
 
-    const zonaBusqueda =
-  document.getElementById("zonaBusqueda");
+    resultado.innerHTML = `
+      <div class="card">
 
-if (zonaBusqueda) {
-  zonaBusqueda.style.display = "none";
-}
+        <h3>
+          ✅ Activo encontrado
+        </h3>
 
-    document.getElementById("resultado").innerHTML = `
-  <div class="card">
+        <p>
+          <b>Cliente:</b>
+          <span class="dato-activo">
+            ${data.cliente || "Sin información"}
+          </span>
+        </p>
 
-    <h3 style="
-      margin-top:0;
-      color:#374757;
-      text-align:center;
-    ">
-      ✅ Activo encontrado
-    </h3>
+        <p>
+          <b>Anexo:</b>
+          <span class="dato-activo">
+            ${data.Annex || "Sin información"}
+          </span>
+        </p>
 
-    <p>
-      <b>Cliente:</b>
-      ${data.cliente || "Sin información"}
-    </p>
+        <p>
+          <b>Activo:</b>
+          <span class="dato-activo">
+            ${data.activo || "Sin información"}
+          </span>
+        </p>
 
-    <p>
-      <b>Anexo:</b>
-      ${data.Annex || "Sin información"}
-    </p>
+        <p>
+          <b>No. Serie:</b>
+          <span class="dato-activo">
+            ${data.NoSerie || "Sin información"}
+          </span>
+        </p>
 
-    <p>
-      <b>Activo:</b>
-      ${data.activo || "Sin información"}
-    </p>
+        <p>
+          <b>QR Number:</b>
+          <span class="dato-activo">
+            ${data.QrNumber || "Sin información"}
+          </span>
+        </p>
 
-    <p>
-      <b>No. Serie:</b>
-      ${data.NoSerie || "Sin información"}
-    </p>
+        <p>
+          <b>Estatus:</b>
+          <span class="dato-activo">
+            ${data.estatus || "Sin información"}
+          </span>
+        </p>
 
-    <p>
-      <b>QR Number:</b>
-      ${data.QrNumber || "Sin información"}
-    </p>
+        <a
+          class="btn"
+          href="${data.linkAuditoria}"
+          target="_blank"
+          rel="noopener noreferrer">
 
-    <p>
-      <b>Estatus:</b>
-      ${data.estatus || "Sin información"}
-    </p>
+          Abrir Autoauditoría
 
-    <a
-      class="btn"
-      href="${data.linkAuditoria}"
-      target="_blank"
-      rel="noopener noreferrer">
-      Abrir Autoauditoría
-    </a>
+        </a>
 
-    <button
-      type="button"
-      onclick="reiniciarScanner()"
-      style="
-        background:#374757;
-        margin-top:15px;
-      ">
-      🔄 Volver a Escanear
-    </button>
+        <button
+          type="button"
+          onclick="reiniciarScanner()"
+          style="background:#374757;">
 
-  </div>
-`;
-  })
+          🔄 Volver a escanear
 
-  .catch(error => {
+        </button>
 
-    document.getElementById("resultado").innerHTML =
-    `
-    <div class="card">
-      ❌ Error: ${error}
-    </div>
+      </div>
     `;
-  });
+
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth"
+    });
+
+  } catch (error) {
+
+    ocultarCargando();
+
+    resultado.innerHTML = `
+      <div class="card">
+
+        <h3>
+          ❌ No fue posible consultar el activo
+        </h3>
+
+        <p style="text-align:center;">
+          Revise su conexión a Internet e intente nuevamente.
+        </p>
+
+        <button
+          type="button"
+          onclick="reiniciarScanner()"
+          style="background:#374757;">
+
+          🔄 Intentar nuevamente
+
+        </button>
+
+      </div>
+    `;
+
+  }
+
 }
 
 </script>
