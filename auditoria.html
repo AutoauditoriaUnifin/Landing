@@ -1,0 +1,3739 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+  <base target="_top">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <!-- Fuente -->
+  <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;500;700&display=swap" rel="stylesheet">
+
+  <!-- Iconos -->
+  <link rel="stylesheet"
+  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+
+<style>
+
+  .required-star{
+  color:#FF8E72;
+  font-weight:700;
+}
+
+body{
+
+  font-family:'Rubik',Arial,sans-serif;
+  font-size:20px;
+  background:#fcfeff;
+  margin:0;
+  padding:30px;
+
+}
+
+.container{
+
+  max-width:700px;
+  margin:auto;
+  background:#405366;
+  padding:25px;
+  border-radius:10px;
+
+}
+
+h1 {
+
+  font-size: 26px;
+  margin-bottom: 20px;
+
+}
+
+.info{
+
+  background:#EEF2F5;      /* Gris claro */
+  color:#374757;           /* Gris Unifin */
+  border-left:8px solid #118AB2;
+  padding:25px;
+  border-radius:12px;
+  margin-bottom:25px;
+  box-shadow:0 4px 15px rgba(0,0,0,.08);
+
+}
+
+.info p{
+
+  margin:14px 0;
+  font-size:24px;
+  color:#374757;
+  font-weight:400;
+
+}
+
+.info p strong{
+
+  color:#1F3557;          /* Azul oscuro Unifin */
+  font-weight:700;
+
+}
+
+button{
+
+  width:100%;
+  padding:18px;
+  margin-top:20px;
+
+  background:#118AB2;
+  color:white;
+
+  border:none;
+  border-radius:12px;
+
+  font-size:22px;
+  font-weight:600;
+
+  cursor:pointer;
+
+  transition:.3s;
+
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  gap:12px;
+
+}
+
+button:hover{
+
+  background:#0D6E8C;
+
+}
+
+button i{
+
+  font-size:28px;
+
+}
+
+select,
+textarea,
+input{
+
+  width:100%;
+  padding:18px;
+  font-size:20px;
+
+  border:2px solid #118AB2;
+  border-radius:12px;
+  background:#FFFFFF;
+  color:#374757;
+  box-sizing:border-box;
+  transition:all .25s ease;
+
+}
+
+select:focus,
+textarea:focus,
+input:focus{
+
+  outline:none;
+  border-color:#1F3557;
+  box-shadow:0 0 0 4px rgba(17,138,178,.18);
+
+}
+
+/* ===== TEXTO BLANCO ===== */
+
+label{
+
+  color:#118AB2;
+  font-weight:700;
+  display:block;
+  margin-top:25px;
+  font-size:22px;
+
+}
+
+form {
+
+  color: white;
+
+}
+
+#gpsStatus{
+
+  color:#374757;
+  font-size:22px;
+  font-weight:bold;
+  margin-top:15px;
+
+}
+
+input[type="file"] {
+
+  color:#374757;
+  font-size:18px;
+
+}
+
+/* ===== MENSAJES ===== */
+
+.success {
+
+  color:#8EDD65;
+  font-weight: bold;
+  margin-top: 30px;
+
+}
+
+.error {
+
+  color:#FF8E72;
+  font-weight: bold;
+  margin-top: 30px;
+
+}
+
+.bloqueado {
+
+  background: #ffe6e6;
+  border: 2px solid red;
+  padding: 15px;
+  border-radius: 10px;
+  margin-bottom: 20px;
+  color: red;
+  font-weight: bold;
+
+}
+
+/* ===== FIRMA ===== */
+
+canvas {
+
+  background: white;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  width: 100%;
+  height: 200px;
+  margin-top: 10px;
+
+}
+
+/* =========================================
+   AUMENTAR TAMAÑO DE TEXTOS
+========================================= */
+
+body{
+  font-size:32px;
+}
+
+h1{
+  font-size:46px !important;
+}
+
+.info p{
+  font-size:37px;
+  line-height:1.5;
+}
+
+label{
+  font-size:35px;
+  line-height:1.4;
+}
+
+select,
+textarea,
+input{
+  font-size:33px;
+}
+
+input[type="file"]{
+  font-size:31px;
+}
+
+button{
+  font-size:34px;
+}
+
+#gpsStatus{
+  font-size:34px;
+}
+
+#loadingPercent{
+  font-size:35px !important;
+}
+
+#loadingText{
+  font-size:32px !important;
+  line-height:1.4;
+}
+
+.bloqueado{
+  font-size:32px;
+  line-height:1.5;
+}
+
+/* =========================================
+   CÁMARA Y CONFIRMACIONES
+========================================= */
+
+.estado-foto{
+  display:none;
+  margin-top:12px;
+  padding:14px;
+  background:#EFFBE9;
+  color:#374757;
+  border-left:6px solid #8EDD65;
+  border-radius:10px;
+  font-size:25px;
+  font-weight:700;
+  line-height:1.4;
+}
+
+.btnFoto.cargando{
+  background:#8A98A6;
+  pointer-events:none;
+}
+
+.btnFoto.completada{
+  background:#8EDD65;
+  color:#374757;
+}
+
+.camara-contenido{
+  width:100%;
+  max-width:600px;
+  padding:18px;
+  background:#FFFFFF;
+  border-radius:16px;
+  box-sizing:border-box;
+}
+
+
+.botones-camara{
+  display:flex;
+  gap:12px;
+}
+
+.botones-camara button{
+  width:50%;
+}
+
+/* =========================================
+   DISEÑO RESPONSIVO UNIFIN
+========================================= */
+
+:root {
+  --unifin-charcoal: #374757;
+  --unifin-dark-blue: #1F3557;
+  --unifin-blue: #118AB2;
+  --unifin-blue-hover: #0D6E8C;
+  --unifin-light-blue: #EEF7FB;
+  --unifin-gray: #EEF2F5;
+  --unifin-green: #8EDD65;
+  --unifin-light-green: #EFFBE9;
+  --unifin-salmon: #FF8E72;
+  --unifin-yellow: #FFD071;
+  --unifin-white: #FFFFFF;
+}
+
+/* Evita desbordamientos */
+* {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  padding:
+    max(18px, env(safe-area-inset-top))
+    max(16px, env(safe-area-inset-right))
+    max(30px, env(safe-area-inset-bottom))
+    max(16px, env(safe-area-inset-left));
+
+  background: #FCFEFF;
+  color: var(--unifin-charcoal);
+  font-family: "Rubik", Arial, sans-serif;
+  font-size: 18px;
+  line-height: 1.5;
+}
+
+/* Todo el contenido centrado */
+body > * {
+  width: min(96%, 1100px);
+  max-width: 1100px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Título */
+h1 {
+  color: var(--unifin-charcoal);
+  font-size: clamp(30px, 7vw, 42px) !important;
+  line-height: 1.15;
+  margin-top: 0;
+  margin-bottom: 24px;
+}
+
+/* Información del cliente */
+.info {
+  padding: 20px;
+  margin-bottom: 24px;
+  background: var(--unifin-gray);
+  border-left: 7px solid var(--unifin-blue);
+  border-radius: 14px;
+  box-shadow: 0 5px 18px rgba(55, 71, 87, 0.10);
+}
+
+.info p {
+  margin: 12px 0;
+  color: var(--unifin-charcoal);
+  font-size: clamp(19px, 4.8vw, 25px);
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+.info p strong {
+  color: var(--unifin-dark-blue);
+}
+
+/* Campos */
+label {
+  color: var(--unifin-charcoal);
+  font-size: clamp(20px, 5vw, 26px);
+  line-height: 1.35;
+}
+
+select,
+textarea,
+input {
+  min-height: 56px;
+  padding: 15px 16px;
+  color: var(--unifin-charcoal);
+  background: var(--unifin-white);
+  border: 2px solid var(--unifin-blue);
+  border-radius: 12px;
+  font-family: inherit;
+  font-size: 18px;
+}
+
+/* Botones profesionales y accesibles */
+button,
+.btn {
+  min-height: 58px;
+  padding: 16px 18px;
+  margin-top: 14px;
+  border: 0;
+  border-radius: 12px;
+  background: var(--unifin-blue);
+  color: var(--unifin-white);
+  font-family: inherit;
+  font-size: clamp(19px, 5vw, 25px);
+  font-weight: 700;
+  line-height: 1.25;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(17, 138, 178, 0.18);
+  transition:
+    background-color 0.2s ease,
+    transform 0.15s ease,
+    opacity 0.2s ease;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+button:active {
+  transform: scale(0.985);
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
+  box-shadow: none;
+}
+
+/* Íconos */
+button i {
+  flex: 0 0 auto;
+  font-size: 24px;
+}
+
+/* Confirmación de fotografía */
+.estado-foto {
+  padding: 14px 16px;
+  margin-top: 10px;
+  background: var(--unifin-light-green);
+  color: var(--unifin-charcoal);
+  border-left: 6px solid var(--unifin-green);
+  border-radius: 10px;
+  font-size: clamp(17px, 4.5vw, 22px);
+  line-height: 1.4;
+}
+
+/* Fotografía completada */
+.btnFoto.completada {
+  background: var(--unifin-green);
+  color: var(--unifin-charcoal);
+}
+
+/* Fotografía cargando */
+.btnFoto.cargando {
+  background: #8A98A6;
+  color: #FFFFFF;
+  pointer-events: none;
+}
+
+/* Asteriscos UNIFIN */
+.required-star {
+  color: var(--unifin-salmon) !important;
+  font-size: 1.15em !important;
+  font-weight: 700;
+}
+
+/* GPS */
+#gpsStatus {
+  margin-top: 12px;
+  color: var(--unifin-charcoal);
+  font-size: clamp(18px, 4.8vw, 24px);
+  line-height: 1.4;
+}
+
+/* Barra de progreso */
+#loading {
+  margin-top: 22px !important;
+  padding: 20px !important;
+  background: var(--unifin-light-blue) !important;
+  border-left: 6px solid var(--unifin-blue) !important;
+  border-radius: 12px !important;
+}
+
+#loadingPercent {
+  color: var(--unifin-blue) !important;
+  font-size: clamp(24px, 6vw, 32px) !important;
+}
+
+#loadingText {
+  color: var(--unifin-charcoal) !important;
+  font-size: clamp(18px, 4.8vw, 24px) !important;
+}
+
+/* Mensajes de bloqueo */
+.bloqueado {
+  padding: 18px;
+  background: #FFF0EC;
+  color: var(--unifin-charcoal);
+  border: 2px solid var(--unifin-salmon);
+  border-left: 7px solid var(--unifin-salmon);
+  border-radius: 12px;
+  font-size: clamp(19px, 5vw, 25px);
+  line-height: 1.45;
+}
+
+/* Teléfonos pequeños */
+@media (max-width: 420px) {
+
+  body {
+    padding: 14px;
+  }
+
+  .info {
+    padding: 17px;
+  }
+
+  button {
+    padding: 15px 12px;
+  }
+
+  button i {
+    font-size: 21px;
+  }
+}
+
+/* Pantallas grandes */
+@media (min-width: 768px) {
+
+  body {
+    padding-top: 30px;
+    padding-bottom: 45px;
+  }
+
+  .info {
+    padding: 26px;
+  }
+}
+
+/* Personas que prefieren menos animación */
+@media (prefers-reduced-motion: reduce) {
+
+  * {
+    scroll-behavior: auto !important;
+    transition: none !important;
+  }
+}
+/* =========================================
+   TAMAÑO MÁS GRANDE Y RESPONSIVO
+========================================= */
+
+.info {
+  padding: 28px;
+}
+
+.info p {
+  font-size: clamp(24px, 2.4vw, 34px);
+  line-height: 1.5;
+}
+
+h1 {
+  font-size: clamp(38px, 4vw, 54px) !important;
+}
+
+label {
+  font-size: clamp(25px, 2.6vw, 34px);
+}
+
+select,
+textarea,
+input {
+  font-size: clamp(22px, 2.2vw, 30px);
+}
+
+button,
+.btn {
+  min-height: 68px;
+  padding: 18px 22px;
+  font-size: clamp(24px, 2.5vw, 32px);
+}
+
+.estado-foto {
+  font-size: clamp(21px, 2.2vw, 28px);
+}
+
+/* Teléfonos verticales */
+@media (max-width: 600px) {
+
+  body {
+    padding: 14px;
+  }
+
+  body > * {
+    width: 100%;
+    max-width: none;
+  }
+
+  h1 {
+    font-size: 34px !important;
+  }
+
+  .info {
+    padding: 20px;
+  }
+
+  .info p {
+    font-size: 23px;
+  }
+
+  label {
+    font-size: 25px;
+  }
+
+  select,
+  textarea,
+  input {
+    font-size: 22px;
+  }
+
+  button,
+  .btn {
+    min-height: 62px;
+    font-size: 24px;
+  }
+
+  .estado-foto {
+    font-size: 21px;
+  }
+}
+
+/* =========================================
+   PULSO DEL SIGUIENTE BOTÓN
+========================================= */
+
+.paso-actual {
+  position: relative;
+  z-index: 10;
+  border: 3px solid #FFD071 !important;
+  animation: latidoSiguientePaso 1.8s ease-in-out infinite;
+}
+
+@keyframes latidoSiguientePaso {
+
+  0% {
+    transform: scale(1);
+    box-shadow:
+      0 0 0 0 rgba(255, 208, 113, 0.55),
+      0 5px 12px rgba(55, 71, 87, 0.12);
+  }
+
+  12% {
+    transform: scale(1.012);
+    box-shadow:
+      0 0 0 9px rgba(255, 208, 113, 0.32),
+      0 8px 20px rgba(55, 71, 87, 0.20);
+  }
+
+  24% {
+    transform: scale(1);
+    box-shadow:
+      0 0 0 2px rgba(255, 208, 113, 0.15),
+      0 5px 12px rgba(55, 71, 87, 0.12);
+  }
+
+  36% {
+    transform: scale(1.012);
+    box-shadow:
+      0 0 0 9px rgba(142, 221, 101, 0.30),
+      0 8px 20px rgba(55, 71, 87, 0.20);
+  }
+
+  50%,
+  100% {
+    transform: scale(1);
+    box-shadow:
+      0 0 0 0 rgba(142, 221, 101, 0),
+      0 5px 12px rgba(55, 71, 87, 0.12);
+  }
+
+}
+
+button:disabled.paso-actual {
+  animation: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+  .paso-actual {
+    animation: none;
+    border: 4px solid #FFD071 !important;
+    box-shadow:
+      0 0 0 6px rgba(255, 208, 113, 0.25) !important;
+  }
+
+}
+
+/* =========================================
+   BARRA DE PROGRESO ANIMADA
+========================================= */
+
+#loadingBar {
+  position: relative;
+  overflow: hidden;
+
+  background-color: #118AB2 !important;
+
+  background-image: linear-gradient(
+    110deg,
+    transparent 0%,
+    transparent 30%,
+    rgba(255, 255, 255, 0.85) 48%,
+    rgba(255, 255, 255, 0.85) 52%,
+    transparent 70%,
+    transparent 100%
+  ) !important;
+
+  background-size: 220% 100% !important;
+
+ animation:
+  movimientoBarra 1.1s linear infinite,
+  latidoBarraDoble 1.8s ease-in-out infinite !important;
+}
+
+@keyframes movimientoBarra {
+
+  from {
+    background-position: 160% 0;
+  }
+
+  to {
+    background-position: -160% 0;
+  }
+
+}
+
+@keyframes latidoBarraDoble {
+
+  /* Reposo */
+  0% {
+    opacity: 1;
+    filter: brightness(1);
+    box-shadow:
+      inset 0 0 0 rgba(255, 255, 255, 0);
+  }
+
+  /* Primer pulso */
+  12% {
+    opacity: 0.48;
+    filter: brightness(1.55);
+    box-shadow:
+      inset 0 0 14px rgba(255, 255, 255, 0.85);
+  }
+
+  /* Primer descanso */
+  24% {
+    opacity: 1;
+    filter: brightness(1);
+    box-shadow:
+      inset 0 0 0 rgba(255, 255, 255, 0);
+  }
+
+  /* Segundo pulso */
+  36% {
+    opacity: 0.48;
+    filter: brightness(1.55);
+    box-shadow:
+      inset 0 0 14px rgba(142, 221, 101, 0.90);
+  }
+
+  /* Descanso */
+  50%,
+  100% {
+    opacity: 1;
+    filter: brightness(1);
+    box-shadow:
+      inset 0 0 0 rgba(255, 255, 255, 0);
+  }
+
+}
+
+/* =========================================
+   PARPADEO DEL RECUADRO DE PROGRESO COMPLETO
+========================================= */
+
+#loading {
+  transform-origin: center;
+  animation:
+    latidoProgresoCompleto 1.8s ease-in-out infinite;
+}
+
+@keyframes latidoProgresoCompleto {
+
+  /* Reposo */
+  0% {
+    transform: scale(1);
+    background: #EEF7FB;
+    border-left-color: #118AB2;
+    box-shadow:
+      0 4px 12px rgba(55, 71, 87, 0.08);
+  }
+
+  /* Primer pulso */
+  12% {
+    transform: scale(1.008);
+    background: #DFF3FA;
+    border-left-color: #FFD071;
+    box-shadow:
+      0 0 0 6px rgba(255, 208, 113, 0.25),
+      0 8px 22px rgba(17, 138, 178, 0.22);
+  }
+
+  /* Primer descanso */
+  24% {
+    transform: scale(1);
+    background: #EEF7FB;
+    border-left-color: #118AB2;
+    box-shadow:
+      0 4px 12px rgba(55, 71, 87, 0.08);
+  }
+
+  /* Segundo pulso */
+  36% {
+    transform: scale(1.008);
+    background: #EFFBE9;
+    border-left-color: #8EDD65;
+    box-shadow:
+      0 0 0 6px rgba(142, 221, 101, 0.25),
+      0 8px 22px rgba(17, 138, 178, 0.22);
+  }
+
+  /* Descanso */
+  50%,
+  100% {
+    transform: scale(1);
+    background: #EEF7FB;
+    border-left-color: #118AB2;
+    box-shadow:
+      0 4px 12px rgba(55, 71, 87, 0.08);
+  }
+
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+  #loading {
+    animation: none;
+    box-shadow:
+      0 0 0 5px rgba(17, 138, 178, 0.20);
+  }
+
+}
+
+/* =========================================
+   MODO PARA TELÉFONOS DE POCA MEMORIA
+========================================= */
+
+.modo-ligero *,
+.modo-ligero *::before,
+.modo-ligero *::after {
+  animation: none !important;
+  transition: none !important;
+  box-shadow: none !important;
+}
+
+.modo-ligero .paso-actual {
+  border: 4px solid #FFD071 !important;
+  outline: 4px solid rgba(255, 208, 113, 0.25);
+}
+
+</style>
+
+</head>
+
+<body>
+<!-- =========================
+     LOGO UNIFIN
+========================== -->
+
+<div style="text-align:center;margin-bottom:25px;">
+
+<img
+src="https://autoauditoriaunifin.github.io/Landing/logoo.png"
+alt="UNIFIN"
+style="
+max-width:340px;
+width:90%;
+display:block;
+margin:auto;
+">
+
+</div>
+    <h1 style="
+text-align:center;
+color:#374757;
+font-size:42px;
+font-weight:700;
+margin-bottom:30px;
+">
+  Autoauditoría UNIFIN
+</h1>
+
+
+<div
+  id="estadoInicial"
+  style="
+    background:#EEF7FB;
+    color:#374757;
+    border-left:7px solid #118AB2;
+    padding:28px;
+    border-radius:14px;
+    text-align:center;
+    font-size:26px;
+    font-weight:700;
+  ">
+  <i class="fas fa-spinner fa-spin"></i>
+  Cargando autoauditoría...
+</div>
+
+<div id="errorInicial" style="display:none;"></div>
+
+<main id="contenidoAuditoria" style="display:none;">
+
+<div class="info">
+
+  <p><strong>Cliente:</strong> <span id="datoCliente"></span></p>
+  <p><strong>Activo:</strong> <span id="datoActivo"></span></p>
+  <p><strong>No. Serie:</strong> <span id="datoNumeroSerie"></span></p>
+  <p><strong>QR Number:</strong> <span id="datoQrNumber"></span></p>
+  <p><strong>Anexo:</strong> <span id="datoAnexo"></span></p>
+
+
+</div>
+
+<form id="auditForm">
+
+  <input type="hidden" id="auditId" value="">
+  <input type="hidden" id="token" value="">
+
+  <!-- ========================= TIPO DE ACTIVO ========================== -->
+
+<div style="
+background:#EEF2F5;
+border-left:6px solid #118AB2;
+padding:20px;
+border-radius:12px;
+margin-top:20px;
+">
+
+<label style="
+margin-top:0;
+color:#1F3557;
+font-size:32px;
+font-weight:700;
+">
+Tipo de activo
+</label>
+
+<select id="tipoActivo" onchange="validarTipoActivo()">
+
+  <option value="">
+    Seleccione una opción
+  </option>
+
+  <option value="VEHICULO">
+    Vehículo
+  </option>
+
+  <option value="TRACTOCAMION">
+    Tractocamión
+  </option>
+
+  <option value="TRANSPORTE">
+    Transporte
+  </option>
+
+  <option value="MAQUINARIA">
+    Maquinaria amarilla
+  </option>
+
+  <option value="AGRICOLA">
+    Tractores y maquinaria agrícola
+  </option>
+
+  <option value="OTRO">
+    Otro
+  </option>
+
+</select>
+
+<div
+  id="tipoActivoDetectado"
+  style="
+    display:none;
+    margin-top:15px;
+    padding:15px;
+    background:#EFFBE9;
+    color:#374757;
+    border-left:6px solid #8EDD65;
+    font-size:25px;
+    font-weight:700;
+    line-height:1.4;
+  ">
+</div>
+
+</div>
+
+ <!-- =========================
+     FOTOGRAFÍAS OPTIMIZADAS
+========================= -->
+<div style="
+  background:#FFF7E5;
+  color:#374757;
+  border-left:6px solid #FFD071;
+  padding:16px;
+  border-radius:10px;
+  margin-top:18px;
+  font-size:24px;
+  font-weight:700;
+  line-height:1.5;
+">
+
+  ⚠️ Después de tomar cada fotografía, espere hasta ver el mensaje:
+
+  <br><br>
+
+  <span style="color:#374757;">
+    ✅ Fotografía guardada correctamente
+  </span>
+
+  <br><br>
+
+  En ese momento la fotografía estará protegida aunque la página se actualice.
+
+</div>
+
+<div style="
+  background:#EEF7FB;
+  color:#374757;
+  border-left:6px solid #118AB2;
+  padding:16px;
+  border-radius:10px;
+  margin-top:18px;
+  font-size:24px;
+  font-weight:700;
+  line-height:1.5;
+">
+
+  <span
+    class="required-star"
+    style="font-size:30px;">
+    *
+  </span>
+
+  El asterisco significa campo obligatorio
+
+</div>
+
+<div style="
+  background:#EEF7FB;
+  color:#374757;
+  border-left:6px solid #118AB2;
+  padding:16px;
+  border-radius:10px;
+  margin-top:25px;
+  font-size:30px;
+  font-weight:700;
+  line-height:1.4;
+">
+
+  <i
+    class="fas fa-camera"
+    style="
+      color:#118AB2;
+      margin-right:10px;
+    ">
+  </i>
+
+  Foto frontal
+
+  <span style="
+    color:#FF8E72;
+    font-size:34px;
+    font-weight:700;
+    margin-left:5px;
+  ">
+    *
+  </span>
+
+</div>
+
+<button
+  type="button"
+  class="btnFoto"
+  data-campo="fotoFrontal"
+  onclick="abrirCamara('fotoFrontal')">
+  <i class="fas fa-camera"></i>
+  Tomar foto frontal
+</button>
+
+<div id="estadoFotoFrontal" class="estado-foto"></div>
+
+
+<div
+  id="labelIzquierdo"
+  style="
+    background:#EEF7FB;
+    color:#374757;
+    border-left:6px solid #118AB2;
+    padding:16px;
+    border-radius:10px;
+    margin-top:25px;
+    font-size:30px;
+    font-weight:700;
+    line-height:1.4;
+  ">
+
+  <i
+    class="fas fa-camera"
+    style="
+      color:#118AB2;
+      margin-right:10px;
+    ">
+  </i>
+
+  Foto lado izquierdo
+
+</div>
+
+<button
+  type="button"
+  id="btnFotoIzquierdo"
+  class="btnFoto"
+  data-campo="fotoIzquierdo"
+  onclick="abrirCamara('fotoIzquierdo')">
+  <i class="fas fa-camera"></i>
+  Tomar foto lado izquierdo
+</button>
+
+<div id="estadoFotoIzquierdo" class="estado-foto"></div>
+
+
+<div
+  id="labelDerecho"
+  style="
+    background:#EEF7FB;
+    color:#374757;
+    border-left:6px solid #118AB2;
+    padding:16px;
+    border-radius:10px;
+    margin-top:25px;
+    font-size:30px;
+    font-weight:700;
+    line-height:1.4;
+  ">
+
+  <i
+    class="fas fa-camera"
+    style="
+      color:#118AB2;
+      margin-right:10px;
+    ">
+  </i>
+
+  Foto lado derecho
+
+</div>
+
+<button
+  type="button"
+  id="btnFotoDerecho"
+  class="btnFoto"
+  data-campo="fotoDerecho"
+  onclick="abrirCamara('fotoDerecho')">
+  <i class="fas fa-camera"></i>
+  Tomar foto lado derecho
+</button>
+
+<div id="estadoFotoDerecho" class="estado-foto"></div>
+
+
+<div
+  id="labelTrasera"
+  style="
+    background:#EEF7FB;
+    color:#374757;
+    border-left:6px solid #118AB2;
+    padding:16px;
+    border-radius:10px;
+    margin-top:25px;
+    font-size:30px;
+    font-weight:700;
+    line-height:1.4;
+  ">
+
+  <i
+    class="fas fa-camera"
+    style="
+      color:#118AB2;
+      margin-right:10px;
+    ">
+  </i>
+
+  Foto trasera
+
+</div>
+<button
+  type="button"
+  id="btnFotoTrasera"
+  class="btnFoto"
+  data-campo="fotoTrasera"
+  onclick="abrirCamara('fotoTrasera')">
+  <i class="fas fa-camera"></i>
+  Tomar foto trasera
+</button>
+
+<div id="estadoFotoTrasera" class="estado-foto"></div>
+
+
+<div style="
+  background:#EEF7FB;
+  color:#374757;
+  border-left:6px solid #118AB2;
+  padding:16px;
+  border-radius:10px;
+  margin-top:25px;
+  font-size:30px;
+  font-weight:700;
+  line-height:1.4;
+">
+
+  <i
+    class="fas fa-barcode"
+    style="
+      color:#118AB2;
+      margin-right:10px;
+    ">
+  </i>
+
+  Foto serie / VIN
+
+  <span
+    class="required-star"
+    style="
+      font-size:34px;
+      margin-left:5px;
+    ">
+    *
+  </span>
+
+</div>
+
+<button
+  type="button"
+  class="btnFoto"
+  data-campo="fotoSerie"
+  onclick="abrirCamara('fotoSerie')">
+  <i class="fas fa-camera"></i>
+  Tomar foto serie / VIN
+</button>
+
+<div id="estadoFotoSerie" class="estado-foto"></div>
+
+
+<div style="
+  background:#EEF7FB;
+  color:#374757;
+  border-left:6px solid #118AB2;
+  padding:16px;
+  border-radius:10px;
+  margin-top:25px;
+  font-size:30px;
+  font-weight:700;
+  line-height:1.4;
+">
+
+  <i
+    class="fas fa-qrcode"
+    style="
+      color:#118AB2;
+      margin-right:10px;
+    ">
+  </i>
+
+  Foto del Código QR
+
+  <span
+    class="required-star"
+    style="
+      font-size:34px;
+      margin-left:5px;
+    ">
+    *
+  </span>
+
+</div>
+
+<button
+  type="button"
+  class="btnFoto"
+  data-campo="fotoQr"
+  onclick="abrirCamara('fotoQr')">
+  <i class="fas fa-camera"></i>
+  Tomar foto del Código QR
+</button>
+
+<div id="estadoFotoQr" class="estado-foto"></div>
+
+
+<div id="bloqueOdometro" style="display:none;">
+
+ <div
+  id="labelOdometro"
+  style="
+    background:#EEF7FB;
+    color:#374757;
+    border-left:6px solid #118AB2;
+    padding:16px;
+    border-radius:10px;
+    margin-top:25px;
+    font-size:30px;
+    font-weight:700;
+    line-height:1.4;
+  ">
+
+  <i
+    class="fas fa-gauge-high"
+    style="
+      color:#118AB2;
+      margin-right:10px;
+    ">
+  </i>
+
+  Foto del Odómetro/Kilometraje
+
+</div>
+
+  <button
+    type="button"
+    id="btnFotoOdometro"
+    class="btnFoto"
+    data-campo="fotoOdometro"
+    onclick="abrirCamara('fotoOdometro')">
+    <i class="fas fa-camera"></i>
+    Tomar foto del odómetro
+  </button>
+
+  <div id="estadoFotoOdometro" class="estado-foto"></div>
+
+</div>
+
+
+<div id="bloqueContadorHoras" style="display:none;">
+
+  <div
+  id="labelContadorHoras"
+  style="
+    background:#EEF7FB;
+    color:#374757;
+    border-left:6px solid #118AB2;
+    padding:16px;
+    border-radius:10px;
+    margin-top:25px;
+    font-size:30px;
+    font-weight:700;
+    line-height:1.4;
+  ">
+
+  <i
+    class="fas fa-hourglass-half"
+    style="
+      color:#118AB2;
+      margin-right:10px;
+    ">
+  </i>
+
+  Foto del contador de horas
+
+</div>
+
+  <button
+    type="button"
+    id="btnFotoContadorHoras"
+    class="btnFoto"
+    data-campo="fotoContadorHoras"
+    onclick="abrirCamara('fotoContadorHoras')">
+    <i class="fas fa-camera"></i>
+    Tomar foto del contador de horas
+  </button>
+
+  <div id="estadoFotoContadorHoras" class="estado-foto"></div>
+
+</div>
+
+<input
+  type="file"
+  id="capturaFoto"
+  accept="image/*"
+  capture="environment"
+  onchange="procesarFotoSeleccionada(this)"
+  style="display:none;">
+
+</form>
+
+<div id="mensaje"></div>
+
+<!-- =========================
+     UBICACIÓN GPS
+========================= -->
+
+<button
+  type="button"
+  id="btnCompartirUbicacion"
+  onclick="getLocation()"
+  style="
+    display:none;
+    margin-top:25px;
+  ">
+
+  <i class="fas fa-map-marker-alt"></i>
+  Compartir ubicación
+
+</button>
+
+<div
+  id="gpsStatus"
+  style="
+    margin-top:15px;
+    color:#374757;
+    font-weight:bold;
+  ">
+</div>
+
+<!-- =========================
+     ESCANEAR OTRO ACTIVO
+========================= -->
+
+<button
+  type="button"
+  id="btnEscanearOtro"
+  onclick="abrirEscaner()"
+  style="
+    display:none;
+    background:#374757;
+    margin-top:18px;
+  ">
+
+  <i class="fas fa-qrcode"></i>
+  Escanear otro activo
+
+</button>
+
+<!-- =========================
+     ENVIAR AUTOAUDITORÍA
+========================= -->
+
+<button
+  type="submit"
+  id="btnEnviar"
+  form="auditForm"
+  style="
+    display:none;
+    margin-top:18px;
+    background:#118AB2;
+  ">
+
+  <i class="fas fa-paper-plane"></i>
+  Enviar autoauditoría
+
+</button>
+<!-- =========================
+     PROGRESO DE ENVÍO
+========================= -->
+
+<div id="loading" style="
+display:none;
+margin-top:25px;
+background:#EEF7FB;
+padding:20px;
+border-radius:12px;
+border-left:6px solid #118AB2;
+">
+
+<div style="
+width:100%;
+height:24px;
+background:#E5E5E5;
+border-radius:20px;
+overflow:hidden;
+">
+
+<div id="loadingBar" style="
+width:0%;
+height:100%;
+background:#118AB2;
+transition:width .4s ease;
+">
+</div>
+
+</div>
+
+<div id="loadingPercent" style="
+text-align:center;
+margin-top:10px;
+font-size:22px;
+font-weight:bold;
+color:#118AB2;
+">
+0%
+</div>
+
+<div id="loadingText" style="
+text-align:center;
+margin-top:8px;
+font-size:18px;
+font-weight:bold;
+color:#374757;
+">
+Preparando envío...
+</div>
+
+</div>
+
+</main>
+
+<script>
+
+const API_URL =
+  "https://script.google.com/macros/s/AKfycbxLaoRi4IlFevHqjtckrnU8hY-eQLwkpg4pndXbMns-VZiqcouJ-phdQeEqZIBE7ZpOow/exec";
+
+  const CLOUDINARY_CLOUD_NAME = "b3bnfknd";
+  const CLOUDINARY_UPLOAD_PRESET = "autoauditorias";
+
+
+let latitud = '';
+let longitud = '';
+let precisionGPS = '';
+
+/* =========================================
+   CÁMARA OPTIMIZADA
+========================================= */
+
+let cameraStream = null;
+let campoFotoActual = "";
+let subiendoFotografia = false;
+let restaurandoEvidencias = false;
+const memoriaDispositivo =
+  navigator.deviceMemory || 4;
+
+if (memoriaDispositivo <= 3) {
+
+  document.documentElement.classList.add(
+    "modo-ligero"
+  );
+
+}
+
+let auditIdActual = "";
+let claveEvidencias = "";
+let descripcionActivoActual = "";
+
+let evidenciasUrls = {};
+
+
+/* =========================================
+   NOMBRES DE LAS EVIDENCIAS
+========================================= */
+
+const nombresEvidencias = {
+
+  fotoFrontal:
+    "Foto frontal",
+
+  fotoIzquierdo:
+    "Foto lado izquierdo",
+
+  fotoDerecho:
+    "Foto lado derecho",
+
+  fotoTrasera:
+    "Foto trasera",
+
+  fotoSerie:
+    "Foto serie / VIN",
+
+  fotoQr:
+    "Foto del Código QR",
+
+  fotoOdometro:
+    "Foto del odómetro/kilometraje",
+
+  fotoContadorHoras:
+    "Foto del contador de horas"
+
+};
+
+
+/* =========================================
+   ABRIR CÁMARA INTERNA
+========================================= */
+function abrirCamara(campo) {
+
+  if (subiendoFotografia) {
+    return;
+  }
+
+  campoFotoActual = campo;
+
+  const input =
+    document.getElementById("capturaFoto");
+
+  if (!input) {
+
+    mostrarError(
+      "No se encontró el control de la cámara."
+    );
+
+    return;
+  }
+
+  input.value = "";
+  input.click();
+
+}
+/* =========================================
+   PROCESAR FOTO SELECCIONADA
+========================================= */
+
+async function procesarFotoSeleccionada(input) {
+
+  if (
+    !input.files ||
+    !input.files[0] ||
+    !campoFotoActual
+  ) {
+    return;
+  }
+
+  const archivo =
+    input.files[0];
+
+  const campoCapturado =
+    campoFotoActual;
+
+  const boton =
+    document.querySelector(
+      '[data-campo="' + campoCapturado + '"]'
+    );
+
+  subiendoFotografia = true;
+
+  if (boton) {
+
+    boton.classList.add("cargando");
+
+    boton.innerHTML =
+      '<i class="fas fa-spinner fa-spin"></i> Procesando fotografía...';
+
+  }
+
+  try {
+
+    const blobComprimido =
+      await comprimirFotoOptimizada(archivo);
+
+    // Liberar la referencia del archivo original
+    input.value = "";
+
+    if (boton) {
+
+      boton.innerHTML =
+        '<i class="fas fa-cloud-arrow-up"></i> Subiendo fotografía...';
+
+    }
+
+    const url =
+      await subirBlobCloudinary(
+        blobComprimido,
+        campoCapturado
+      );
+
+    evidenciasUrls[campoCapturado] =
+      url;
+
+    localStorage.setItem(
+  claveEvidencias,
+  JSON.stringify(evidenciasUrls)
+);
+
+    mostrarConfirmacionFoto(
+      campoCapturado
+    );
+
+    campoFotoActual = "";
+
+  } catch (error) {
+
+    if (boton) {
+
+      boton.classList.remove("cargando");
+
+      boton.innerHTML =
+        '<i class="fas fa-camera"></i> Intentar nuevamente';
+
+    }
+
+    mostrarError(
+      error.message ||
+      "No fue posible guardar la fotografía."
+    );
+
+    campoFotoActual = "";
+
+  } finally {
+
+    subiendoFotografia = false;
+    input.value = "";
+
+  }
+
+}
+/* =========================================
+   COMPRIMIR FOTO CON BAJO CONSUMO
+========================================= */
+
+function comprimirFotoOptimizada(archivo) {
+
+  return new Promise(function(resolve, reject) {
+
+    const imagen =
+      new Image();
+
+    const urlTemporal =
+      URL.createObjectURL(archivo);
+
+    imagen.onload = function() {
+
+      try {
+
+        const medidas =
+          calcularMedidasImagen(
+            imagen.naturalWidth,
+            imagen.naturalHeight,
+            960
+          );
+
+        const canvas =
+          document.createElement("canvas");
+
+        canvas.width =
+          medidas.width;
+
+        canvas.height =
+          medidas.height;
+
+        const contexto =
+          canvas.getContext(
+            "2d",
+            {
+              alpha: false
+            }
+          );
+
+        contexto.drawImage(
+          imagen,
+          0,
+          0,
+          canvas.width,
+          canvas.height
+        );
+
+        URL.revokeObjectURL(
+          urlTemporal
+        );
+
+        imagen.onload = null;
+        imagen.onerror = null;
+        imagen.src = "";
+
+        canvas.toBlob(
+          function(blob) {
+
+            if (!blob) {
+
+              canvas.width = 1;
+              canvas.height = 1;
+
+              reject(
+                new Error(
+                  "No fue posible comprimir la fotografía."
+                )
+              );
+
+              return;
+            }
+
+            contexto.clearRect(
+              0,
+              0,
+              canvas.width,
+              canvas.height
+            );
+
+            canvas.width = 1;
+            canvas.height = 1;
+
+            resolve(blob);
+
+          },
+          "image/jpeg",
+          0.50
+        );
+
+      } catch (error) {
+
+        URL.revokeObjectURL(
+          urlTemporal
+        );
+
+        reject(error);
+
+      }
+
+    };
+
+    imagen.onerror = function() {
+
+      URL.revokeObjectURL(
+        urlTemporal
+      );
+
+      reject(
+        new Error(
+          "El teléfono no pudo leer la fotografía."
+        )
+      );
+
+    };
+
+    imagen.src =
+      urlTemporal;
+
+  });
+
+}
+
+
+/* =========================================
+   CALCULAR TAMAÑO REDUCIDO
+========================================= */
+
+function calcularMedidasImagen(
+  anchoOriginal,
+  altoOriginal,
+  maximo
+) {
+
+  let width =
+    anchoOriginal;
+
+  let height =
+    altoOriginal;
+
+  if (
+    width > maximo ||
+    height > maximo
+  ) {
+
+    const escala =
+      Math.min(
+        maximo / width,
+        maximo / height
+      );
+
+    width =
+      Math.round(width * escala);
+
+    height =
+      Math.round(height * escala);
+
+  }
+
+  return {
+    width,
+    height
+  };
+
+}
+/* =========================================
+   SUBIR UNA SOLA FOTOGRAFÍA
+========================================= */
+async function subirBlobCloudinary(
+  blob,
+  campo
+) {
+
+  const urlCloudinary =
+    "https://api.cloudinary.com/v1_1/" +
+    CLOUDINARY_CLOUD_NAME +
+    "/image/upload";
+
+  const MAX_INTENTOS = 3;
+
+  let ultimoError = null;
+
+  for (
+    let intento = 1;
+    intento <= MAX_INTENTOS;
+    intento++
+  ) {
+
+    const controlador =
+      new AbortController();
+
+    const temporizador =
+      setTimeout(function() {
+
+        controlador.abort();
+
+      }, 60000);
+
+    try {
+
+      /*
+        Crear un FormData nuevo en cada intento.
+        Esto mejora la compatibilidad con Safari.
+      */
+
+      const datos =
+        new FormData();
+
+      datos.append(
+        "file",
+        blob,
+        campo + ".jpg"
+      );
+
+      datos.append(
+        "upload_preset",
+        CLOUDINARY_UPLOAD_PRESET
+      );
+
+      const respuesta =
+        await fetch(
+          urlCloudinary,
+          {
+            method: "POST",
+            body: datos,
+            signal: controlador.signal,
+            cache: "no-store"
+          }
+        );
+
+      if (!respuesta.ok) {
+
+        let detalle =
+          "Error " +
+          respuesta.status;
+
+        try {
+
+          const errorCloudinary =
+            await respuesta.json();
+
+          if (
+            errorCloudinary.error &&
+            errorCloudinary.error.message
+          ) {
+
+            detalle =
+              errorCloudinary.error.message;
+
+          }
+
+        } catch (error) {
+
+          // Conservar el código de error HTTP
+
+        }
+
+        throw new Error(
+          detalle
+        );
+
+      }
+
+      const resultado =
+        await respuesta.json();
+
+      if (!resultado.secure_url) {
+
+        throw new Error(
+          "Cloudinary no devolvió la URL de la fotografía."
+        );
+
+      }
+
+      clearTimeout(
+        temporizador
+      );
+
+      return resultado.secure_url;
+
+    } catch (error) {
+
+      clearTimeout(
+        temporizador
+      );
+
+      ultimoError =
+        error;
+
+      if (
+        intento <
+        MAX_INTENTOS
+      ) {
+
+        const boton =
+          document.querySelector(
+            '[data-campo="' +
+            campo +
+            '"]'
+          );
+
+        if (boton) {
+
+          boton.innerHTML =
+            '<i class="fas fa-spinner fa-spin"></i>' +
+            ' Reintentando fotografía ' +
+            (intento + 1) +
+            ' de ' +
+            MAX_INTENTOS +
+            '...';
+
+        }
+
+        await esperar(
+          intento * 2500
+        );
+
+      }
+
+    }
+
+  }
+
+  if (
+    ultimoError &&
+    ultimoError.name === "AbortError"
+  ) {
+
+    throw new Error(
+      "La fotografía tardó demasiado en subir. " +
+      "Revise su conexión e intente nuevamente."
+    );
+
+  }
+
+  throw new Error(
+    "No fue posible subir la fotografía después de 3 intentos. " +
+    "Abra la auditoría directamente en Safari y revise su conexión."
+  );
+
+}
+/* =========================================
+   CONFIRMACIÓN VERDE
+========================================= */
+
+function mostrarConfirmacionFoto(campo) {
+
+  const nombreEstado =
+    "estado" +
+    campo.charAt(0).toUpperCase() +
+    campo.slice(1);
+
+  const estado =
+    document.getElementById(nombreEstado);
+
+  if (estado) {
+
+    estado.textContent =
+      "✅ Fotografía guardada correctamente";
+
+    estado.style.display =
+      "block";
+
+  }
+
+  const boton =
+    document.querySelector(
+      '[data-campo="' + campo + '"]'
+    );
+
+  if (boton) {
+
+    boton.classList.remove("cargando");
+    boton.classList.add("completada");
+
+    boton.innerHTML =
+      '<i class="fas fa-check"></i> Volver a tomar fotografía';
+
+  }
+  verificarFotosParaUbicacion();
+
+  actualizarGuiaVisual(
+    !restaurandoEvidencias
+  );
+}
+
+
+/* =========================================
+   RESTAURAR FOTOGRAFÍAS GUARDADAS
+========================================= */
+
+function restaurarConfirmaciones() {
+
+  restaurandoEvidencias = true;
+
+  Object.keys(evidenciasUrls)
+    .forEach(function(campo) {
+
+      if (evidenciasUrls[campo]) {
+
+        mostrarConfirmacionFoto(
+          campo
+        );
+
+      }
+
+    });
+
+  restaurandoEvidencias = false;
+
+  verificarFotosParaUbicacion();
+  actualizarGuiaVisual(false);
+
+}
+/* =========================================
+   MOSTRAR ERROR
+========================================= */
+
+function mostrarError(texto) {
+
+  const mensaje =
+    document.getElementById("mensaje");
+
+  if (!mensaje) {
+    alert(texto);
+    return;
+  }
+
+  mensaje.innerHTML =
+    '<div style="' +
+      'background:#FFE8E8;' +
+      'color:#B00020;' +
+      'padding:18px;' +
+      'border-left:6px solid #B00020;' +
+      'border-radius:10px;' +
+      'font-size:25px;' +
+      'font-weight:700;' +
+      'margin-top:18px;' +
+    '">' +
+      texto +
+    '</div>';
+
+  mensaje.scrollIntoView({
+    behavior: "smooth",
+    block: "center"
+  });
+
+}
+
+/* =========================================
+   INDICAR EL SIGUIENTE BOTÓN
+========================================= */
+
+function actualizarGuiaVisual(moverPantalla) {
+
+  // Quitar el pulso anterior
+  document
+    .querySelectorAll(".paso-actual")
+    .forEach(function(elemento) {
+
+      elemento.classList.remove(
+        "paso-actual"
+      );
+
+    });
+
+  const formulario =
+    document.getElementById("auditForm");
+
+  const selector =
+    document.getElementById("tipoActivo");
+
+  if (
+    !formulario ||
+    !selector ||
+    !selector.value
+  ) {
+    return;
+  }
+
+  let siguienteBoton = null;
+
+  const faltantes =
+    obtenerEvidenciasFaltantes(
+      selector.value
+    );
+
+  /*
+    Primero señalar la siguiente
+    fotografía obligatoria.
+  */
+
+  if (faltantes.length > 0) {
+
+    siguienteBoton =
+      document.querySelector(
+        '[data-campo="' +
+        faltantes[0] +
+        '"]'
+      );
+
+  } else if (
+    !latitud ||
+    !longitud
+  ) {
+
+    /*
+      Después de las fotos,
+      señalar ubicación.
+    */
+
+    siguienteBoton =
+      document.getElementById(
+        "btnCompartirUbicacion"
+      );
+
+  } else {
+
+    /*
+      Después del GPS,
+      señalar enviar.
+    */
+
+    siguienteBoton =
+      document.getElementById(
+        "btnEnviar"
+      );
+
+  }
+
+  if (!siguienteBoton) {
+    return;
+  }
+
+  siguienteBoton.classList.add(
+    "paso-actual"
+  );
+
+  if (moverPantalla) {
+
+    setTimeout(function() {
+
+      siguienteBoton.scrollIntoView({
+        behavior: "smooth",
+        block: "center"
+      });
+
+    }, 300);
+
+  }
+
+}
+
+/* =========================================
+   VALIDAR TIPO DE ACTIVO
+========================================= */
+
+function validarTipoActivo() {
+
+  const selector =
+    document.getElementById("tipoActivo");
+
+  if (!selector) {
+    return;
+  }
+
+  const respuesta =
+    selector.value;
+
+
+  /* =========================================
+     FOTOS LATERALES Y TRASERA
+  ========================================= */
+
+  const requiereLaterales =
+    respuesta === "VEHICULO" ||
+    respuesta === "TRACTOCAMION" ||
+    respuesta === "TRANSPORTE" ||
+    respuesta === "MAQUINARIA" ||
+    respuesta === "AGRICOLA";
+
+  const laterales = [
+
+    {
+      label: "labelIzquierdo",
+      texto: "Foto lado izquierdo"
+    },
+
+    {
+      label: "labelDerecho",
+      texto: "Foto lado derecho"
+    },
+
+    {
+      label: "labelTrasera",
+      texto: "Foto trasera"
+    }
+
+  ];
+
+  laterales.forEach(function(elemento) {
+
+    const label =
+      document.getElementById(
+        elemento.label
+      );
+
+    if (label) {
+
+      label.innerHTML =
+        '<i class="fas fa-camera" style="' +
+          'color:#118AB2;' +
+          'margin-right:10px;' +
+        '"></i>' +
+
+        elemento.texto +
+
+        (
+          requiereLaterales
+            ? ' <span class="required-star" style="' +
+                'font-size:34px;' +
+                'margin-left:5px;' +
+              '">*</span>'
+            : ''
+        );
+
+    }
+
+  });
+
+
+  /* =========================================
+     FOTO DEL ODÓMETRO
+  ========================================= */
+
+  const requiereOdometro =
+    respuesta === "VEHICULO" ||
+    respuesta === "TRACTOCAMION" ||
+    respuesta === "TRANSPORTE";
+
+  const bloqueOdometro =
+    document.getElementById(
+      "bloqueOdometro"
+    );
+
+  if (bloqueOdometro) {
+
+    bloqueOdometro.style.display =
+      requiereOdometro
+        ? "block"
+        : "none";
+
+  }
+
+  const labelOdometro =
+    document.getElementById(
+      "labelOdometro"
+    );
+
+  if (labelOdometro) {
+
+    labelOdometro.innerHTML =
+      '<i class="fas fa-gauge-high" style="' +
+        'color:#118AB2;' +
+        'margin-right:10px;' +
+      '"></i>' +
+
+      'Foto del Odómetro/Kilometraje' +
+
+      (
+        requiereOdometro
+          ? ' <span class="required-star" style="' +
+              'font-size:34px;' +
+              'margin-left:5px;' +
+            '">*</span>'
+          : ''
+      );
+
+  }
+
+
+  /* =========================================
+     FOTO DEL CONTADOR DE HORAS
+  ========================================= */
+
+  const requiereContador =
+    respuesta === "MAQUINARIA" ||
+    respuesta === "AGRICOLA";
+
+  const bloqueContador =
+    document.getElementById(
+      "bloqueContadorHoras"
+    );
+
+  if (bloqueContador) {
+
+    bloqueContador.style.display =
+      requiereContador
+        ? "block"
+        : "none";
+
+  }
+
+  const labelContador =
+    document.getElementById(
+      "labelContadorHoras"
+    );
+
+  if (labelContador) {
+
+    labelContador.innerHTML =
+      '<i class="fas fa-hourglass-half" style="' +
+        'color:#118AB2;' +
+        'margin-right:10px;' +
+      '"></i>' +
+
+      'Foto del contador de horas' +
+
+      (
+        requiereContador
+          ? ' <span class="required-star" style="' +
+              'font-size:34px;' +
+              'margin-left:5px;' +
+            '">*</span>'
+          : ''
+      );
+
+  }
+
+
+  /* =========================================
+     VERIFICAR SI SE PUEDE MOSTRAR EL GPS
+  ========================================= */
+
+verificarFotosParaUbicacion();
+actualizarGuiaVisual(false);
+
+}
+
+/* =========================================
+   DETECTAR TIPO DESDE ASSET DESCRIPTION
+========================================= */
+
+function seleccionarTipoActivoAutomaticamente() {
+
+  const descripcionOriginal =
+    descripcionActivoActual;
+
+  const descripcion =
+    normalizarDescripcion(
+      descripcionOriginal
+    );
+
+  if (!descripcion) {
+    return;
+  }
+
+  const texto =
+    " " + descripcion + " ";
+
+  function contiene(lista) {
+
+    return lista.some(function(palabra) {
+
+      const palabraNormalizada =
+        normalizarDescripcion(palabra);
+
+      return texto.includes(
+        " " + palabraNormalizada + " "
+      );
+
+    });
+
+  }
+
+
+  /* =========================================
+     PALABRAS DE MAQUINARIA AGRÍCOLA
+  ========================================= */
+
+  const palabrasAgricola = [
+
+    "TRACTOR AGRICOLA",
+    "TRACTOR DE CAMPO",
+    "MAQUINARIA AGRICOLA",
+    "COSECHADORA",
+    "SEMBRADORA",
+    "EMPACADORA AGRICOLA",
+    "FUMIGADORA",
+    "DESGRANADORA",
+    "TRILLADORA",
+    "FORRAJERA",
+    "CULTIVADORA",
+    "AGRICULTURAL MACHINERY",
+    "FARM TRACTOR",
+    "HARVESTER"
+
+  ];
+
+
+  /* =========================================
+     PALABRAS DE MAQUINARIA AMARILLA
+  ========================================= */
+
+  const palabrasMaquinaria = [
+
+    "MAQUINARIA AMARILLA",
+    "MAQUINARIA PESADA",
+    "EXCAVADORA",
+    "RETROEXCAVADORA",
+    "MINIEXCAVADORA",
+    "MONTACARGAS",
+    "LIFT TRUCK",
+    "FORKLIFT",
+    "CARGADOR FRONTAL",
+    "MINICARGADOR",
+    "MOTOCONFORMADORA",
+    "MOTONIVELADORA",
+    "BULLDOZER",
+    "COMPACTADOR",
+    "APLANADORA",
+    "RODILLO COMPACTADOR",
+    "GRUA",
+    "PLATAFORMA ELEVADORA",
+    "MANIPULADOR TELESCOPICO",
+    "PALA MECANICA",
+    "CONSTRUCTION MACHINERY",
+    "YELLOW MACHINERY",
+    "MINING EQUIPMENT",
+    "CATERPILLAR",
+    "KOMATSU",
+    "JCB",
+    "BOBCAT"
+
+  ];
+
+
+  /* =========================================
+     PALABRAS DE TRANSPORTE
+  ========================================= */
+
+  const palabrasTransporte = [
+
+    "AUTOBUS",
+    "BUS",
+    "MINIBUS",
+    "MICROBUS",
+    "OMNIBUS",
+    "CAMION DE PASAJEROS",
+    "TRANSPORTE DE PASAJEROS",
+    "PASSENGER TRANSPORT",
+    "PASSENGER BUS",
+    "MOTOCICLETA",
+    "MOTOCICLETAS",
+    "MOTORCYCLE",
+    "MOTO",
+    "SCOOTER"
+
+  ];
+
+
+  /* =========================================
+     PALABRAS DE TRACTOCAMIÓN
+  ========================================= */
+
+  const palabrasTractocamion = [
+
+    "TRACTOCAMION",
+    "TRACTO CAMION",
+    "TRACTO",
+    "CAMION",
+    "CAMION DE CARGA",
+    "TRANSPORTE DE CARGA",
+    "FREIGHT TRANSPORT",
+    "TRAILER",
+    "TRACTO TRAILER",
+    "QUINTA RUEDA",
+    "TORTON",
+    "RABON",
+    "CAMION VOLTEO",
+    "VOLTEO",
+    "KENWORTH",
+    "FREIGHTLINER",
+    "PETERBILT",
+    "MACK",
+    "SCANIA",
+    "DINA",
+    "SINOTRUK",
+    "HOWO"
+
+  ];
+
+
+  /* =========================================
+     PALABRAS DE VEHÍCULO
+  ========================================= */
+
+  const palabrasVehiculo = [
+
+    "VEHICULO",
+    "AUTO",
+    "AUTOMOVIL",
+    "SEDAN",
+    "COUPE",
+    "HATCHBACK",
+    "SUV",
+    "PICKUP",
+    "PICK UP",
+    "CAMIONETA",
+    "VAGONETA",
+
+    "TOYOTA",
+    "NISSAN",
+    "CHEVROLET",
+    "FORD",
+    "HONDA",
+    "VOLKSWAGEN",
+    "MAZDA",
+    "KIA",
+    "HYUNDAI",
+    "RENAULT",
+    "DODGE",
+    "JEEP",
+    "RAM",
+    "BMW",
+    "AUDI",
+    "TESLA",
+    "SEAT",
+    "SUZUKI",
+    "MITSUBISHI",
+    "PEUGEOT",
+    "FIAT",
+    "SUBARU",
+    "ACURA",
+    "INFINITI",
+    "LEXUS",
+
+    "HILUX",
+    "TACOMA",
+    "COROLLA",
+    "CAMRY",
+    "RAV4",
+    "YARIS",
+    "AVANZA",
+    "SIENNA",
+    "NP300",
+    "FRONTIER",
+    "VERSA",
+    "SENTRA",
+    "MARCH",
+    "ALTIMA",
+    "XTRAIL",
+    "LOBO",
+    "RANGER",
+    "MAVERICK",
+    "ESCAPE",
+    "EXPLORER",
+    "CIVIC",
+    "ACCORD",
+    "JETTA",
+    "VENTO",
+    "TIGUAN",
+    "TAOS"
+
+  ];
+
+
+  /* =========================================
+     CLASIFICAR POR PRIORIDAD
+  ========================================= */
+
+  let tipoDetectado = "OTRO";
+
+  /*
+    El orden evita que un montacargas Toyota
+    sea clasificado como vehículo.
+  */
+
+  if (contiene(palabrasAgricola)) {
+
+    tipoDetectado =
+      "AGRICOLA";
+
+  } else if (contiene(palabrasMaquinaria)) {
+
+    tipoDetectado =
+      "MAQUINARIA";
+
+  } else if (contiene(palabrasTransporte)) {
+
+    tipoDetectado =
+      "TRANSPORTE";
+
+  } else if (contiene(palabrasTractocamion)) {
+
+    tipoDetectado =
+      "TRACTOCAMION";
+
+  } else if (contiene(palabrasVehiculo)) {
+
+    tipoDetectado =
+      "VEHICULO";
+
+  }
+
+
+  /* =========================================
+     COLOCAR RESULTADO EN EL SELECTOR
+  ========================================= */
+
+  const selector =
+    document.getElementById(
+      "tipoActivo"
+    );
+
+  if (!selector) {
+    return;
+  }
+
+  selector.value =
+    tipoDetectado;
+
+  validarTipoActivo();
+
+  mostrarDeteccionTipo(
+    tipoDetectado,
+    descripcionOriginal
+  );
+
+}
+
+
+/* =========================================
+   NORMALIZAR DESCRIPCIÓN
+========================================= */
+
+function normalizarDescripcion(valor) {
+
+  return String(valor || "")
+    .toUpperCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/&/g, " AND ")
+    .replace(/[^A-Z0-9]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+
+}
+
+
+/* =========================================
+   MOSTRAR RESULTADO
+========================================= */
+
+function mostrarDeteccionTipo(
+  tipo,
+  descripcion
+) {
+
+  const nombres = {
+
+    VEHICULO:
+      "Vehículo",
+
+    TRACTOCAMION:
+      "Tractocamión",
+
+    TRANSPORTE:
+      "Transporte",
+
+    MAQUINARIA:
+      "Maquinaria amarilla",
+
+    AGRICOLA:
+      "Tractores y maquinaria agrícola",
+
+    OTRO:
+      "Otro"
+
+  };
+
+  const mensaje =
+    document.getElementById(
+      "tipoActivoDetectado"
+    );
+
+  if (!mensaje) {
+    return;
+  }
+
+  mensaje.innerHTML =
+    "✅ Tipo seleccionado automáticamente: " +
+    nombres[tipo] +
+    "<br>" +
+    "<span style='font-weight:400;'>" +
+    "Puede cambiarlo si no es correcto." +
+    "</span>";
+
+  mensaje.style.display =
+    "block";
+
+}
+
+/* =========================
+   GPS
+========================= */
+function getLocation() {
+
+    actualizarProgreso(
+    10,
+    "Obteniendo ubicación GPS..."
+  );
+
+  const botonUbicacion =
+    document.getElementById("btnCompartirUbicacion");
+
+  const botonEnviar =
+    document.getElementById("btnEnviar");
+
+  const estadoGPS =
+    document.getElementById("gpsStatus");
+
+  botonUbicacion.disabled = true;
+
+  botonUbicacion.innerHTML =
+    '<i class="fas fa-spinner fa-spin"></i>' +
+    ' Obteniendo ubicación...';
+
+  navigator.geolocation.getCurrentPosition(
+
+    function(position) {
+
+      latitud =
+        position.coords.latitude;
+
+      longitud =
+        position.coords.longitude;
+
+      precisionGPS =
+        position.coords.accuracy;
+        actualizarProgreso(
+  20,
+  "Ubicación capturada. Lista para enviar."
+);
+
+      estadoGPS.innerHTML =
+        '<div style="' +
+          'background:#EFFBE9;' +
+          'color:#374757;' +
+          'border-left:6px solid #8EDD65;' +
+          'padding:16px;' +
+          'border-radius:10px;' +
+          'font-size:24px;' +
+          'font-weight:700;' +
+        '">' +
+          '✅ Ubicación capturada correctamente' +
+        '</div>';
+
+      botonUbicacion.disabled = false;
+
+      botonUbicacion.innerHTML =
+        '<i class="fas fa-location-dot"></i>' +
+        ' Actualizar ubicación';
+
+      if (botonEnviar) {
+
+  botonEnviar.style.display =
+    "flex";
+
+  actualizarGuiaVisual(false);
+
+  setTimeout(function() {
+
+    botonEnviar.scrollIntoView({
+      behavior: "smooth",
+      block: "center"
+    });
+
+  }, 300);
+
+}
+
+    },
+
+    function() {
+
+      estadoGPS.innerHTML =
+        '<div style="' +
+          'background:#FFF0EC;' +
+          'color:#374757;' +
+          'border-left:6px solid #FF8E72;' +
+          'padding:16px;' +
+          'border-radius:10px;' +
+          'font-size:24px;' +
+          'font-weight:700;' +
+        '">' +
+          '❌ Debe permitir el acceso a la ubicación GPS.' +
+        '</div>';
+
+      botonUbicacion.disabled = false;
+
+      botonUbicacion.innerHTML =
+        '<i class="fas fa-location-dot"></i>' +
+        ' Intentar compartir ubicación nuevamente';
+
+      if (botonEnviar) {
+        botonEnviar.style.display = "none";
+      }
+
+    },
+
+    {
+      enableHighAccuracy: true,
+      timeout: 20000,
+      maximumAge: 0
+    }
+
+  );
+
+}
+/* =========================
+   ACTUALIZAR PROGRESO
+========================= */
+
+function actualizarProgreso(
+  porcentaje,
+  mensaje
+) {
+
+  const loading =
+    document.getElementById("loading");
+
+  const barra =
+    document.getElementById("loadingBar");
+
+  const texto =
+    document.getElementById("loadingText");
+
+  const porcentajeTexto =
+    document.getElementById(
+      "loadingPercent"
+    );
+
+  if (
+    !loading ||
+    !barra ||
+    !texto ||
+    !porcentajeTexto
+  ) {
+    return;
+  }
+
+  loading.style.display =
+    "block";
+
+  barra.style.width =
+    porcentaje + "%";
+
+  porcentajeTexto.textContent =
+    porcentaje + "%";
+
+  texto.textContent =
+    mensaje;
+
+}
+/* =========================
+   REINTENTOS AUTOMÁTICOS
+========================= */
+
+const MAX_REINTENTOS = 3;
+
+function esperar(milisegundos) {
+
+  return new Promise(resolve => {
+
+    setTimeout(
+      resolve,
+      milisegundos
+    );
+
+  });
+
+}
+
+async function ejecutarConReintentos(
+  operacion,
+  nombreOperacion,
+  maxIntentos = MAX_REINTENTOS
+) {
+
+  let ultimoError;
+
+  for (
+    let intento = 1;
+    intento <= maxIntentos;
+    intento++
+  ) {
+
+    try {
+
+      return await operacion();
+
+    } catch (error) {
+
+      ultimoError = error;
+
+      if (intento >= maxIntentos) {
+        break;
+      }
+
+      const tiempoEspera =
+        intento * 3000;
+
+      document.getElementById("mensaje").innerHTML = `
+        <div style="
+          background:#FFF3CD;
+          color:#665200;
+          padding:15px;
+          border-radius:10px;
+          font-weight:bold;
+          margin-top:15px;
+        ">
+
+          ⚠️ Ocurrió un problema al ${nombreOperacion}.<br><br>
+
+          Reintentando automáticamente
+          (${intento + 1} de ${maxIntentos})...
+
+        </div>
+      `;
+
+      await esperar(tiempoEspera);
+
+    }
+
+  }
+
+  throw ultimoError;
+
+}
+
+/* =========================
+   ENVIAR DATOS A APPS SCRIPT
+========================= */
+
+async function enviarDatosAppsScript(formData) {
+
+  const respuesta =
+    await fetch(
+      API_URL,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "text/plain;charset=utf-8"
+        },
+        body: JSON.stringify({
+          action: "submitAudit",
+          formData: formData
+        }),
+        redirect: "follow",
+        cache: "no-store"
+      }
+    );
+
+  if (!respuesta.ok) {
+    throw new Error(
+      "El servidor no respondió correctamente."
+    );
+  }
+
+  const resultado =
+    await respuesta.json();
+
+  if (!resultado.success) {
+    throw new Error(
+      resultado.error ||
+      "No fue posible guardar la autoauditoría."
+    );
+  }
+
+  return resultado.resultado;
+
+}
+/* =========================================
+   VALIDAR EVIDENCIAS
+========================================= */
+
+function obtenerEvidenciasFaltantes(tipoActivo) {
+
+  const obligatorias = [];
+
+  // Primera fotografía
+  obligatorias.push(
+    "fotoFrontal"
+  );
+
+  // Laterales y trasera
+  if (
+    tipoActivo === "VEHICULO" ||
+    tipoActivo === "TRACTOCAMION" ||
+    tipoActivo === "TRANSPORTE" ||
+    tipoActivo === "MAQUINARIA" ||
+    tipoActivo === "AGRICOLA"
+  ) {
+
+    obligatorias.push(
+      "fotoIzquierdo",
+      "fotoDerecho",
+      "fotoTrasera"
+    );
+
+  }
+
+  // Serie y código QR
+  obligatorias.push(
+    "fotoSerie",
+    "fotoQr"
+  );
+
+  // Odómetro
+  if (
+    tipoActivo === "VEHICULO" ||
+    tipoActivo === "TRACTOCAMION" ||
+    tipoActivo === "TRANSPORTE"
+  ) {
+
+    obligatorias.push(
+      "fotoOdometro"
+    );
+
+  }
+
+  // Contador de horas
+  if (
+    tipoActivo === "MAQUINARIA" ||
+    tipoActivo === "AGRICOLA"
+  ) {
+
+    obligatorias.push(
+      "fotoContadorHoras"
+    );
+
+  }
+
+  return obligatorias.filter(
+    function(campo) {
+
+      return !evidenciasUrls[campo];
+
+    }
+  );
+
+}
+
+/* =========================================
+   MOSTRAR UBICACIÓN CUANDO ESTÉN LAS FOTOS
+========================================= */
+
+function verificarFotosParaUbicacion() {
+
+  const botonUbicacion =
+    document.getElementById(
+      "btnCompartirUbicacion"
+    );
+
+  const selector =
+    document.getElementById(
+      "tipoActivo"
+    );
+
+  if (
+    !botonUbicacion ||
+    !selector
+  ) {
+    return;
+  }
+
+  const tipoActivo =
+    selector.value;
+
+  /*
+    Sin tipo de activo seleccionado,
+    el botón permanece oculto.
+  */
+
+  if (!tipoActivo) {
+
+    botonUbicacion.style.display =
+      "none";
+
+    return;
+  }
+
+  const faltantes =
+    obtenerEvidenciasFaltantes(
+      tipoActivo
+    );
+
+  if (faltantes.length === 0) {
+
+    botonUbicacion.style.display =
+      "flex";
+
+    botonUbicacion.innerHTML =
+      '<i class="fas fa-map-marker-alt"></i>' +
+      ' Compartir ubicación';
+
+  } else {
+
+    botonUbicacion.style.display =
+      "none";
+
+  }
+
+}
+
+/* =========================================
+   ENVIAR AUTOAUDITORÍA
+========================================= */
+
+const formulario =
+  document.getElementById("auditForm");
+
+if (formulario) {
+
+  formulario.addEventListener(
+    "submit",
+    async function(evento) {
+
+      evento.preventDefault();
+
+      const botonEnviar =
+  document.getElementById("btnEnviar");
+
+let temporizadorProgreso = null;
+
+try {
+
+        if (!latitud || !longitud) {
+
+          throw new Error(
+            "Debe compartir su ubicación antes de enviar."
+          );
+
+        }
+
+        const tipoActivo =
+          document.getElementById("tipoActivo").value;
+
+        if (!tipoActivo) {
+
+          throw new Error(
+            "Debe seleccionar el tipo de activo."
+          );
+
+        }
+
+        const faltantes =
+          obtenerEvidenciasFaltantes(tipoActivo);
+
+        if (faltantes.length > 0) {
+
+          const nombres =
+            faltantes.map(function(campo) {
+              return nombresEvidencias[campo];
+            });
+
+          throw new Error(
+            "Debe tomar las siguientes fotografías:<br><br>" +
+            nombres.join("<br>")
+          );
+
+        }
+
+        actualizarProgreso(
+  30,
+  "Validando información..."
+);
+
+const progresoEnvio =
+  document.getElementById("loading");
+
+if (progresoEnvio) {
+
+  progresoEnvio.style.display =
+    "block";
+
+  setTimeout(function() {
+
+    progresoEnvio.scrollIntoView({
+      behavior: "smooth",
+      block: "center"
+    });
+
+  }, 250);
+
+}
+
+        const formData = {
+
+          auditId:
+            document.getElementById("auditId").value,
+
+          token:
+            document.getElementById("token").value,
+
+          tipoActivo,
+
+          latitud,
+
+          longitud,
+
+          precisionGPS,
+
+          fotoFrontal:
+            evidenciasUrls.fotoFrontal || "",
+
+          fotoIzquierdo:
+            evidenciasUrls.fotoIzquierdo || "",
+
+          fotoDerecho:
+            evidenciasUrls.fotoDerecho || "",
+
+          fotoTrasera:
+            evidenciasUrls.fotoTrasera || "",
+
+          fotoSerie:
+            evidenciasUrls.fotoSerie || "",
+
+          fotoQr:
+            evidenciasUrls.fotoQr || "",
+
+          fotoOdometro:
+            evidenciasUrls.fotoOdometro || "",
+
+          fotoContadorHoras:
+            evidenciasUrls.fotoContadorHoras || ""
+
+        };
+
+       /* =========================================
+   PROGRESO VISUAL DEL GUARDADO
+========================================= */
+
+let progresoVisual = 30;
+
+actualizarProgreso(
+  progresoVisual,
+  "Preparando evidencias..."
+);
+
+temporizadorProgreso = setInterval(function() {
+
+  if (progresoVisual < 90) {
+
+    progresoVisual += 5;
+
+    let textoProgreso =
+      "Guardando autoauditoría...";
+
+    if (progresoVisual >= 50) {
+
+      textoProgreso =
+        "Registrando evidencias...";
+
+    }
+
+    if (progresoVisual >= 75) {
+
+      textoProgreso =
+        "Finalizando información...";
+
+    }
+
+    actualizarProgreso(
+      progresoVisual,
+      textoProgreso
+    );
+
+  }
+
+}, 400);
+
+await ejecutarConReintentos(
+  function() {
+
+    return enviarDatosAppsScript(
+      formData
+    );
+
+  },
+  "guardar la autoauditoría",
+  3
+);
+
+clearInterval(
+  temporizadorProgreso
+);
+
+temporizadorProgreso = null;
+
+actualizarProgreso(
+  100,
+  "Autoauditoría completada."
+);
+
+        localStorage.removeItem(
+  claveEvidencias
+);
+
+        formulario.style.display =
+          "none";
+
+        document.getElementById("mensaje").innerHTML = `
+          <div style="
+  background:#91fc5b;
+  color:#374757;
+  padding:25px;
+  border-left:7px solid #8EDD65;
+  border-radius:12px;
+  font-size:25px;
+  font-weight:bold;
+  text-align:center;
+  margin-top:20px;
+">
+  ✅ Autoauditoría enviada correctamente.
+  <br><br>
+  Muchas gracias.
+</div>
+        `;
+        mostrarPantallaFinal();
+
+      } catch (error) {
+
+  if (temporizadorProgreso) {
+
+    clearInterval(
+      temporizadorProgreso
+    );
+
+    temporizadorProgreso = null;
+
+  }
+
+  botonEnviar.disabled = false;
+
+        document.getElementById("loading")
+          .style.display = "none";
+
+        mostrarError(
+          error.message ||
+          "No fue posible enviar la autoauditoría."
+        );
+
+      }
+
+    }
+  );
+
+}
+
+function mostrarPantallaFinal() {
+
+    document
+    .querySelectorAll(".paso-actual")
+    .forEach(function(elemento) {
+
+      elemento.classList.remove(
+        "paso-actual"
+      );
+
+    });
+
+  // Ocultar formulario, ubicación y barra de progreso
+  const elementosOcultar = [
+    "auditForm",
+    "btnCompartirUbicacion",
+    "gpsStatus",
+    "loading",
+    "btnEnviar"
+  ];
+
+  elementosOcultar.forEach(function(id) {
+
+    const elemento =
+      document.getElementById(id);
+
+    if (elemento) {
+      elemento.style.display = "none";
+    }
+
+  });
+
+  // Mostrar solamente el botón Escanear otro activo
+  const botonEscanear =
+    document.getElementById("btnEscanearOtro");
+
+  if (botonEscanear) {
+    botonEscanear.style.display = "flex";
+  }
+
+  // Regresar arriba para mostrar logo, título e información
+  window.scrollTo({
+    top: 0,
+    behavior: "smooth"
+  });
+
+}
+
+function volverAEscanear() {
+
+  window.open(
+    "https://autoauditoriaunifin.github.io/Landing/",
+    "_blank"
+  );
+
+}
+
+function abrirEscaner() {
+
+  window.open(
+    "https://autoauditoriaunifin.github.io/Landing/",
+    "_blank"
+  );
+
+}
+
+/* ======================================================
+   CARGAR AUDITORÍA DESDE APPS SCRIPT
+====================================================== */
+
+async function cargarAuditoriaDesdeApi() {
+
+  const estadoInicial =
+    document.getElementById("estadoInicial");
+
+  const errorInicial =
+    document.getElementById("errorInicial");
+
+  const contenido =
+    document.getElementById("contenidoAuditoria");
+
+  try {
+
+    const parametros =
+      new URLSearchParams(
+        window.location.search
+      );
+
+    const auditId =
+      parametros.get("audit") || "";
+
+    const token =
+      parametros.get("token") || "";
+
+    if (!auditId || !token) {
+      throw new Error(
+        "El enlace de la autoauditoría no es válido."
+      );
+    }
+
+    const urlConsulta =
+      API_URL +
+      "?action=getAudit" +
+      "&audit=" + encodeURIComponent(auditId) +
+      "&token=" + encodeURIComponent(token) +
+      "&_=" + Date.now();
+
+    const respuesta =
+      await fetch(
+        urlConsulta,
+        {
+          method: "GET",
+          redirect: "follow",
+          cache: "no-store"
+        }
+      );
+
+    if (!respuesta.ok) {
+      throw new Error(
+        "No fue posible consultar la autoauditoría."
+      );
+    }
+
+    const resultado =
+      await respuesta.json();
+
+    if (!resultado.success) {
+      throw new Error(
+        resultado.message ||
+        "No fue posible abrir la autoauditoría."
+      );
+    }
+
+    const audit =
+      resultado.audit;
+
+    document.getElementById("auditId").value =
+      audit.auditId;
+
+    document.getElementById("token").value =
+      audit.token;
+
+    document.getElementById("datoCliente").textContent =
+      audit.cliente || "Sin información";
+
+    document.getElementById("datoActivo").textContent =
+      audit.activo || "Sin información";
+
+    document.getElementById("datoNumeroSerie").textContent =
+      audit.numeroSerie || "Sin información";
+
+    document.getElementById("datoQrNumber").textContent =
+      audit.qrNumber || "Sin información";
+
+    document.getElementById("datoAnexo").textContent =
+      audit.anexo || "Sin información";
+
+    auditIdActual =
+      audit.auditId;
+
+    claveEvidencias =
+      "evidenciasAutoauditoria_" +
+      auditIdActual;
+
+    descripcionActivoActual =
+      audit.activo || "";
+
+    try {
+
+      evidenciasUrls =
+        JSON.parse(
+          localStorage.getItem(claveEvidencias) || "{}"
+        );
+
+    } catch (error) {
+      evidenciasUrls = {};
+    }
+
+    seleccionarTipoActivoAutomaticamente();
+    restaurarConfirmaciones();
+    verificarFotosParaUbicacion();
+    actualizarGuiaVisual(false);
+
+    estadoInicial.style.display =
+      "none";
+
+    contenido.style.display =
+      "block";
+
+  } catch (error) {
+
+    estadoInicial.style.display =
+      "none";
+
+    errorInicial.style.display =
+      "block";
+
+    errorInicial.innerHTML =
+      '<div class="bloqueado">⚠️ ' +
+      escaparHtml(
+        error.message ||
+        "No fue posible abrir la autoauditoría."
+      ) +
+      '</div>' +
+      '<button type="button" onclick="abrirEscaner()">' +
+      '<i class="fas fa-qrcode"></i> Escanear otro activo' +
+      '</button>';
+
+  }
+
+}
+
+function escaparHtml(texto) {
+
+  const elemento =
+    document.createElement("div");
+
+  elemento.textContent =
+    String(texto || "");
+
+  return elemento.innerHTML;
+
+}
+
+cargarAuditoriaDesdeApi();
+
+</script>
