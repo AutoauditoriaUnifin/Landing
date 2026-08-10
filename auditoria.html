@@ -3096,40 +3096,116 @@ async function ejecutarConReintentos(
 
 async function enviarDatosAppsScript(formData) {
 
-  const respuesta =
-    await fetch(
-      API_URL,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "text/plain;charset=utf-8"
-        },
-        body: JSON.stringify({
-          action: "submitAudit",
-          formData: formData
-        }),
-        redirect: "follow",
-        cache: "no-store"
+  return new Promise(function(resolve, reject) {
+
+    const requestId =
+      "unifin_" +
+      Date.now() +
+      "_" +
+      Math.random().toString(36).slice(2);
+
+    const nombreIframe =
+      "iframe_" + requestId;
+
+    const iframe =
+      document.createElement("iframe");
+
+    iframe.name = nombreIframe;
+    iframe.style.display = "none";
+
+    const form =
+      document.createElement("form");
+
+    form.method = "POST";
+    form.action = API_URL;
+    form.target = nombreIframe;
+    form.style.display = "none";
+
+    const campo =
+      document.createElement("input");
+
+    campo.type = "hidden";
+    campo.name = "payload";
+    campo.value = JSON.stringify({
+      action: "submitAudit",
+      requestId: requestId,
+      formData: formData
+    });
+
+    form.appendChild(campo);
+    document.body.appendChild(iframe);
+    document.body.appendChild(form);
+
+    let terminado = false;
+
+    const limpiar = function() {
+
+      window.removeEventListener(
+        "message",
+        recibirRespuesta
+      );
+
+      clearTimeout(temporizador);
+      form.remove();
+      iframe.remove();
+
+    };
+
+    const recibirRespuesta = function(evento) {
+
+      const datos =
+        evento.data;
+
+      if (
+        !datos ||
+        datos.source !== "unifin-auditoria" ||
+        datos.requestId !== requestId
+      ) {
+        return;
       }
+
+      terminado = true;
+      limpiar();
+
+      if (!datos.success) {
+        reject(
+          new Error(
+            datos.error ||
+            "No fue posible guardar la autoauditoría."
+          )
+        );
+        return;
+      }
+
+      resolve(datos.resultado);
+
+    };
+
+    window.addEventListener(
+      "message",
+      recibirRespuesta
     );
 
-  if (!respuesta.ok) {
-    throw new Error(
-      "El servidor no respondió correctamente."
-    );
-  }
+    const temporizador =
+      setTimeout(function() {
 
-  const resultado =
-    await respuesta.json();
+        if (terminado) {
+          return;
+        }
 
-  if (!resultado.success) {
-    throw new Error(
-      resultado.error ||
-      "No fue posible guardar la autoauditoría."
-    );
-  }
+        limpiar();
 
-  return resultado.resultado;
+        reject(
+          new Error(
+            "El servidor tardó demasiado en responder. Intente nuevamente."
+          )
+        );
+
+      }, 180000);
+
+    form.submit();
+
+  });
 
 }
 /* =========================================
@@ -3617,24 +3693,10 @@ async function cargarAuditoriaDesdeApi() {
       "&token=" + encodeURIComponent(token) +
       "&_=" + Date.now();
 
-    const respuesta =
-      await fetch(
-        urlConsulta,
-        {
-          method: "GET",
-          redirect: "follow",
-          cache: "no-store"
-        }
-      );
-
-    if (!respuesta.ok) {
-      throw new Error(
-        "No fue posible consultar la autoauditoría."
-      );
-    }
-
     const resultado =
-      await respuesta.json();
+      await consultarApiJsonp(
+        urlConsulta
+      );
 
     if (!resultado.success) {
       throw new Error(
@@ -3731,6 +3793,102 @@ function escaparHtml(texto) {
     String(texto || "");
 
   return elemento.innerHTML;
+
+}
+
+function consultarApiJsonp(url) {
+
+  return new Promise(function(resolve, reject) {
+
+    const nombreCallback =
+      "__unifinJsonp_" +
+      Date.now() +
+      "_" +
+      Math.random()
+        .toString(36)
+        .slice(2);
+
+    const script =
+      document.createElement("script");
+
+    let finalizado = false;
+
+    const limpiar = function() {
+
+      clearTimeout(temporizador);
+      script.remove();
+
+      try {
+        delete window[nombreCallback];
+      } catch (error) {
+        window[nombreCallback] = undefined;
+      }
+
+    };
+
+    window[nombreCallback] = function(datos) {
+
+      if (finalizado) {
+        return;
+      }
+
+      finalizado = true;
+      limpiar();
+      resolve(datos);
+
+    };
+
+    script.onerror = function() {
+
+      if (finalizado) {
+        return;
+      }
+
+      finalizado = true;
+      limpiar();
+
+      reject(
+        new Error(
+          "No fue posible conectar con el servidor."
+        )
+      );
+
+    };
+
+    const separador =
+      url.includes("?")
+        ? "&"
+        : "?";
+
+    script.src =
+      url +
+      separador +
+      "callback=" +
+      encodeURIComponent(nombreCallback);
+
+    const temporizador =
+      setTimeout(function() {
+
+        if (finalizado) {
+          return;
+        }
+
+        finalizado = true;
+        limpiar();
+
+        reject(
+          new Error(
+            "El servidor tardó demasiado en responder."
+          )
+        );
+
+      }, 45000);
+
+    document.head.appendChild(
+      script
+    );
+
+  });
 
 }
 
