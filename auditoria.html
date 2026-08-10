@@ -3137,6 +3137,8 @@ async function enviarDatosAppsScript(formData) {
     document.body.appendChild(form);
 
     let terminado = false;
+    let verificacionEnCurso = false;
+    let temporizadorVerificacion = null;
 
     const limpiar = function() {
 
@@ -3146,6 +3148,11 @@ async function enviarDatosAppsScript(formData) {
       );
 
       clearTimeout(temporizador);
+
+      if (temporizadorVerificacion) {
+        clearInterval(temporizadorVerificacion);
+      }
+
       form.remove();
       iframe.remove();
 
@@ -3186,6 +3193,67 @@ async function enviarDatosAppsScript(formData) {
       recibirRespuesta
     );
 
+    const verificarGuardado = async function() {
+
+      if (
+        terminado ||
+        verificacionEnCurso
+      ) {
+        return;
+      }
+
+      verificacionEnCurso = true;
+
+      try {
+
+        const urlVerificacion =
+          API_URL +
+          "?action=getAudit" +
+          "&audit=" +
+          encodeURIComponent(formData.auditId) +
+          "&token=" +
+          encodeURIComponent(formData.token) +
+          "&_=" +
+          Date.now();
+
+        const estado =
+          await consultarApiJsonp(
+            urlVerificacion
+          );
+
+        if (
+          estado &&
+          estado.success === false &&
+          estado.code === "ALREADY_SUBMITTED"
+        ) {
+
+          terminado = true;
+          limpiar();
+
+          resolve({
+            success: true,
+            alreadyProcessed: true,
+            message:
+              "Autoauditoría enviada correctamente."
+          });
+
+        }
+
+      } catch (error) {
+
+        /*
+          Ignorar este intento y volver a
+          consultar automáticamente.
+        */
+
+      } finally {
+
+        verificacionEnCurso = false;
+
+      }
+
+    };
+
     const temporizador =
       setTimeout(function() {
 
@@ -3203,7 +3271,18 @@ async function enviarDatosAppsScript(formData) {
 
       }, 180000);
 
+    temporizadorVerificacion =
+      setInterval(
+        verificarGuardado,
+        3500
+      );
+
     form.submit();
+
+    setTimeout(
+      verificarGuardado,
+      1800
+    );
 
   });
 
