@@ -1663,62 +1663,6 @@ function abrirAutoauditoria(evento, url) {
 
       </main>
 
-      <!-- =========================================
-     VALIDAR NAVEGADOR
-========================================= -->
-
-<div
-  id="modalNavegador"
-  class="modal-navegador"
-  role="dialog"
-  aria-modal="true">
-
-  <div class="modal-navegador-contenido">
-
-    <div class="modal-navegador-icono">
-      🌐
-    </div>
-
-    <div class="modal-navegador-titulo">
-      Abrir Autoauditoría UNIFIN
-    </div>
-
-    <div
-      id="mensajeNavegador"
-      class="modal-navegador-mensaje">
-    </div>
-
-    <div
-      id="avisoNavegador"
-      class="modal-navegador-aviso">
-    </div>
-
-    <button
-      type="button"
-      id="btnContinuarAuditoria"
-      onclick="continuarAutoauditoria()">
-      ✅ Continuar
-    </button>
-
-    <button
-      type="button"
-      id="btnCopiarAuditoria"
-      onclick="copiarEnlaceAuditoria()"
-      style="background:#374757;">
-      📋 Copiar enlace
-    </button>
-
-    <button
-      type="button"
-      onclick="cerrarValidacionNavegador()"
-      style="background:#7A8793;">
-      Cancelar
-    </button>
-
-  </div>
-
-</div>
-
     </body>
 
     </html>
@@ -1916,6 +1860,62 @@ async function consultarActivo(id) {
 }
 
 </script>
+
+<!-- =========================================
+     VALIDAR NAVEGADOR
+========================================= -->
+
+<div
+  id="modalNavegador"
+  class="modal-navegador"
+  role="dialog"
+  aria-modal="true">
+
+  <div class="modal-navegador-contenido">
+
+    <div class="modal-navegador-icono">
+      🌐
+    </div>
+
+    <div class="modal-navegador-titulo">
+      Abrir Autoauditoría UNIFIN
+    </div>
+
+    <div
+      id="mensajeNavegador"
+      class="modal-navegador-mensaje">
+    </div>
+
+    <div
+      id="avisoNavegador"
+      class="modal-navegador-aviso">
+    </div>
+
+    <button
+      type="button"
+      id="btnContinuarAuditoria"
+      onclick="continuarAutoauditoria()">
+      ✅ Continuar
+    </button>
+
+    <button
+      type="button"
+      id="btnCopiarAuditoria"
+      onclick="copiarEnlaceAuditoria()"
+      style="background:#374757;">
+      📋 Copiar enlace
+    </button>
+
+    <button
+      type="button"
+      onclick="cerrarValidacionNavegador()"
+      style="background:#7A8793;">
+      Cancelar
+    </button>
+
+  </div>
+
+</div>
 
 </body>
 </html>
