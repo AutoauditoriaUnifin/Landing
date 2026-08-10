@@ -554,6 +554,64 @@ input::placeholder {
     font-size: 25px !important;
   }
 }
+
+/* =========================================
+   VALIDACIÓN DE NAVEGADOR
+========================================= */
+
+.modal-navegador {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 15000;
+  align-items: center;
+  justify-content: center;
+  padding: 18px;
+  background: rgba(31, 53, 87, 0.78);
+}
+
+.modal-navegador-contenido {
+  width: 100%;
+  max-width: 620px;
+  padding: clamp(22px, 6vw, 35px);
+  background: #FFFFFF;
+  border-left: 7px solid #118AB2;
+  border-radius: 18px;
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.25);
+  text-align: center;
+}
+
+.modal-navegador-icono {
+  color: #118AB2;
+  font-size: 55px;
+}
+
+.modal-navegador-titulo {
+  margin-top: 15px;
+  color: #1F3557;
+  font-size: clamp(26px, 7vw, 35px);
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.modal-navegador-mensaje {
+  margin-top: 18px;
+  padding: 18px;
+  background: #EEF7FB;
+  color: #374757;
+  border-radius: 12px;
+  font-size: clamp(18px, 5vw, 24px);
+  font-weight: 700;
+  line-height: 1.5;
+}
+
+.modal-navegador-aviso {
+  margin-top: 15px;
+  color: #FF8E72;
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1.4;
+}
  
 </style>
 
@@ -1165,6 +1223,250 @@ function ocultarCargando() {
 
 }
 
+/* =========================================
+   VALIDAR NAVEGADOR ANTES DE ABRIR
+========================================= */
+
+let urlAuditoriaPendiente = "";
+
+function validarNavegadorAuditoria(
+  evento,
+  url
+) {
+
+  evento.preventDefault();
+
+  urlAuditoriaPendiente =
+    url;
+
+  const navegador =
+    detectarNavegadorRecomendado();
+
+  const modal =
+    document.getElementById(
+      "modalNavegador"
+    );
+
+  const mensaje =
+    document.getElementById(
+      "mensajeNavegador"
+    );
+
+  const aviso =
+    document.getElementById(
+      "avisoNavegador"
+    );
+
+  const botonContinuar =
+    document.getElementById(
+      "btnContinuarAuditoria"
+    );
+
+  mensaje.innerHTML =
+    navegador.mensaje;
+
+  if (navegador.correcto) {
+
+    aviso.innerHTML =
+      "✅ Navegador recomendado detectado.";
+
+    aviso.style.color =
+      "#118AB2";
+
+    botonContinuar.style.display =
+      "flex";
+
+  } else {
+
+    aviso.innerHTML =
+      "⚠️ Copie el enlace y ábralo directamente en " +
+      navegador.recomendado +
+      ".";
+
+    aviso.style.color =
+      "#FF8E72";
+
+    /*
+      No permitir continuar dentro de
+      Mail, Gmail, WhatsApp u otro WebView.
+    */
+
+    botonContinuar.style.display =
+      "none";
+
+  }
+
+  modal.style.display =
+    "flex";
+
+  return false;
+
+}
+
+
+function detectarNavegadorRecomendado() {
+
+  const agente =
+    navigator.userAgent || "";
+
+  const esIOS =
+    /iPad|iPhone|iPod/i.test(agente) ||
+    (
+      navigator.platform === "MacIntel" &&
+      navigator.maxTouchPoints > 1
+    );
+
+  const esAndroid =
+    /Android/i.test(agente);
+
+  const esSafari =
+    esIOS &&
+    /Safari/i.test(agente) &&
+    !/CriOS|FxiOS|EdgiOS|OPiOS|GSA/i.test(
+      agente
+    );
+
+  const esChromeAndroid =
+    esAndroid &&
+    /Chrome/i.test(agente) &&
+    !/;\s*wv\)|\bwv\b|EdgA|OPR|SamsungBrowser/i.test(
+      agente
+    );
+
+  if (esIOS) {
+
+    return {
+
+      correcto:
+        esSafari,
+
+      recomendado:
+        "Safari",
+
+      mensaje:
+        "Para evitar que las fotografías se pierdan, abra esta autoauditoría directamente en <b>Safari</b>."
+
+    };
+
+  }
+
+  if (esAndroid) {
+
+    return {
+
+      correcto:
+        esChromeAndroid,
+
+      recomendado:
+        "Google Chrome",
+
+      mensaje:
+        "Para evitar que las fotografías se pierdan, abra esta autoauditoría directamente en <b>Google Chrome</b>."
+
+    };
+
+  }
+
+  return {
+
+    correcto:
+      true,
+
+    recomendado:
+      "Google Chrome o Safari",
+
+    mensaje:
+      "Para obtener el mejor funcionamiento, utilice <b>Google Chrome</b> o <b>Safari</b>."
+
+  };
+
+}
+
+
+function continuarAutoauditoria() {
+
+  const url =
+    urlAuditoriaPendiente;
+
+  cerrarValidacionNavegador();
+
+  if (!url) {
+    return;
+  }
+
+  abrirAutoauditoria(
+    {
+      preventDefault:
+        function() {}
+    },
+    url
+  );
+
+}
+
+
+async function copiarEnlaceAuditoria() {
+
+  if (!urlAuditoriaPendiente) {
+    return;
+  }
+
+  const boton =
+    document.getElementById(
+      "btnCopiarAuditoria"
+    );
+
+  try {
+
+    await navigator.clipboard.writeText(
+      urlAuditoriaPendiente
+    );
+
+    boton.innerHTML =
+      "✅ Enlace copiado";
+
+  } catch (error) {
+
+    const campoTemporal =
+      document.createElement(
+        "textarea"
+      );
+
+    campoTemporal.value =
+      urlAuditoriaPendiente;
+
+    document.body.appendChild(
+      campoTemporal
+    );
+
+    campoTemporal.select();
+
+    document.execCommand(
+      "copy"
+    );
+
+    campoTemporal.remove();
+
+    boton.innerHTML =
+      "✅ Enlace copiado";
+
+  }
+
+}
+
+
+function cerrarValidacionNavegador() {
+
+  const modal =
+    document.getElementById(
+      "modalNavegador"
+    );
+
+  modal.style.display =
+    "none";
+
+}
+
 function abrirAutoauditoria(evento, url) {
 
   evento.preventDefault();
@@ -1361,6 +1663,62 @@ function abrirAutoauditoria(evento, url) {
 
       </main>
 
+      <!-- =========================================
+     VALIDAR NAVEGADOR
+========================================= -->
+
+<div
+  id="modalNavegador"
+  class="modal-navegador"
+  role="dialog"
+  aria-modal="true">
+
+  <div class="modal-navegador-contenido">
+
+    <div class="modal-navegador-icono">
+      🌐
+    </div>
+
+    <div class="modal-navegador-titulo">
+      Abrir Autoauditoría UNIFIN
+    </div>
+
+    <div
+      id="mensajeNavegador"
+      class="modal-navegador-mensaje">
+    </div>
+
+    <div
+      id="avisoNavegador"
+      class="modal-navegador-aviso">
+    </div>
+
+    <button
+      type="button"
+      id="btnContinuarAuditoria"
+      onclick="continuarAutoauditoria()">
+      ✅ Continuar
+    </button>
+
+    <button
+      type="button"
+      id="btnCopiarAuditoria"
+      onclick="copiarEnlaceAuditoria()"
+      style="background:#374757;">
+      📋 Copiar enlace
+    </button>
+
+    <button
+      type="button"
+      onclick="cerrarValidacionNavegador()"
+      style="background:#7A8793;">
+      Cancelar
+    </button>
+
+  </div>
+
+</div>
+
     </body>
 
     </html>
@@ -1503,7 +1861,7 @@ async function consultarActivo(id) {
         <a
   class="btn"
   href="${data.linkAuditoria}"
-  onclick="return abrirAutoauditoria(event, this.href);">
+  onclick="return validarNavegadorAuditoria(event, this.href);">
 
   Abrir Autoauditoría
 
