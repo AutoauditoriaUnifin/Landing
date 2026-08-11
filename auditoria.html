@@ -880,20 +880,52 @@ button:disabled.paso-actual {
 }
 
 /* =========================================
-   MODO PARA TELÉFONOS DE POCA MEMORIA
+   PÁGINA LIGERA PARA TELÉFONOS CON POCA RAM
 ========================================= */
 
-.modo-ligero *,
-.modo-ligero *::before,
-.modo-ligero *::after {
+/* Detener solamente los pulsos pesados */
+
+html.modo-ligero .paso-actual,
+html.modo-ligero #loading,
+html.modo-ligero #loadingBar {
   animation: none !important;
+  transform: none !important;
+  filter: none !important;
+}
+
+/* Quitar transiciones innecesarias */
+
+html.modo-ligero button,
+html.modo-ligero input,
+html.modo-ligero select,
+html.modo-ligero textarea,
+html.modo-ligero #loadingBar {
   transition: none !important;
+}
+
+/* Reducir sombras que consumen procesamiento */
+
+html.modo-ligero .container,
+html.modo-ligero .info,
+html.modo-ligero .estado-foto,
+html.modo-ligero #loading,
+html.modo-ligero button {
   box-shadow: none !important;
 }
 
-.modo-ligero .paso-actual {
+/* El siguiente botón continúa señalado,
+   pero sin palpitar */
+
+html.modo-ligero .paso-actual {
   border: 4px solid #FFD071 !important;
   outline: 4px solid rgba(255, 208, 113, 0.25);
+}
+
+/* La rueda de cargando continúa funcionando */
+
+html.modo-ligero .fa-spinner,
+html.modo-ligero .fa-spin {
+  animation-duration: 1.5s !important;
 }
 
 </style>
@@ -1572,14 +1604,68 @@ let cameraStream = null;
 let campoFotoActual = "";
 let subiendoFotografia = false;
 let restaurandoEvidencias = false;
-const memoriaDispositivo =
-  navigator.deviceMemory || 4;
 
-if (memoriaDispositivo <= 3) {
+/* =========================================
+   MODO LIGERO AUTOMÁTICO
+========================================= */
 
-  document.documentElement.classList.add(
-    "modo-ligero"
+const agenteDispositivo =
+  navigator.userAgent || "";
+
+const esIOS =
+  /iPhone|iPad|iPod/i.test(
+    agenteDispositivo
+  ) ||
+  (
+    navigator.platform === "MacIntel" &&
+    navigator.maxTouchPoints > 1
   );
+
+const esAndroid =
+  /Android/i.test(
+    agenteDispositivo
+  );
+
+const esMovil =
+  esIOS || esAndroid;
+
+/*
+  Chrome puede reportar aproximadamente:
+  1, 2, 4 u 8 GB.
+
+  Safari normalmente no reporta la RAM,
+  por lo que iPhone utilizará modo ligero.
+*/
+
+const memoriaReportada =
+  Number(
+    navigator.deviceMemory || 0
+  );
+
+const modoLigero =
+  esMovil &&
+  (
+    memoriaReportada === 0 ||
+    memoriaReportada <= 4
+  );
+
+const ajustesImagen =
+  modoLigero
+    ? {
+        dimension: 720,
+        calidad: 0.38
+      }
+    : {
+        dimension: 900,
+        calidad: 0.45
+      };
+
+if (modoLigero) {
+
+  document.documentElement
+    .classList.add(
+      "modo-ligero"
+    );
 
 }
 
@@ -1747,123 +1833,239 @@ async function procesarFotoSeleccionada(input) {
   }
 
 }
+
 /* =========================================
-   COMPRIMIR FOTO CON BAJO CONSUMO
+   COMPRESIÓN ADAPTADA A LA MEMORIA
 ========================================= */
 
-function comprimirFotoOptimizada(archivo) {
+function comprimirFotoOptimizada(
+  archivo
+) {
 
-  return new Promise(function(resolve, reject) {
+  return new Promise(function(
+    resolve,
+    reject
+  ) {
 
     const imagen =
       new Image();
 
     const urlTemporal =
-      URL.createObjectURL(archivo);
+      URL.createObjectURL(
+        archivo
+      );
 
-    imagen.onload = function() {
+    imagen.onload =
+      function() {
 
-      try {
+        let canvas =
+          null;
 
-        const medidas =
-          calcularMedidasImagen(
-            imagen.naturalWidth,
-            imagen.naturalHeight,
-            960
-          );
+        let contexto =
+          null;
 
-        const canvas =
-          document.createElement("canvas");
+        try {
 
-        canvas.width =
-          medidas.width;
+          /*
+            Serie, QR, odómetro y contador
+            necesitan un poco más de detalle.
+          */
 
-        canvas.height =
-          medidas.height;
+          const necesitaDetalle =
+            campoFotoActual ===
+              "fotoSerie" ||
+            campoFotoActual ===
+              "fotoQr" ||
+            campoFotoActual ===
+              "fotoOdometro" ||
+            campoFotoActual ===
+              "fotoContadorHoras";
 
-        const contexto =
-          canvas.getContext(
-            "2d",
-            {
-              alpha: false
-            }
-          );
-
-        contexto.drawImage(
-          imagen,
-          0,
-          0,
-          canvas.width,
-          canvas.height
-        );
-
-        URL.revokeObjectURL(
-          urlTemporal
-        );
-
-        imagen.onload = null;
-        imagen.onerror = null;
-        imagen.src = "";
-
-        canvas.toBlob(
-          function(blob) {
-
-            if (!blob) {
-
-              canvas.width = 1;
-              canvas.height = 1;
-
-              reject(
-                new Error(
-                  "No fue posible comprimir la fotografía."
+          const maximoDimension =
+            necesitaDetalle
+              ? Math.max(
+                  ajustesImagen.dimension,
+                  800
                 )
-              );
+              : ajustesImagen.dimension;
 
-              return;
-            }
+          const calidad =
+            necesitaDetalle
+              ? Math.max(
+                  ajustesImagen.calidad,
+                  0.42
+                )
+              : ajustesImagen.calidad;
 
-            contexto.clearRect(
-              0,
-              0,
-              canvas.width,
-              canvas.height
+          const medidas =
+            calcularMedidasImagen(
+              imagen.naturalWidth,
+              imagen.naturalHeight,
+              maximoDimension
             );
 
-            canvas.width = 1;
-            canvas.height = 1;
+          canvas =
+            document.createElement(
+              "canvas"
+            );
 
-            resolve(blob);
+          canvas.width =
+            medidas.width;
 
-          },
-          "image/jpeg",
-          0.50
-        );
+          canvas.height =
+            medidas.height;
 
-      } catch (error) {
+          contexto =
+            canvas.getContext(
+              "2d",
+              {
+                alpha: false
+              }
+            );
+
+          if (!contexto) {
+
+            throw new Error(
+              "El teléfono no pudo preparar la fotografía."
+            );
+
+          }
+
+          /*
+            Fondo blanco para evitar imágenes
+            negras en ciertos teléfonos.
+          */
+
+          contexto.fillStyle =
+            "#FFFFFF";
+
+          contexto.fillRect(
+            0,
+            0,
+            canvas.width,
+            canvas.height
+          );
+
+          contexto.drawImage(
+            imagen,
+            0,
+            0,
+            canvas.width,
+            canvas.height
+          );
+
+          URL.revokeObjectURL(
+            urlTemporal
+          );
+
+          imagen.onload =
+            null;
+
+          imagen.onerror =
+            null;
+
+          imagen.src =
+            "";
+
+          canvas.toBlob(
+            function(blob) {
+
+              if (!blob) {
+
+                canvas.width =
+                  1;
+
+                canvas.height =
+                  1;
+
+                reject(
+                  new Error(
+                    "No fue posible comprimir la fotografía."
+                  )
+                );
+
+                return;
+
+              }
+
+              contexto.clearRect(
+                0,
+                0,
+                canvas.width,
+                canvas.height
+              );
+
+              canvas.width =
+                1;
+
+              canvas.height =
+                1;
+
+              contexto =
+                null;
+
+              canvas =
+                null;
+
+              resolve(
+                blob
+              );
+
+            },
+            "image/jpeg",
+            calidad
+          );
+
+        } catch (error) {
+
+          URL.revokeObjectURL(
+            urlTemporal
+          );
+
+          if (canvas) {
+
+            canvas.width =
+              1;
+
+            canvas.height =
+              1;
+
+          }
+
+          contexto =
+            null;
+
+          canvas =
+            null;
+
+          reject(
+            error
+          );
+
+        }
+
+      };
+
+    imagen.onerror =
+      function() {
 
         URL.revokeObjectURL(
           urlTemporal
         );
 
-        reject(error);
+        imagen.onload =
+          null;
 
-      }
+        imagen.onerror =
+          null;
 
-    };
+        reject(
+          new Error(
+            "El teléfono no pudo leer la fotografía."
+          )
+        );
 
-    imagen.onerror = function() {
-
-      URL.revokeObjectURL(
-        urlTemporal
-      );
-
-      reject(
-        new Error(
-          "El teléfono no pudo leer la fotografía."
-        )
-      );
-
-    };
+      };
 
     imagen.src =
       urlTemporal;
@@ -1871,7 +2073,6 @@ function comprimirFotoOptimizada(archivo) {
   });
 
 }
-
 
 /* =========================================
    CALCULAR TAMAÑO REDUCIDO
