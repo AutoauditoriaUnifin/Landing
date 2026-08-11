@@ -896,81 +896,11 @@ button:disabled.paso-actual {
   outline: 4px solid rgba(255, 208, 113, 0.25);
 }
 
-<!-- =========================================
-     CONFIGURACIÓN PWA UNIFIN
-========================================= -->
-
-<link
-  rel="manifest"
-  href="./manifest.json"
->
-
-<meta
-  name="theme-color"
-  content="#374757"
->
-
-<meta
-  name="apple-mobile-web-app-capable"
-  content="yes"
->
-
-<meta
-  name="apple-mobile-web-app-status-bar-style"
-  content="default"
->
-
-<meta
-  name="apple-mobile-web-app-title"
-  content="UNIFIN"
->
-
-<link
-  rel="apple-touch-icon"
-  href="./icon-192.png"
->
-
 </style>
 
 </head>
 
 <body>
-
-<!-- =========================================
-     REGISTRAR SERVICE WORKER
-========================================= -->
-
-<script>
-
-if (
-  "serviceWorker" in navigator
-) {
-
-  window.addEventListener(
-    "load",
-    function() {
-
-      navigator
-        .serviceWorker
-        .register(
-          "./sw.js"
-        )
-        .catch(function(error) {
-
-          console.warn(
-            "Service Worker no disponible:",
-            error
-          );
-
-        });
-
-    }
-  );
-
-}
-
-</script>
-
 <!-- =========================
      LOGO UNIFIN
 ========================== -->
@@ -1629,46 +1559,6 @@ const API_URL =
   const CLOUDINARY_CLOUD_NAME = "b3bnfknd";
   const CLOUDINARY_UPLOAD_PRESET = "autoauditorias";
 
-  /* =========================================
-   DETECTAR TELÉFONOS CON POCA MEMORIA
-========================================= */
-
-const agenteDispositivo =
-  navigator.userAgent || "";
-
-const esDispositivoMovil =
-  /Android|iPhone|iPad|iPod/i.test(
-    agenteDispositivo
-  ) ||
-  (
-    navigator.platform ===
-      "MacIntel" &&
-    navigator.maxTouchPoints > 1
-  );
-
-/*
-  Algunos navegadores no informan la memoria.
-  En ese caso, los dispositivos móviles usan
-  automáticamente el modo ligero.
-*/
-
-const memoriaReportada =
-  Number(
-    navigator.deviceMemory || 0
-  );
-
-/*
-  Se utiliza 4 como límite porque algunos
-  teléfonos con aproximadamente 3 GB pueden
-  ser reportados por el navegador como 4 GB.
-*/
-
-const modoLigero =
-  esDispositivoMovil &&
-  (
-    memoriaReportada === 0 ||
-    memoriaReportada <= 4
-  );
 
 let latitud = '';
 let longitud = '';
@@ -1697,427 +1587,8 @@ let auditIdActual = "";
 let claveEvidencias = "";
 let descripcionActivoActual = "";
 
-/* =========================================
-   RESTAURAR EVIDENCIAS LOCALES
-========================================= */
+let evidenciasUrls = {};
 
-let evidenciasLocales =
-  {};
-
-try {
-
-  evidenciasLocales =
-    JSON.parse(
-      localStorage.getItem(
-        claveEvidencias
-      ) || "{}"
-    );
-
-} catch (error) {
-
-  evidenciasLocales =
-    {};
-
-}
-
-
-/* =========================================
-   RECUPERAR EVIDENCIAS DE GOOGLE SHEETS
-========================================= */
-
-const evidenciasServidor =
-  audit.evidencias || {};
-
-
-/* =========================================
-   COMBINAR AMBAS FUENTES
-========================================= */
-
-evidenciasUrls =
-  Object.assign(
-    {},
-    evidenciasLocales
-  );
-
-/*
-  Si una fotografía ya está guardada en
-  Google Sheets, esa URL tiene prioridad.
-*/
-
-Object.keys(
-  evidenciasServidor
-).forEach(function(campo) {
-
-  if (
-    evidenciasServidor[campo]
-  ) {
-
-    evidenciasUrls[campo] =
-      evidenciasServidor[campo];
-
-  }
-
-});
-
-
-/* =========================================
-   ACTUALIZAR LOCALSTORAGE
-========================================= */
-
-localStorage.setItem(
-  claveEvidencias,
-  JSON.stringify(
-    evidenciasUrls
-  )
-);
-
-/* =========================================
-   RESPALDO LOCAL DE FOTOGRAFÍAS
-   INDEXEDDB
-========================================= */
-
-const NOMBRE_DB_EVIDENCIAS =
-  "unifin_evidencias_db";
-
-const STORE_EVIDENCIAS =
-  "pendientes";
-
-let reintentandoEvidencias =
-  false;
-
-
-/* =========================================
-   ABRIR BASE DE DATOS LOCAL
-========================================= */
-
-function abrirDbEvidencias() {
-
-  return new Promise(function(
-    resolve,
-    reject
-  ) {
-
-    if (!window.indexedDB) {
-
-      reject(
-        new Error(
-          "IndexedDB no está disponible."
-        )
-      );
-
-      return;
-
-    }
-
-    const solicitud =
-      indexedDB.open(
-        NOMBRE_DB_EVIDENCIAS,
-        1
-      );
-
-    solicitud.onupgradeneeded =
-      function(evento) {
-
-        const db =
-          evento.target.result;
-
-        if (
-          !db.objectStoreNames.contains(
-            STORE_EVIDENCIAS
-          )
-        ) {
-
-          db.createObjectStore(
-            STORE_EVIDENCIAS,
-            {
-              keyPath: "id"
-            }
-          );
-
-        }
-
-      };
-
-    solicitud.onsuccess =
-      function() {
-
-        resolve(
-          solicitud.result
-        );
-
-      };
-
-    solicitud.onerror =
-      function() {
-
-        reject(
-          solicitud.error
-        );
-
-      };
-
-  });
-
-}
-
-
-/* =========================================
-   ID LOCAL DE CADA FOTOGRAFÍA
-========================================= */
-
-function idPendienteEvidencia(
-  campo
-) {
-
-  return (
-    auditIdActual +
-    "::" +
-    campo
-  );
-
-}
-
-
-/* =========================================
-   GUARDAR FOTOGRAFÍA PENDIENTE
-========================================= */
-
-async function guardarPendienteLocal(
-  campo,
-  blob,
-  url
-) {
-
-  const db =
-    await abrirDbEvidencias();
-
-  return new Promise(function(
-    resolve,
-    reject
-  ) {
-
-    const transaccion =
-      db.transaction(
-        STORE_EVIDENCIAS,
-        "readwrite"
-      );
-
-    const store =
-      transaccion.objectStore(
-        STORE_EVIDENCIAS
-      );
-
-    const id =
-      idPendienteEvidencia(
-        campo
-      );
-
-    const obtener =
-      store.get(id);
-
-    obtener.onsuccess =
-      function() {
-
-        const anterior =
-          obtener.result || {};
-
-        store.put({
-
-          id:
-            id,
-
-          auditId:
-            auditIdActual,
-
-          campo:
-            campo,
-
-          blob:
-            blob ||
-            anterior.blob ||
-            null,
-
-          url:
-            url ||
-            anterior.url ||
-            "",
-
-          actualizado:
-            Date.now()
-
-        });
-
-      };
-
-    transaccion.oncomplete =
-      function() {
-
-        db.close();
-        resolve();
-
-      };
-
-    transaccion.onerror =
-      function() {
-
-        db.close();
-
-        reject(
-          transaccion.error
-        );
-
-      };
-
-  });
-
-}
-
-
-/* =========================================
-   CONSULTAR FOTOGRAFÍAS PENDIENTES
-========================================= */
-
-async function listarPendientesLocales() {
-
-  const db =
-    await abrirDbEvidencias();
-
-  return new Promise(function(
-    resolve,
-    reject
-  ) {
-
-    const transaccion =
-      db.transaction(
-        STORE_EVIDENCIAS,
-        "readonly"
-      );
-
-    const solicitud =
-      transaccion
-        .objectStore(
-          STORE_EVIDENCIAS
-        )
-        .getAll();
-
-    solicitud.onsuccess =
-      function() {
-
-        const todos =
-          solicitud.result || [];
-
-        resolve(
-          todos.filter(
-            function(item) {
-
-              return (
-                item.auditId ===
-                auditIdActual
-              );
-
-            }
-          )
-        );
-
-      };
-
-    solicitud.onerror =
-      function() {
-
-        reject(
-          solicitud.error
-        );
-
-      };
-
-    transaccion.oncomplete =
-      function() {
-
-        db.close();
-
-      };
-
-  });
-
-}
-
-
-/* =========================================
-   ELIMINAR UNA FOTOGRAFÍA PENDIENTE
-========================================= */
-
-async function eliminarPendienteLocal(
-  campo
-) {
-
-  const db =
-    await abrirDbEvidencias();
-
-  return new Promise(function(
-    resolve,
-    reject
-  ) {
-
-    const transaccion =
-      db.transaction(
-        STORE_EVIDENCIAS,
-        "readwrite"
-      );
-
-    transaccion
-      .objectStore(
-        STORE_EVIDENCIAS
-      )
-      .delete(
-        idPendienteEvidencia(
-          campo
-        )
-      );
-
-    transaccion.oncomplete =
-      function() {
-
-        db.close();
-        resolve();
-
-      };
-
-    transaccion.onerror =
-      function() {
-
-        db.close();
-
-        reject(
-          transaccion.error
-        );
-
-      };
-
-  });
-
-}
-
-
-/* =========================================
-   LIMPIAR RESPALDOS DE LA AUDITORÍA
-========================================= */
-
-async function limpiarPendientesAuditoria() {
-
-  const pendientes =
-    await listarPendientesLocales();
-
-  for (
-    const pendiente of pendientes
-  ) {
-
-    await eliminarPendienteLocal(
-      pendiente.campo
-    );
-
-  }
-
-}
 
 /* =========================================
    NOMBRES DE LAS EVIDENCIAS
@@ -2179,173 +1650,103 @@ function abrirCamara(campo) {
   input.click();
 
 }
-
 /* =========================================
-   REINTENTAR FOTOGRAFÍAS PENDIENTES
+   PROCESAR FOTO SELECCIONADA
 ========================================= */
 
-async function reintentarEvidenciasPendientes() {
-
-  /*
-    Evitar dos reintentos simultáneos,
-    interferir con una foto nueva o intentar
-    guardar sin conexión.
-  */
+async function procesarFotoSeleccionada(input) {
 
   if (
-    reintentandoEvidencias ||
-    subiendoFotografia ||
-    !navigator.onLine ||
-    !auditIdActual
+    !input.files ||
+    !input.files[0] ||
+    !campoFotoActual
   ) {
-
     return;
+  }
+
+  const archivo =
+    input.files[0];
+
+  const campoCapturado =
+    campoFotoActual;
+
+  const boton =
+    document.querySelector(
+      '[data-campo="' + campoCapturado + '"]'
+    );
+
+  subiendoFotografia = true;
+
+  if (boton) {
+
+    boton.classList.add("cargando");
+
+    boton.innerHTML =
+      '<i class="fas fa-spinner fa-spin"></i> Procesando fotografía...';
 
   }
 
-  reintentandoEvidencias =
-    true;
-
   try {
 
-    const pendientes =
-      await listarPendientesLocales();
+    const blobComprimido =
+      await comprimirFotoOptimizada(archivo);
 
-    for (
-      const pendiente of pendientes
-    ) {
+    // Liberar la referencia del archivo original
+    input.value = "";
 
-      try {
+    if (boton) {
 
-        let url =
-          pendiente.url || "";
-
-
-        /* =========================================
-           SI NO SUBIÓ A CLOUDINARY, SUBIRLA
-        ========================================= */
-
-        if (
-          !url &&
-          pendiente.blob
-        ) {
-
-          url =
-            await subirBlobCloudinary(
-              pendiente.blob,
-              pendiente.campo
-            );
-
-          /*
-            Guardar la URL obtenida para no volver
-            a subir la misma fotografía.
-          */
-
-          await guardarPendienteLocal(
-            pendiente.campo,
-            pendiente.blob,
-            url
-          );
-
-        }
-
-        if (!url) {
-          continue;
-        }
-
-
-        /* =========================================
-           RESTAURAR URL EN LA PÁGINA
-        ========================================= */
-
-        evidenciasUrls[
-          pendiente.campo
-        ] = url;
-
-        localStorage.setItem(
-          claveEvidencias,
-          JSON.stringify(
-            evidenciasUrls
-          )
-        );
-
-
-        /* =========================================
-           CONFIRMAR URL EN GOOGLE SHEETS
-        ========================================= */
-
-        await guardarEvidenciaEnServidor(
-          pendiente.campo,
-          url
-        );
-
-
-        /* =========================================
-           ELIMINAR RESPALDO YA CONFIRMADO
-        ========================================= */
-
-        await eliminarPendienteLocal(
-          pendiente.campo
-        );
-
-        mostrarConfirmacionFoto(
-          pendiente.campo
-        );
-
-      } catch (errorEvidencia) {
-
-        /*
-          Si una fotografía falla, continúa con
-          las demás y conserva esta pendiente.
-        */
-
-        console.warn(
-          "La evidencia continúa pendiente:",
-          pendiente.campo,
-          errorEvidencia
-        );
-
-      }
+      boton.innerHTML =
+        '<i class="fas fa-cloud-arrow-up"></i> Subiendo fotografía...';
 
     }
 
+    const url =
+      await subirBlobCloudinary(
+        blobComprimido,
+        campoCapturado
+      );
 
-    /* =========================================
-       ACTUALIZAR BOTONES DEL FORMULARIO
-    ========================================= */
+    evidenciasUrls[campoCapturado] =
+      url;
 
-    verificarFotosParaUbicacion();
+    localStorage.setItem(
+  claveEvidencias,
+  JSON.stringify(evidenciasUrls)
+);
 
-    actualizarGuiaVisual(
-      false
+    mostrarConfirmacionFoto(
+      campoCapturado
     );
+
+    campoFotoActual = "";
 
   } catch (error) {
 
-    console.warn(
-      "No fue posible revisar las evidencias pendientes:",
-      error
+    if (boton) {
+
+      boton.classList.remove("cargando");
+
+      boton.innerHTML =
+        '<i class="fas fa-camera"></i> Intentar nuevamente';
+
+    }
+
+    mostrarError(
+      error.message ||
+      "No fue posible guardar la fotografía."
     );
+
+    campoFotoActual = "";
 
   } finally {
 
-    reintentandoEvidencias =
-      false;
+    subiendoFotografia = false;
+    input.value = "";
 
   }
 
 }
-
-
-/* =========================================
-   REINTENTAR CUANDO REGRESE INTERNET
-========================================= */
-
-window.addEventListener(
-  "online",
-  reintentarEvidenciasPendientes
-);
-
 /* =========================================
    COMPRIMIR FOTO CON BAJO CONSUMO
 ========================================= */
@@ -2364,26 +1765,12 @@ function comprimirFotoOptimizada(archivo) {
 
       try {
 
-        /* =========================================
-   TAMAÑO SEGÚN CAPACIDAD DEL TELÉFONO
-========================================= */
-
-const maximoDimension =
-  modoLigero
-    ? 800
-    : 960;
-
-const calidadCompresion =
-  modoLigero
-    ? 0.44
-    : 0.50;
-
-const medidas =
-  calcularMedidasImagen(
-    imagen.naturalWidth,
-    imagen.naturalHeight,
-    maximoDimension
-  );
+        const medidas =
+          calcularMedidasImagen(
+            imagen.naturalWidth,
+            imagen.naturalHeight,
+            960
+          );
 
         const canvas =
           document.createElement("canvas");
@@ -2449,7 +1836,7 @@ const medidas =
 
           },
           "image/jpeg",
-          calidadCompresion
+          0.50
         );
 
       } catch (error) {
@@ -2773,18 +2160,7 @@ function restaurarConfirmaciones() {
   restaurandoEvidencias = false;
 
   verificarFotosParaUbicacion();
-
   actualizarGuiaVisual(false);
-
-  /*
-  Esperar un momento para permitir que
-  el formulario termine de mostrarse.
-*/
-
-setTimeout(
-  reintentarEvidenciasPendientes,
-  800
-);
 
 }
 /* =========================================
@@ -3714,255 +3090,6 @@ async function ejecutarConReintentos(
 
 }
 
-/* =========================================
-   ENVIAR SOLICITUD MEDIANTE IFRAME
-========================================= */
-
-function enviarPayloadIframe(
-  payload,
-  tiempoMaximo
-) {
-
-  return new Promise(function(
-    resolve,
-    reject
-  ) {
-
-    const requestId =
-  formData.requestId ||
-  (
-    "unifin_" +
-    Date.now() +
-    "_" +
-    Math.random()
-      .toString(36)
-      .slice(2)
-  );
-
-    payload.requestId =
-      requestId;
-
-    const nombreIframe =
-      "iframe_" +
-      requestId;
-
-    const iframe =
-      document.createElement(
-        "iframe"
-      );
-
-    const form =
-      document.createElement(
-        "form"
-      );
-
-    const campo =
-      document.createElement(
-        "input"
-      );
-
-    iframe.name =
-      nombreIframe;
-
-    iframe.style.display =
-      "none";
-
-    form.method =
-      "POST";
-
-    form.action =
-      API_URL;
-
-    form.target =
-      nombreIframe;
-
-    form.style.display =
-      "none";
-
-    campo.type =
-      "hidden";
-
-    campo.name =
-      "payload";
-
-    campo.value =
-      JSON.stringify(
-        payload
-      );
-
-    form.appendChild(
-      campo
-    );
-
-    document.body.appendChild(
-      iframe
-    );
-
-    document.body.appendChild(
-      form
-    );
-
-    let terminado =
-      false;
-
-
-    /* =========================================
-       LIMPIAR ELEMENTOS TEMPORALES
-    ========================================= */
-
-    const limpiar =
-      function() {
-
-        window.removeEventListener(
-          "message",
-          recibir
-        );
-
-        clearTimeout(
-          temporizador
-        );
-
-        form.remove();
-        iframe.remove();
-
-      };
-
-
-    /* =========================================
-       RECIBIR RESPUESTA DE APPS SCRIPT
-    ========================================= */
-
-    const recibir =
-      function(evento) {
-
-        const datos =
-          evento.data;
-
-        if (
-          !datos ||
-          datos.source !==
-            "unifin-auditoria" ||
-          datos.requestId !==
-            requestId ||
-          terminado
-        ) {
-
-          return;
-
-        }
-
-        terminado =
-          true;
-
-        limpiar();
-
-        if (!datos.success) {
-
-          reject(
-            new Error(
-              datos.error ||
-              "No fue posible guardar la evidencia."
-            )
-          );
-
-          return;
-
-        }
-
-        resolve(
-          datos.resultado
-        );
-
-      };
-
-    window.addEventListener(
-      "message",
-      recibir
-    );
-
-
-    /* =========================================
-       TIEMPO MÁXIMO DE ESPERA
-    ========================================= */
-
-    const temporizador =
-      setTimeout(
-        function() {
-
-          if (terminado) {
-            return;
-          }
-
-          terminado =
-            true;
-
-          limpiar();
-
-          reject(
-            new Error(
-              "El servidor tardó demasiado en responder."
-            )
-          );
-
-        },
-        tiempoMaximo ||
-        90000
-      );
-
-
-    /* =========================================
-       ENVIAR FORMULARIO OCULTO
-    ========================================= */
-
-    form.submit();
-
-  });
-
-}
-
-
-/* =========================================
-   GUARDAR URL DE UNA FOTOGRAFÍA
-   EN GOOGLE SHEETS
-========================================= */
-
-function guardarEvidenciaEnServidor(
-  campo,
-  url
-) {
-
-  return enviarPayloadIframe(
-    {
-
-      action:
-        "saveEvidenceDraft",
-
-      auditId:
-        document
-          .getElementById(
-            "auditId"
-          )
-          .value,
-
-      token:
-        document
-          .getElementById(
-            "token"
-          )
-          .value,
-
-      campo:
-        campo,
-
-      url:
-        url
-
-    },
-    90000
-  );
-
-}
-
 /* =========================
    ENVIAR DATOS A APPS SCRIPT
 ========================= */
@@ -4095,10 +3222,10 @@ async function enviarDatosAppsScript(formData) {
           );
 
         if (
-  estado &&
-  estado.success === true &&
-  estado.submitted === true
-) {
+          estado &&
+          estado.success === false &&
+          estado.code === "ALREADY_SUBMITTED"
+        ) {
 
           terminado = true;
           limpiar();
@@ -4375,45 +3502,7 @@ if (progresoEnvio) {
 
 }
 
-/* =========================================
-   IDENTIFICADOR ÚNICO DEL ENVÍO
-========================================= */
-
-const claveRequest =
-  "requestSubmit_" +
-  auditIdActual;
-
-let requestId =
-  localStorage.getItem(
-    claveRequest
-  );
-
-if (!requestId) {
-
-  requestId =
-    window.crypto &&
-    crypto.randomUUID
-      ? crypto.randomUUID()
-      : (
-          "req_" +
-          Date.now() +
-          "_" +
-          Math.random()
-            .toString(36)
-            .slice(2)
-        );
-
-  localStorage.setItem(
-    claveRequest,
-    requestId
-  );
-
-}
-
         const formData = {
-
-          requestId:
-           requestId,
 
           auditId:
             document.getElementById("auditId").value,
@@ -4524,27 +3613,6 @@ actualizarProgreso(
         localStorage.removeItem(
   claveEvidencias
 );
-
-/* =========================================
-   LIMPIAR IDENTIFICADOR Y RESPALDOS
-========================================= */
-
-localStorage.removeItem(
-  claveRequest
-);
-
-try {
-
-  await limpiarPendientesAuditoria();
-
-} catch (errorIndexedDb) {
-
-  console.warn(
-    "No fue posible limpiar las evidencias locales.",
-    errorIndexedDb
-  );
-
-}
 
         formulario.style.display =
           "none";
@@ -4751,6 +3819,11 @@ async function cargarAuditoriaDesdeApi() {
       audit.activo || "";
 
     try {
+
+      evidenciasUrls =
+        JSON.parse(
+          localStorage.getItem(claveEvidencias) || "{}"
+        );
 
     } catch (error) {
       evidenciasUrls = {};
