@@ -1506,6 +1506,40 @@ function abrirAutoauditoria(evento, url) {
         name="viewport"
         content="width=device-width, initial-scale=1.0">
 
+        <!-- =========================================
+     CONFIGURACIÓN PWA UNIFIN
+========================================= -->
+
+<link
+  rel="manifest"
+  href="./manifest.json"
+>
+
+<meta
+  name="theme-color"
+  content="#374757"
+>
+
+<meta
+  name="apple-mobile-web-app-capable"
+  content="yes"
+>
+
+<meta
+  name="apple-mobile-web-app-status-bar-style"
+  content="default"
+>
+
+<meta
+  name="apple-mobile-web-app-title"
+  content="UNIFIN"
+>
+
+<link
+  rel="apple-touch-icon"
+  href="./icon-192.png"
+>
+
       <title>Cargando Autoauditoría UNIFIN</title>
 
       <style>
@@ -1662,6 +1696,41 @@ function abrirAutoauditoria(evento, url) {
         </div>
 
       </main>
+
+      <!-- =========================================
+     REGISTRAR SERVICE WORKER
+========================================= -->
+
+<script>
+
+if (
+  "serviceWorker" in navigator
+) {
+
+  window.addEventListener(
+    "load",
+    function() {
+
+      navigator
+        .serviceWorker
+        .register(
+          "./sw.js"
+        )
+        .catch(function(error) {
+
+          console.warn(
+            "Service Worker no disponible:",
+            error
+          );
+
+        });
+
+    }
+  );
+
+}
+
+</script>
 
     </body>
 
