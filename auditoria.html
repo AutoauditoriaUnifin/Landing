@@ -928,6 +928,147 @@ html.modo-ligero .fa-spin {
   animation-duration: 1.5s !important;
 }
 
+/* =========================================
+   CÁMARA INTERNA UNIFIN
+========================================= */
+
+body.camara-interna-activa {
+  overflow: hidden !important;
+}
+
+#modalCamaraInterna {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 30000;
+
+  width: 100% !important;
+  max-width: none !important;
+  height: 100vh;
+  margin: 0 !important;
+  padding:
+    max(12px, env(safe-area-inset-top))
+    max(12px, env(safe-area-inset-right))
+    max(12px, env(safe-area-inset-bottom))
+    max(12px, env(safe-area-inset-left));
+
+  align-items: center;
+  justify-content: center;
+
+  background: rgba(31, 53, 87, 0.96);
+  box-sizing: border-box;
+  overflow-y: auto;
+}
+
+@supports (height: 100dvh) {
+
+  #modalCamaraInterna {
+    height: 100dvh;
+  }
+
+}
+
+.camara-interna-panel {
+  width: 100%;
+  max-width: 680px;
+  padding: clamp(15px, 4vw, 24px);
+  margin: auto;
+
+  background: #FFFFFF;
+  border-radius: 16px;
+  border-top: 7px solid #118AB2;
+
+  box-sizing: border-box;
+  text-align: center;
+}
+
+.camara-interna-titulo {
+  margin: 0 0 12px;
+  color: #1F3557;
+  font-size: clamp(24px, 6vw, 32px);
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.camara-interna-mensaje {
+  margin-bottom: 12px;
+  padding: 11px 13px;
+
+  background: #EEF7FB;
+  color: #374757;
+  border-radius: 10px;
+
+  font-size: clamp(16px, 4.3vw, 20px);
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+#videoCamaraInterna {
+  display: block;
+  width: 100%;
+  max-height: 55vh;
+
+  background: #000000;
+  border: 3px solid #118AB2;
+  border-radius: 12px;
+
+  object-fit: contain;
+}
+
+.camara-interna-acciones {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.camara-interna-acciones button {
+  margin: 0;
+  min-height: 56px;
+  font-size: clamp(17px, 4.5vw, 22px);
+}
+
+#btnCapturarCamaraInterna {
+  background: #118AB2;
+}
+
+#btnUsarCamaraNativa {
+  background: #374757;
+}
+
+#btnCancelarCamaraInterna {
+  background: #7A8793;
+}
+
+/* Evitar efectos pesados mientras la cámara está abierta */
+
+.camara-interna-activa *,
+.camara-interna-activa *::before,
+.camara-interna-activa *::after {
+  transition: none !important;
+}
+
+html.modo-ligero .camara-interna-panel,
+html.modo-ligero #videoCamaraInterna {
+  box-shadow: none !important;
+}
+
+@media (max-width: 480px) {
+
+  #modalCamaraInterna {
+    align-items: flex-start;
+  }
+
+  .camara-interna-panel {
+    border-radius: 13px;
+  }
+
+  #videoCamaraInterna {
+    max-height: 48vh;
+  }
+
+}
+
 </style>
 
 </head>
@@ -1462,6 +1603,82 @@ Tipo de activo
 
 </form>
 
+<!-- =========================================
+     CÁMARA INTERNA UNIFIN
+========================================= -->
+
+<div
+  id="modalCamaraInterna"
+  role="dialog"
+  aria-modal="true"
+  aria-hidden="true"
+  aria-labelledby="tituloCamaraInterna">
+
+  <div class="camara-interna-panel">
+
+    <div
+      id="tituloCamaraInterna"
+      class="camara-interna-titulo">
+
+      Tomar fotografía
+
+    </div>
+
+    <div
+      id="mensajeCamaraInterna"
+      class="camara-interna-mensaje"
+      role="status"
+      aria-live="polite">
+
+      Preparando cámara...
+
+    </div>
+
+    <video
+      id="videoCamaraInterna"
+      autoplay
+      muted
+      playsinline>
+    </video>
+
+    <div class="camara-interna-acciones">
+
+      <button
+        type="button"
+        id="btnCapturarCamaraInterna"
+        onclick="capturarFotoInterna()"
+        disabled>
+
+        <i class="fas fa-camera"></i>
+        Capturar fotografía
+
+      </button>
+
+      <button
+        type="button"
+        id="btnUsarCamaraNativa"
+        onclick="usarCamaraNativa()">
+
+        <i class="fas fa-mobile-screen"></i>
+        Usar cámara del teléfono
+
+      </button>
+
+      <button
+        type="button"
+        id="btnCancelarCamaraInterna"
+        onclick="cerrarCamaraInterna(true)">
+
+        Cancelar
+
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
+
 <div id="mensaje"></div>
 
 <!-- =========================
@@ -1603,6 +1820,16 @@ let precisionGPS = '';
 let cameraStream = null;
 let campoFotoActual = "";
 let subiendoFotografia = false;
+/* Control de la cámara interna */
+
+let abriendoCamaraInterna =
+  false;
+
+let usandoCamaraNativa =
+  false;
+
+let temporizadorRegresoCamara =
+  null;
 let restaurandoEvidencias = false;
 
 /* =========================================
@@ -1742,42 +1969,976 @@ const nombresEvidencias = {
 
 };
 
+/* =========================================
+   IDENTIFICAR FOTOGRAFÍAS DE DETALLE
+========================================= */
+
+function esFotografiaDetalle(
+  campo
+) {
+
+  return (
+    campo === "fotoSerie" ||
+    campo === "fotoQr" ||
+    campo === "fotoOdometro" ||
+    campo === "fotoContadorHoras"
+  );
+
+}
+
 
 /* =========================================
-   ABRIR CÁMARA INTERNA
+   OBTENER BOTÓN DE LA FOTOGRAFÍA
 ========================================= */
-function abrirCamara(campo) {
+
+function obtenerBotonFotografia(
+  campo
+) {
+
+  return document.querySelector(
+    '[data-campo="' +
+    campo +
+    '"]'
+  );
+
+}
+
+
+/* =========================================
+   MOSTRAR MODAL DE CÁMARA
+========================================= */
+
+function mostrarModalCamaraInterna() {
+
+  const modal =
+    document.getElementById(
+      "modalCamaraInterna"
+    );
+
+  if (!modal) {
+    return;
+  }
+
+  modal.style.display =
+    "flex";
+
+  modal.setAttribute(
+    "aria-hidden",
+    "false"
+  );
+
+  document.body.classList.add(
+    "camara-interna-activa"
+  );
+
+}
+
+
+/* =========================================
+   OCULTAR MODAL DE CÁMARA
+========================================= */
+
+function ocultarModalCamaraInterna() {
+
+  const modal =
+    document.getElementById(
+      "modalCamaraInterna"
+    );
+
+  if (modal) {
+
+    modal.style.display =
+      "none";
+
+    modal.setAttribute(
+      "aria-hidden",
+      "true"
+    );
+
+  }
+
+  document.body.classList.remove(
+    "camara-interna-activa"
+  );
+
+}
+
+
+/* =========================================
+   MENSAJE DE LA CÁMARA
+========================================= */
+
+function mostrarMensajeCamaraInterna(
+  texto,
+  esError
+) {
+
+  const mensaje =
+    document.getElementById(
+      "mensajeCamaraInterna"
+    );
+
+  if (!mensaje) {
+    return;
+  }
+
+  mensaje.textContent =
+    texto;
+
+  mensaje.style.background =
+    esError
+      ? "#FFE8E8"
+      : "#EEF7FB";
+
+  mensaje.style.color =
+    esError
+      ? "#B00020"
+      : "#374757";
+
+}
+
+
+/* =========================================
+   DETENER Y LIBERAR CÁMARA
+========================================= */
+
+function detenerCamaraInterna() {
+
+  if (cameraStream) {
+
+    cameraStream
+      .getTracks()
+      .forEach(function(track) {
+
+        try {
+
+          track.stop();
+
+        } catch (error) {
+
+          console.warn(
+            "No fue posible detener una pista:",
+            error
+          );
+
+        }
+
+      });
+
+  }
+
+  cameraStream =
+    null;
+
+  const video =
+    document.getElementById(
+      "videoCamaraInterna"
+    );
+
+  if (video) {
+
+    try {
+      video.pause();
+    } catch (error) {
+      // La cámara ya estaba detenida.
+    }
+
+    video.srcObject =
+      null;
+
+    video.removeAttribute(
+      "src"
+    );
+
+    try {
+      video.load();
+    } catch (error) {
+      // No requiere otra acción.
+    }
+
+  }
+
+}
+
+
+/* =========================================
+   CERRAR CÁMARA
+========================================= */
+
+function cerrarCamaraInterna(
+  limpiarCampo
+) {
+
+  detenerCamaraInterna();
+
+  ocultarModalCamaraInterna();
+
+  abriendoCamaraInterna =
+    false;
+
+  const botonCapturar =
+    document.getElementById(
+      "btnCapturarCamaraInterna"
+    );
+
+  if (botonCapturar) {
+
+    botonCapturar.disabled =
+      true;
+
+  }
+
+  if (limpiarCampo) {
+
+    campoFotoActual =
+      "";
+
+  }
+
+}
+
+
+/* =========================================
+   ESPERAR A QUE EL VIDEO ESTÉ LISTO
+========================================= */
+
+function esperarVideoCamara(
+  video
+) {
+
+  return new Promise(function(
+    resolve,
+    reject
+  ) {
+
+    if (
+      video.videoWidth > 0 &&
+      video.videoHeight > 0
+    ) {
+
+      resolve();
+      return;
+
+    }
+
+    let terminado =
+      false;
+
+    const limpiar =
+      function() {
+
+        video.removeEventListener(
+          "loadedmetadata",
+          comprobar
+        );
+
+        video.removeEventListener(
+          "canplay",
+          comprobar
+        );
+
+        clearTimeout(
+          temporizador
+        );
+
+      };
+
+    const comprobar =
+      function() {
+
+        if (
+          terminado ||
+          video.videoWidth <= 0 ||
+          video.videoHeight <= 0
+        ) {
+
+          return;
+
+        }
+
+        terminado =
+          true;
+
+        limpiar();
+        resolve();
+
+      };
+
+    video.addEventListener(
+      "loadedmetadata",
+      comprobar
+    );
+
+    video.addEventListener(
+      "canplay",
+      comprobar
+    );
+
+    const temporizador =
+      setTimeout(
+        function() {
+
+          if (terminado) {
+            return;
+          }
+
+          terminado =
+            true;
+
+          limpiar();
+
+          reject(
+            new Error(
+              "La cámara no entregó imagen."
+            )
+          );
+
+        },
+        12000
+      );
+
+  });
+
+}
+
+
+/* =========================================
+   ABRIR CÁMARA DENTRO DE LA PÁGINA
+========================================= */
+
+async function abrirCamara(
+  campo
+) {
+
+  if (
+    subiendoFotografia ||
+    abriendoCamaraInterna
+  ) {
+
+    return;
+
+  }
+
+  campoFotoActual =
+    campo;
+
+  /*
+    Si el navegador no permite cámara interna,
+    utilizar el respaldo nativo.
+  */
+
+  if (
+    !navigator.mediaDevices ||
+    !navigator.mediaDevices.getUserMedia
+  ) {
+
+    usarCamaraNativa();
+    return;
+
+  }
+
+  mostrarModalCamaraInterna();
+
+  mostrarMensajeCamaraInterna(
+    "Preparando cámara trasera...",
+    false
+  );
+
+  const botonCapturar =
+    document.getElementById(
+      "btnCapturarCamaraInterna"
+    );
+
+  if (botonCapturar) {
+
+    botonCapturar.disabled =
+      true;
+
+  }
+
+  abriendoCamaraInterna =
+    true;
+
+  try {
+
+    detenerCamaraInterna();
+
+    const necesitaDetalle =
+      esFotografiaDetalle(
+        campo
+      );
+
+    const anchoIdeal =
+      modoLigero
+        ? (
+            necesitaDetalle
+              ? 960
+              : 640
+          )
+        : 1280;
+
+    const altoIdeal =
+      modoLigero
+        ? (
+            necesitaDetalle
+              ? 720
+              : 480
+          )
+        : 720;
+
+    cameraStream =
+      await navigator
+        .mediaDevices
+        .getUserMedia({
+
+          video: {
+
+            facingMode: {
+              ideal: "environment"
+            },
+
+            width: {
+  ideal: anchoIdeal
+},
+
+height: {
+  ideal: altoIdeal
+},
+
+frameRate: {
+  ideal: 15
+}
+
+          },
+
+          audio:
+            false
+
+        });
+
+    const video =
+      document.getElementById(
+        "videoCamaraInterna"
+      );
+
+    if (!video) {
+
+      throw new Error(
+        "No se encontró el visor de la cámara."
+      );
+
+    }
+
+    video.srcObject =
+      cameraStream;
+
+    await video.play();
+
+    await esperarVideoCamara(
+      video
+    );
+
+    mostrarMensajeCamaraInterna(
+      "Centre el activo y presione Capturar fotografía.",
+      false
+    );
+
+    if (botonCapturar) {
+
+      botonCapturar.disabled =
+        false;
+
+    }
+
+  } catch (error) {
+
+    detenerCamaraInterna();
+
+    mostrarMensajeCamaraInterna(
+      "No fue posible abrir la cámara interna. " +
+      "Puede usar la cámara del teléfono.",
+      true
+    );
+
+    if (botonCapturar) {
+
+      botonCapturar.disabled =
+        true;
+
+    }
+
+    console.warn(
+      "Error de cámara interna:",
+      error
+    );
+
+  } finally {
+
+    abriendoCamaraInterna =
+      false;
+
+  }
+
+}
+
+
+/* =========================================
+   USAR CÁMARA NATIVA COMO RESPALDO
+========================================= */
+
+function usarCamaraNativa() {
 
   if (subiendoFotografia) {
     return;
   }
 
-  campoFotoActual = campo;
-
   const input =
-    document.getElementById("capturaFoto");
+    document.getElementById(
+      "capturaFoto"
+    );
 
   if (!input) {
 
     mostrarError(
-      "No se encontró el control de la cámara."
+      "No se encontró la cámara de respaldo."
     );
 
     return;
+
   }
 
-  input.value = "";
+  detenerCamaraInterna();
+
+  ocultarModalCamaraInterna();
+
+  usandoCamaraNativa =
+    true;
+
+  input.value =
+    "";
+
+  /*
+    Debe ejecutarse directamente desde el clic
+    para que iPhone permita abrir la cámara.
+  */
+
   input.click();
 
 }
 
+
 /* =========================================
-   PROCESAR UNA FOTOGRAFÍA A LA VEZ
+   CONVERTIR CANVAS A JPEG
+========================================= */
+
+function convertirCanvasABlob(
+  canvas,
+  calidad
+) {
+
+  return new Promise(function(
+    resolve,
+    reject
+  ) {
+
+    let terminado =
+      false;
+
+    const temporizador =
+      setTimeout(
+        function() {
+
+          if (terminado) {
+            return;
+          }
+
+          terminado =
+            true;
+
+          reject(
+            new Error(
+              "El teléfono tardó demasiado en preparar la fotografía."
+            )
+          );
+
+        },
+        20000
+      );
+
+    canvas.toBlob(
+      function(blob) {
+
+        if (terminado) {
+          return;
+        }
+
+        terminado =
+          true;
+
+        clearTimeout(
+          temporizador
+        );
+
+        if (!blob) {
+
+          reject(
+            new Error(
+              "No fue posible crear la fotografía."
+            )
+          );
+
+          return;
+
+        }
+
+        resolve(blob);
+
+      },
+      "image/jpeg",
+      calidad
+    );
+
+  });
+
+}
+
+
+/* =========================================
+   SUBIR Y GUARDAR UNA FOTO PREPARADA
+========================================= */
+
+async function subirFotografiaPreparada(
+  blob,
+  campo
+) {
+
+  const boton =
+    obtenerBotonFotografia(
+      campo
+    );
+
+  if (boton) {
+
+    boton.classList.add(
+      "cargando"
+    );
+
+    boton.innerHTML =
+      '<i class="fas fa-cloud-arrow-up"></i> ' +
+      "Subiendo fotografía...";
+
+  }
+
+  const url =
+    await subirBlobCloudinary(
+      blob,
+      campo
+    );
+
+  evidenciasUrls[campo] =
+    url;
+
+  localStorage.setItem(
+    claveEvidencias,
+    JSON.stringify(
+      evidenciasUrls
+    )
+  );
+
+  mostrarConfirmacionFoto(
+    campo
+  );
+
+  return url;
+
+}
+
+
+/* =========================================
+   RESTAURAR BOTÓN DESPUÉS DE ERROR
+========================================= */
+
+function mostrarErrorFotografia(
+  campo,
+  error
+) {
+
+  const boton =
+    obtenerBotonFotografia(
+      campo
+    );
+
+  if (boton) {
+
+    boton.classList.remove(
+      "cargando"
+    );
+
+    boton.innerHTML =
+      '<i class="fas fa-camera"></i> ' +
+      "Intentar nuevamente";
+
+  }
+
+  mostrarError(
+    error && error.message
+      ? error.message
+      : "No fue posible guardar la fotografía."
+  );
+
+}
+
+
+/* =========================================
+   CAPTURAR DESDE EL VIDEO INTERNO
+========================================= */
+
+async function capturarFotoInterna() {
+
+  if (
+    subiendoFotografia ||
+    !campoFotoActual
+  ) {
+
+    return;
+
+  }
+
+  const campoCapturado =
+    campoFotoActual;
+
+  const video =
+    document.getElementById(
+      "videoCamaraInterna"
+    );
+
+  if (
+    !video ||
+    !cameraStream ||
+    video.videoWidth <= 0 ||
+    video.videoHeight <= 0
+  ) {
+
+    mostrarMensajeCamaraInterna(
+      "La cámara todavía no está lista.",
+      true
+    );
+
+    return;
+
+  }
+
+  const botonFoto =
+    obtenerBotonFotografia(
+      campoCapturado
+    );
+
+  const botonCapturar =
+    document.getElementById(
+      "btnCapturarCamaraInterna"
+    );
+
+  let canvas =
+    null;
+
+  let contexto =
+    null;
+
+  let blob =
+    null;
+
+  subiendoFotografia =
+    true;
+
+  if (botonCapturar) {
+
+    botonCapturar.disabled =
+      true;
+
+  }
+
+  if (botonFoto) {
+
+    botonFoto.classList.add(
+      "cargando"
+    );
+
+    botonFoto.innerHTML =
+      '<i class="fas fa-spinner fa-spin"></i> ' +
+      "Procesando fotografía...";
+
+  }
+
+  try {
+
+    const necesitaDetalle =
+      esFotografiaDetalle(
+        campoCapturado
+      );
+
+    const maximo =
+      necesitaDetalle
+        ? ajustesImagen.dimensionDetalle
+        : ajustesImagen.dimension;
+
+    const calidad =
+      necesitaDetalle
+        ? ajustesImagen.calidadDetalle
+        : ajustesImagen.calidad;
+
+    const medidas =
+      calcularMedidasImagen(
+        video.videoWidth,
+        video.videoHeight,
+        maximo
+      );
+
+    canvas =
+      document.createElement(
+        "canvas"
+      );
+
+    canvas.width =
+      medidas.width;
+
+    canvas.height =
+      medidas.height;
+
+    contexto =
+      canvas.getContext(
+        "2d",
+        {
+          alpha: false
+        }
+      );
+
+    if (!contexto) {
+
+      throw new Error(
+        "El teléfono no pudo preparar la fotografía."
+      );
+
+    }
+
+    contexto.fillStyle =
+      "#FFFFFF";
+
+    contexto.fillRect(
+      0,
+      0,
+      canvas.width,
+      canvas.height
+    );
+
+    contexto.drawImage(
+      video,
+      0,
+      0,
+      canvas.width,
+      canvas.height
+    );
+
+    /*
+      Detener cámara inmediatamente después
+      de copiar el cuadro.
+    */
+
+    detenerCamaraInterna();
+
+    ocultarModalCamaraInterna();
+
+    blob =
+      await convertirCanvasABlob(
+        canvas,
+        calidad
+      );
+
+    await subirFotografiaPreparada(
+      blob,
+      campoCapturado
+    );
+
+    campoFotoActual =
+      "";
+
+  } catch (error) {
+
+    detenerCamaraInterna();
+
+    ocultarModalCamaraInterna();
+
+    mostrarErrorFotografia(
+      campoCapturado,
+      error
+    );
+
+    campoFotoActual =
+      "";
+
+  } finally {
+
+    if (
+      contexto &&
+      canvas
+    ) {
+
+      contexto.clearRect(
+        0,
+        0,
+        canvas.width,
+        canvas.height
+      );
+
+    }
+
+    if (canvas) {
+
+      canvas.width =
+        1;
+
+      canvas.height =
+        1;
+
+    }
+
+    contexto =
+      null;
+
+    canvas =
+      null;
+
+    blob =
+      null;
+
+    subiendoFotografia =
+      false;
+
+  }
+
+}
+
+
+/* =========================================
+   PROCESAR CÁMARA NATIVA DE RESPALDO
 ========================================= */
 
 async function procesarFotoSeleccionada(
   input
 ) {
+
+  usandoCamaraNativa =
+    false;
+
+  if (temporizadorRegresoCamara) {
+
+    clearTimeout(
+      temporizadorRegresoCamara
+    );
+
+    temporizadorRegresoCamara =
+      null;
+
+  }
 
   if (
     !input.files ||
@@ -1792,11 +2953,6 @@ async function procesarFotoSeleccionada(
   let archivo =
     input.files[0];
 
-  /*
-    Desconectar inmediatamente el archivo
-    del elemento input.
-  */
-
   input.value =
     "";
 
@@ -1804,10 +2960,8 @@ async function procesarFotoSeleccionada(
     campoFotoActual;
 
   const boton =
-    document.querySelector(
-      '[data-campo="' +
-      campoCapturado +
-      '"]'
+    obtenerBotonFotografia(
+      campoCapturado
     );
 
   let blobComprimido =
@@ -1830,11 +2984,6 @@ async function procesarFotoSeleccionada(
 
   try {
 
-    /*
-      Dar tiempo al teléfono para cerrar la
-      cámara antes de comenzar la compresión.
-    */
-
     await new Promise(function(resolve) {
 
       setTimeout(
@@ -1849,46 +2998,11 @@ async function procesarFotoSeleccionada(
         archivo
       );
 
-    /*
-      La fotografía original ya no se necesita.
-    */
-
     archivo =
       null;
 
-    if (boton) {
-
-      boton.innerHTML =
-        '<i class="fas fa-cloud-arrow-up"></i> ' +
-        "Subiendo fotografía...";
-
-    }
-
-    const url =
-      await subirBlobCloudinary(
-        blobComprimido,
-        campoCapturado
-      );
-
-    /*
-      El JPEG comprimido ya fue enviado.
-    */
-
-    blobComprimido =
-      null;
-
-    evidenciasUrls[
-      campoCapturado
-    ] = url;
-
-    localStorage.setItem(
-      claveEvidencias,
-      JSON.stringify(
-        evidenciasUrls
-      )
-    );
-
-    mostrarConfirmacionFoto(
+    await subirFotografiaPreparada(
+      blobComprimido,
       campoCapturado
     );
 
@@ -1897,21 +3011,9 @@ async function procesarFotoSeleccionada(
 
   } catch (error) {
 
-    if (boton) {
-
-      boton.classList.remove(
-        "cargando"
-      );
-
-      boton.innerHTML =
-        '<i class="fas fa-camera"></i> ' +
-        "Intentar nuevamente";
-
-    }
-
-    mostrarError(
-      error.message ||
-      "No fue posible guardar la fotografía."
+    mostrarErrorFotografia(
+      campoCapturado,
+      error
     );
 
     campoFotoActual =
@@ -1932,6 +3034,123 @@ async function procesarFotoSeleccionada(
       "";
 
   }
+
+}
+
+
+/* =========================================
+   DETECTAR REGRESO SIN FOTOGRAFÍA
+========================================= */
+
+function verificarRegresoCamaraNativa() {
+
+  if (
+    !usandoCamaraNativa ||
+    document.hidden
+  ) {
+
+    return;
+
+  }
+
+  if (temporizadorRegresoCamara) {
+
+    clearTimeout(
+      temporizadorRegresoCamara
+    );
+
+  }
+
+  temporizadorRegresoCamara =
+    setTimeout(
+      function() {
+
+        if (!usandoCamaraNativa) {
+          return;
+        }
+
+        usandoCamaraNativa =
+          false;
+
+        campoFotoActual =
+          "";
+
+        mostrarError(
+          "El teléfono no devolvió la fotografía. " +
+          "Abra esta auditoría directamente en Chrome " +
+          "o Safari, o utilice la cámara interna."
+        );
+
+      },
+      2500
+    );
+
+}
+
+
+/* =========================================
+   LIBERAR CÁMARA AL SALIR
+========================================= */
+
+document.addEventListener(
+  "visibilitychange",
+  function() {
+
+    if (
+      document.hidden &&
+      cameraStream
+    ) {
+
+      cerrarCamaraInterna(
+        true
+      );
+
+      return;
+
+    }
+
+    if (!document.hidden) {
+
+      verificarRegresoCamaraNativa();
+
+    }
+
+  }
+);
+
+window.addEventListener(
+  "focus",
+  verificarRegresoCamaraNativa
+);
+
+window.addEventListener(
+  "pagehide",
+  function() {
+
+    detenerCamaraInterna();
+
+  }
+);
+
+const inputFotoRespaldo =
+  document.getElementById(
+    "capturaFoto"
+  );
+
+if (inputFotoRespaldo) {
+
+  inputFotoRespaldo.addEventListener(
+    "cancel",
+    function() {
+
+      usandoCamaraNativa =
+        false;
+
+      campoFotoActual =
+        "";
+
+    }
+  );
 
 }
 
