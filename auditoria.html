@@ -2014,6 +2014,7 @@ if (modoLigero) {
 
 let auditIdActual = "";
 let claveEvidencias = "";
+let claveSesion = "";
 let descripcionActivoActual = "";
 
 let evidenciasUrls = {};
@@ -3959,6 +3960,233 @@ function restaurarConfirmaciones() {
 
 }
 /* =========================================
+   GUARDAR Y RECUPERAR LA SESIÓN
+========================================= */
+
+function guardarSesionLocal() {
+
+  if (!claveSesion) {
+    return;
+  }
+
+  const selector =
+    document.getElementById(
+      "tipoActivo"
+    );
+
+  const sesion = {
+
+    tipoActivo:
+      selector
+        ? selector.value
+        : "",
+
+    latitud:
+      latitud || "",
+
+    longitud:
+      longitud || "",
+
+    precisionGPS:
+      precisionGPS || "",
+
+    ultimaActualizacion:
+      Date.now()
+
+  };
+
+  try {
+
+    localStorage.setItem(
+      claveSesion,
+      JSON.stringify(sesion)
+    );
+
+  } catch (error) {
+
+    console.warn(
+      "No fue posible guardar la sesión.",
+      error
+    );
+
+  }
+
+}
+
+
+function restaurarSesionLocal() {
+
+  if (!claveSesion) {
+    return {};
+  }
+
+  let sesion = {};
+
+  try {
+
+    sesion =
+      JSON.parse(
+        localStorage.getItem(
+          claveSesion
+        ) || "{}"
+      );
+
+  } catch (error) {
+
+    sesion = {};
+
+  }
+
+  const tiposPermitidos = [
+
+    "VEHICULO",
+    "TRACTOCAMION",
+    "TRANSPORTE",
+    "MAQUINARIA",
+    "AGRICOLA",
+    "OTRO"
+
+  ];
+
+  const selector =
+    document.getElementById(
+      "tipoActivo"
+    );
+
+  if (
+    selector &&
+    tiposPermitidos.includes(
+      sesion.tipoActivo
+    )
+  ) {
+
+    selector.value =
+      sesion.tipoActivo;
+
+  }
+
+  if (
+    sesion.latitud !== undefined &&
+    sesion.latitud !== null &&
+    sesion.latitud !== ""
+  ) {
+
+    latitud =
+      String(sesion.latitud);
+
+  }
+
+  if (
+    sesion.longitud !== undefined &&
+    sesion.longitud !== null &&
+    sesion.longitud !== ""
+  ) {
+
+    longitud =
+      String(sesion.longitud);
+
+  }
+
+  if (
+    sesion.precisionGPS !== undefined &&
+    sesion.precisionGPS !== null
+  ) {
+
+    precisionGPS =
+      String(
+        sesion.precisionGPS || ""
+      );
+
+  }
+
+  return sesion;
+
+}
+
+
+function mostrarSesionRestaurada() {
+
+  if (
+    !latitud ||
+    !longitud
+  ) {
+    return;
+  }
+
+  const selector =
+    document.getElementById(
+      "tipoActivo"
+    );
+
+  if (
+    !selector ||
+    !selector.value
+  ) {
+    return;
+  }
+
+  const faltantes =
+    obtenerEvidenciasFaltantes(
+      selector.value
+    );
+
+  if (faltantes.length > 0) {
+    return;
+  }
+
+  const estadoGPS =
+    document.getElementById(
+      "gpsStatus"
+    );
+
+  const botonUbicacion =
+    document.getElementById(
+      "btnCompartirUbicacion"
+    );
+
+  const botonEnviar =
+    document.getElementById(
+      "btnEnviar"
+    );
+
+  if (estadoGPS) {
+
+    estadoGPS.innerHTML =
+      '<div style="' +
+        'background:#EFFBE9;' +
+        'color:#374757;' +
+        'border-left:6px solid #8EDD65;' +
+        'padding:16px;' +
+        'border-radius:10px;' +
+        'font-size:22px;' +
+        'font-weight:700;' +
+        'line-height:1.4;' +
+      '">' +
+        '✅ Ubicación recuperada correctamente' +
+      '</div>';
+
+  }
+
+  if (botonUbicacion) {
+
+    botonUbicacion.style.display =
+      "flex";
+
+    botonUbicacion.innerHTML =
+      '<i class="fas fa-location-dot"></i>' +
+      ' Actualizar ubicación';
+
+  }
+
+  if (botonEnviar) {
+
+    botonEnviar.style.display =
+      "flex";
+
+  }
+
+}
+/* =========================================
    MOSTRAR ERROR
 ========================================= */
 
@@ -4279,6 +4507,7 @@ function validarTipoActivo() {
   ========================================= */
 
 verificarFotosParaUbicacion();
+guardarSesionLocal();
 actualizarGuiaVisual(false);
 
 }
@@ -4684,6 +4913,7 @@ function getLocation() {
 
       precisionGPS =
         position.coords.accuracy;
+        guardarSesionLocal();
         actualizarProgreso(
   20,
   "Ubicación capturada. Lista para enviar."
@@ -5409,6 +5639,10 @@ actualizarProgreso(
   claveEvidencias
 );
 
+localStorage.removeItem(
+  claveSesion
+);
+
         formulario.style.display =
           "none";
 
@@ -5519,9 +5753,8 @@ function volverAEscanear() {
 
 function abrirEscaner() {
 
-  window.open(
-    "https://autoauditoriaunifin.github.io/Landing/",
-    "_blank"
+  window.location.replace(
+    "https://autoauditoriaunifin.github.io/Landing/"
   );
 
 }
@@ -5610,6 +5843,10 @@ async function cargarAuditoriaDesdeApi() {
       "evidenciasAutoauditoria_" +
       auditIdActual;
 
+      claveSesion =
+  "sesionAutoauditoria_" +
+  auditIdActual;
+
     descripcionActivoActual =
       audit.activo || "";
 
@@ -5624,10 +5861,25 @@ async function cargarAuditoriaDesdeApi() {
       evidenciasUrls = {};
     }
 
-    seleccionarTipoActivoAutomaticamente();
-    restaurarConfirmaciones();
-    verificarFotosParaUbicacion();
-    actualizarGuiaVisual(false);
+    const sesionRecuperada =
+  restaurarSesionLocal();
+
+if (
+  sesionRecuperada.tipoActivo
+) {
+
+  validarTipoActivo();
+
+} else {
+
+  seleccionarTipoActivoAutomaticamente();
+
+}
+
+restaurarConfirmaciones();
+verificarFotosParaUbicacion();
+mostrarSesionRestaurada();
+actualizarGuiaVisual(false);
 
     estadoInicial.style.display =
       "none";
