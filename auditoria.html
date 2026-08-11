@@ -1649,15 +1649,49 @@ const modoLigero =
     memoriaReportada <= 4
   );
 
+/* =========================================
+   PERFILES DE COMPRESIÓN
+========================================= */
+
 const ajustesImagen =
   modoLigero
     ? {
-        dimension: 720,
-        calidad: 0.38
+
+        /*
+          Android de gama baja y iPhone.
+        */
+
+        dimension:
+          640,
+
+        calidad:
+          0.34,
+
+        dimensionDetalle:
+          800,
+
+        calidadDetalle:
+          0.40
+
       }
     : {
-        dimension: 900,
-        calidad: 0.45
+
+        /*
+          Teléfonos con más memoria.
+        */
+
+        dimension:
+          900,
+
+        calidad:
+          0.45,
+
+        dimensionDetalle:
+          900,
+
+        calidadDetalle:
+          0.45
+
       };
 
 if (modoLigero) {
@@ -1736,54 +1770,97 @@ function abrirCamara(campo) {
   input.click();
 
 }
+
 /* =========================================
-   PROCESAR FOTO SELECCIONADA
+   PROCESAR UNA FOTOGRAFÍA A LA VEZ
 ========================================= */
 
-async function procesarFotoSeleccionada(input) {
+async function procesarFotoSeleccionada(
+  input
+) {
 
   if (
     !input.files ||
     !input.files[0] ||
     !campoFotoActual
   ) {
+
     return;
+
   }
 
-  const archivo =
+  let archivo =
     input.files[0];
+
+  /*
+    Desconectar inmediatamente el archivo
+    del elemento input.
+  */
+
+  input.value =
+    "";
 
   const campoCapturado =
     campoFotoActual;
 
   const boton =
     document.querySelector(
-      '[data-campo="' + campoCapturado + '"]'
+      '[data-campo="' +
+      campoCapturado +
+      '"]'
     );
 
-  subiendoFotografia = true;
+  let blobComprimido =
+    null;
+
+  subiendoFotografia =
+    true;
 
   if (boton) {
 
-    boton.classList.add("cargando");
+    boton.classList.add(
+      "cargando"
+    );
 
     boton.innerHTML =
-      '<i class="fas fa-spinner fa-spin"></i> Procesando fotografía...';
+      '<i class="fas fa-spinner fa-spin"></i> ' +
+      "Procesando fotografía...";
 
   }
 
   try {
 
-    const blobComprimido =
-      await comprimirFotoOptimizada(archivo);
+    /*
+      Dar tiempo al teléfono para cerrar la
+      cámara antes de comenzar la compresión.
+    */
 
-    // Liberar la referencia del archivo original
-    input.value = "";
+    await new Promise(function(resolve) {
+
+      setTimeout(
+        resolve,
+        150
+      );
+
+    });
+
+    blobComprimido =
+      await comprimirFotoOptimizada(
+        archivo
+      );
+
+    /*
+      La fotografía original ya no se necesita.
+    */
+
+    archivo =
+      null;
 
     if (boton) {
 
       boton.innerHTML =
-        '<i class="fas fa-cloud-arrow-up"></i> Subiendo fotografía...';
+        '<i class="fas fa-cloud-arrow-up"></i> ' +
+        "Subiendo fotografía...";
 
     }
 
@@ -1793,28 +1870,42 @@ async function procesarFotoSeleccionada(input) {
         campoCapturado
       );
 
-    evidenciasUrls[campoCapturado] =
-      url;
+    /*
+      El JPEG comprimido ya fue enviado.
+    */
+
+    blobComprimido =
+      null;
+
+    evidenciasUrls[
+      campoCapturado
+    ] = url;
 
     localStorage.setItem(
-  claveEvidencias,
-  JSON.stringify(evidenciasUrls)
-);
+      claveEvidencias,
+      JSON.stringify(
+        evidenciasUrls
+      )
+    );
 
     mostrarConfirmacionFoto(
       campoCapturado
     );
 
-    campoFotoActual = "";
+    campoFotoActual =
+      "";
 
   } catch (error) {
 
     if (boton) {
 
-      boton.classList.remove("cargando");
+      boton.classList.remove(
+        "cargando"
+      );
 
       boton.innerHTML =
-        '<i class="fas fa-camera"></i> Intentar nuevamente';
+        '<i class="fas fa-camera"></i> ' +
+        "Intentar nuevamente";
 
     }
 
@@ -1823,24 +1914,114 @@ async function procesarFotoSeleccionada(input) {
       "No fue posible guardar la fotografía."
     );
 
-    campoFotoActual = "";
+    campoFotoActual =
+      "";
 
   } finally {
 
-    subiendoFotografia = false;
-    input.value = "";
+    archivo =
+      null;
+
+    blobComprimido =
+      null;
+
+    subiendoFotografia =
+      false;
+
+    input.value =
+      "";
 
   }
 
 }
 
 /* =========================================
-   COMPRESIÓN ADAPTADA A LA MEMORIA
+   CREAR FUENTE DE IMAGEN REDUCIDA
 ========================================= */
 
-function comprimirFotoOptimizada(
-  archivo
+async function crearFuenteImagenReducida(
+  archivo,
+  dimension
 ) {
+
+  /*
+    Primer intento: solicitar al navegador una
+    imagen reducida desde la decodificación.
+  */
+
+  if (
+    typeof window.createImageBitmap ===
+    "function"
+  ) {
+
+    try {
+
+      const bitmap =
+        await window.createImageBitmap(
+          archivo,
+          {
+
+            imageOrientation:
+              "from-image",
+
+            resizeWidth:
+              dimension,
+
+            resizeQuality:
+              "medium"
+
+          }
+        );
+
+      return {
+
+        fuente:
+          bitmap,
+
+        ancho:
+          bitmap.width,
+
+        alto:
+          bitmap.height,
+
+        liberar:
+          function() {
+
+            if (
+              bitmap &&
+              typeof bitmap.close ===
+                "function"
+            ) {
+
+              bitmap.close();
+
+            }
+
+          }
+
+      };
+
+    } catch (errorBitmap) {
+
+      /*
+        Algunos iPhone o formatos HEIC pueden
+        rechazar createImageBitmap. En ese caso
+        se utiliza el método tradicional.
+      */
+
+      console.warn(
+        "Se utilizará el decodificador compatible:",
+        errorBitmap
+      );
+
+    }
+
+  }
+
+
+  /* =========================================
+     RESPALDO PARA NAVEGADORES ANTIGUOS
+  ========================================= */
 
   return new Promise(function(
     resolve,
@@ -1855,199 +2036,18 @@ function comprimirFotoOptimizada(
         archivo
       );
 
-    imagen.onload =
+    let liberada =
+      false;
+
+    const liberar =
       function() {
 
-        let canvas =
-          null;
-
-        let contexto =
-          null;
-
-        try {
-
-          /*
-            Serie, QR, odómetro y contador
-            necesitan un poco más de detalle.
-          */
-
-          const necesitaDetalle =
-            campoFotoActual ===
-              "fotoSerie" ||
-            campoFotoActual ===
-              "fotoQr" ||
-            campoFotoActual ===
-              "fotoOdometro" ||
-            campoFotoActual ===
-              "fotoContadorHoras";
-
-          const maximoDimension =
-            necesitaDetalle
-              ? Math.max(
-                  ajustesImagen.dimension,
-                  800
-                )
-              : ajustesImagen.dimension;
-
-          const calidad =
-            necesitaDetalle
-              ? Math.max(
-                  ajustesImagen.calidad,
-                  0.42
-                )
-              : ajustesImagen.calidad;
-
-          const medidas =
-            calcularMedidasImagen(
-              imagen.naturalWidth,
-              imagen.naturalHeight,
-              maximoDimension
-            );
-
-          canvas =
-            document.createElement(
-              "canvas"
-            );
-
-          canvas.width =
-            medidas.width;
-
-          canvas.height =
-            medidas.height;
-
-          contexto =
-            canvas.getContext(
-              "2d",
-              {
-                alpha: false
-              }
-            );
-
-          if (!contexto) {
-
-            throw new Error(
-              "El teléfono no pudo preparar la fotografía."
-            );
-
-          }
-
-          /*
-            Fondo blanco para evitar imágenes
-            negras en ciertos teléfonos.
-          */
-
-          contexto.fillStyle =
-            "#FFFFFF";
-
-          contexto.fillRect(
-            0,
-            0,
-            canvas.width,
-            canvas.height
-          );
-
-          contexto.drawImage(
-            imagen,
-            0,
-            0,
-            canvas.width,
-            canvas.height
-          );
-
-          URL.revokeObjectURL(
-            urlTemporal
-          );
-
-          imagen.onload =
-            null;
-
-          imagen.onerror =
-            null;
-
-          imagen.src =
-            "";
-
-          canvas.toBlob(
-            function(blob) {
-
-              if (!blob) {
-
-                canvas.width =
-                  1;
-
-                canvas.height =
-                  1;
-
-                reject(
-                  new Error(
-                    "No fue posible comprimir la fotografía."
-                  )
-                );
-
-                return;
-
-              }
-
-              contexto.clearRect(
-                0,
-                0,
-                canvas.width,
-                canvas.height
-              );
-
-              canvas.width =
-                1;
-
-              canvas.height =
-                1;
-
-              contexto =
-                null;
-
-              canvas =
-                null;
-
-              resolve(
-                blob
-              );
-
-            },
-            "image/jpeg",
-            calidad
-          );
-
-        } catch (error) {
-
-          URL.revokeObjectURL(
-            urlTemporal
-          );
-
-          if (canvas) {
-
-            canvas.width =
-              1;
-
-            canvas.height =
-              1;
-
-          }
-
-          contexto =
-            null;
-
-          canvas =
-            null;
-
-          reject(
-            error
-          );
-
+        if (liberada) {
+          return;
         }
 
-      };
-
-    imagen.onerror =
-      function() {
+        liberada =
+          true;
 
         URL.revokeObjectURL(
           urlTemporal
@@ -2058,6 +2058,37 @@ function comprimirFotoOptimizada(
 
         imagen.onerror =
           null;
+
+        imagen.src =
+          "";
+
+      };
+
+    imagen.onload =
+      function() {
+
+        resolve({
+
+          fuente:
+            imagen,
+
+          ancho:
+            imagen.naturalWidth,
+
+          alto:
+            imagen.naturalHeight,
+
+          liberar:
+            liberar
+
+        });
+
+      };
+
+    imagen.onerror =
+      function() {
+
+        liberar();
 
         reject(
           new Error(
@@ -2071,6 +2102,268 @@ function comprimirFotoOptimizada(
       urlTemporal;
 
   });
+
+}
+
+/* =========================================
+   COMPRIMIR CON DECODIFICACIÓN REDUCIDA
+========================================= */
+
+async function comprimirFotoOptimizada(
+  archivo
+) {
+
+  const necesitaDetalle =
+    campoFotoActual ===
+      "fotoSerie" ||
+    campoFotoActual ===
+      "fotoQr" ||
+    campoFotoActual ===
+      "fotoOdometro" ||
+    campoFotoActual ===
+      "fotoContadorHoras";
+
+  const maximoDimension =
+    necesitaDetalle
+      ? ajustesImagen.dimensionDetalle
+      : ajustesImagen.dimension;
+
+  const calidad =
+    necesitaDetalle
+      ? ajustesImagen.calidadDetalle
+      : ajustesImagen.calidad;
+
+  let recurso =
+    null;
+
+  let canvas =
+    null;
+
+  let contexto =
+    null;
+
+  try {
+
+    /* =========================================
+       DECODIFICAR LA IMAGEN
+    ========================================= */
+
+    recurso =
+      await crearFuenteImagenReducida(
+        archivo,
+        maximoDimension
+      );
+
+    const medidas =
+      calcularMedidasImagen(
+        recurso.ancho,
+        recurso.alto,
+        maximoDimension
+      );
+
+
+    /* =========================================
+       PREPARAR CANVAS PEQUEÑO
+    ========================================= */
+
+    canvas =
+      document.createElement(
+        "canvas"
+      );
+
+    canvas.width =
+      medidas.width;
+
+    canvas.height =
+      medidas.height;
+
+    contexto =
+      canvas.getContext(
+        "2d",
+        {
+          alpha: false
+        }
+      );
+
+    if (!contexto) {
+
+      throw new Error(
+        "El teléfono no pudo preparar la fotografía."
+      );
+
+    }
+
+    contexto.imageSmoothingEnabled =
+      true;
+
+    contexto.imageSmoothingQuality =
+      "medium";
+
+    /*
+      Fondo blanco para evitar fotografías
+      negras en ciertos navegadores.
+    */
+
+    contexto.fillStyle =
+      "#FFFFFF";
+
+    contexto.fillRect(
+      0,
+      0,
+      canvas.width,
+      canvas.height
+    );
+
+    contexto.drawImage(
+      recurso.fuente,
+      0,
+      0,
+      canvas.width,
+      canvas.height
+    );
+
+
+    /* =========================================
+       LIBERAR LA IMAGEN DECODIFICADA
+    ========================================= */
+
+    recurso.liberar();
+
+    recurso =
+      null;
+
+
+    /* =========================================
+       CONVERTIR CANVAS A JPEG
+    ========================================= */
+
+    const blob =
+      await new Promise(function(
+        resolve,
+        reject
+      ) {
+
+        let terminado =
+          false;
+
+        const temporizador =
+          setTimeout(
+            function() {
+
+              if (terminado) {
+                return;
+              }
+
+              terminado =
+                true;
+
+              reject(
+                new Error(
+                  "El teléfono tardó demasiado en comprimir la fotografía."
+                )
+              );
+
+            },
+            30000
+          );
+
+        canvas.toBlob(
+          function(resultado) {
+
+            if (terminado) {
+              return;
+            }
+
+            terminado =
+              true;
+
+            clearTimeout(
+              temporizador
+            );
+
+            if (!resultado) {
+
+              reject(
+                new Error(
+                  "No fue posible comprimir la fotografía."
+                )
+              );
+
+              return;
+
+            }
+
+            resolve(
+              resultado
+            );
+
+          },
+          "image/jpeg",
+          calidad
+        );
+
+      });
+
+    return blob;
+
+  } finally {
+
+    /*
+      Liberar cualquier recurso, incluso
+      cuando ocurra un error.
+    */
+
+    if (recurso) {
+
+      try {
+
+        recurso.liberar();
+
+      } catch (errorLiberacion) {
+
+        console.warn(
+          "No fue posible liberar la imagen:",
+          errorLiberacion
+        );
+
+      }
+
+    }
+
+    if (
+      contexto &&
+      canvas
+    ) {
+
+      contexto.clearRect(
+        0,
+        0,
+        canvas.width,
+        canvas.height
+      );
+
+    }
+
+    if (canvas) {
+
+      canvas.width =
+        1;
+
+      canvas.height =
+        1;
+
+    }
+
+    contexto =
+      null;
+
+    canvas =
+      null;
+
+    recurso =
+      null;
+
+  }
 
 }
 
