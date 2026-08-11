@@ -3,7 +3,7 @@
 ========================================= */
 
 const CACHE_UNIFIN =
-  "unifin-static-v1";
+  "unifin-static-v2";
 
 const ARCHIVOS_UNIFIN = [
 
