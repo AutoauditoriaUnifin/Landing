@@ -555,6 +555,81 @@ input::placeholder {
   }
 }
  
+ /* =========================================
+   CARGANDO AUDITORÍA EN LA MISMA PESTAÑA
+========================================= */
+
+#pantallaCargaAuditoria {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 30000;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: #F4F6F8;
+}
+
+.carga-auditoria-contenido {
+  width: 100%;
+  max-width: 580px;
+  padding: 34px 22px;
+  background: #FFFFFF;
+  border-left: 7px solid #118AB2;
+  border-radius: 18px;
+  text-align: center;
+  box-shadow: 0 10px 30px rgba(55, 71, 87, 0.14);
+}
+
+.carga-auditoria-logo {
+  display: block;
+  width: min(250px, 75%);
+  height: auto;
+  margin: 0 auto 25px;
+}
+
+.carga-auditoria-spinner {
+  width: 58px;
+  height: 58px;
+  margin: 0 auto 22px;
+  border: 6px solid #D8EAF1;
+  border-top-color: #118AB2;
+  border-right-color: #8EDD65;
+  border-radius: 50%;
+  animation: girarCargaAuditoria 0.9s linear infinite;
+}
+
+.carga-auditoria-titulo {
+  color: #1F3557;
+  font-size: clamp(27px, 7vw, 38px);
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.carga-auditoria-texto {
+  margin-top: 15px;
+  color: #374757;
+  font-size: clamp(19px, 5vw, 24px);
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+@keyframes girarCargaAuditoria {
+
+  to {
+    transform: rotate(360deg);
+  }
+
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+  .carga-auditoria-spinner {
+    animation-duration: 1.8s;
+  }
+
+}
+
 </style>
 
 </head>
@@ -1167,217 +1242,65 @@ function ocultarCargando() {
 
 function abrirAutoauditoria(evento, url) {
 
-  evento.preventDefault();
+  if (
+    evento &&
+    typeof evento.preventDefault === "function"
+  ) {
+    evento.preventDefault();
+  }
+
+  if (!url) {
+    return false;
+  }
+
+  const pantalla =
+    document.getElementById(
+      "pantallaCargaAuditoria"
+    );
+
+  if (pantalla) {
+    pantalla.style.display = "flex";
+  }
+
+  document.body.style.overflow =
+    "hidden";
 
   /*
-    Se abre inmediatamente para evitar
-    que el navegador bloquee la pestaña.
+    Liberar la cámara y el lector QR
+    antes de abrir el formulario.
   */
 
-  const nuevaVentana =
-    window.open("", "_blank");
+  try {
 
-  if (!nuevaVentana) {
+    const detencion =
+      detenerScanner();
 
-    /*
-      Si el navegador bloquea la pestaña,
-      abre la auditoría en la ventana actual.
-    */
+    if (
+      detencion &&
+      typeof detencion.catch === "function"
+    ) {
+      detencion.catch(function() {});
+    }
 
-    window.location.href = url;
-    return false;
+  } catch (error) {
+
+    console.warn(
+      "No fue necesario detener el lector.",
+      error
+    );
 
   }
 
-  nuevaVentana.document.open();
-
-  nuevaVentana.document.write(`
-    <!DOCTYPE html>
-
-    <html lang="es">
-
-    <head>
-
-      <meta charset="UTF-8">
-
-      <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0">
-
-      <title>Cargando Autoauditoría UNIFIN</title>
-
-      <style>
-
-        * {
-          box-sizing: border-box;
-        }
-
-        html,
-        body {
-          width: 100%;
-          min-height: 100%;
-          margin: 0;
-        }
-
-        body {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          padding: 22px;
-          background: #F4F6F8;
-          color: #374757;
-          font-family: Arial, sans-serif;
-        }
-
-        .pantalla-carga {
-          width: 100%;
-          max-width: 620px;
-          padding: 38px 24px;
-          background: #FFFFFF;
-          border-left: 7px solid #118AB2;
-          border-radius: 18px;
-          box-shadow: 0 10px 30px rgba(55, 71, 87, 0.13);
-          text-align: center;
-        }
-
-        .logo {
-          display: block;
-          width: min(260px, 80%);
-          height: auto;
-          margin: 0 auto 30px;
-        }
-
-        .spinner {
-          width: 64px;
-          height: 64px;
-          margin: 0 auto 24px;
-          border: 7px solid #D8EAF1;
-          border-top-color: #118AB2;
-          border-right-color: #8EDD65;
-          border-radius: 50%;
-          animation: girar 0.85s linear infinite;
-        }
-
-        h1 {
-          margin: 0;
-          color: #1F3557;
-          font-size: clamp(27px, 7vw, 38px);
-          line-height: 1.25;
-        }
-
-        p {
-          margin: 18px 0 0;
-          color: #374757;
-          font-size: clamp(19px, 5vw, 25px);
-          font-weight: 700;
-          line-height: 1.4;
-        }
-
-        .puntos::after {
-          content: "";
-          display: inline-block;
-          width: 32px;
-          text-align: left;
-          animation: puntos 1.4s steps(4, end) infinite;
-        }
-
-        .aviso {
-          margin-top: 25px;
-          padding: 15px;
-          background: #EEF7FB;
-          color: #374757;
-          border-radius: 10px;
-          font-size: clamp(16px, 4vw, 19px);
-          font-weight: 400;
-          line-height: 1.45;
-        }
-
-        @keyframes girar {
-
-          to {
-            transform: rotate(360deg);
-          }
-
-        }
-
-        @keyframes puntos {
-
-          0% {
-            content: "";
-          }
-
-          25% {
-            content: ".";
-          }
-
-          50% {
-            content: "..";
-          }
-
-          75%,
-          100% {
-            content: "...";
-          }
-
-        }
-
-        @media (prefers-reduced-motion: reduce) {
-
-          .spinner {
-            animation-duration: 1.8s;
-          }
-
-        }
-
-      </style>
-
-    </head>
-
-    <body>
-
-      <main
-        class="pantalla-carga"
-        role="status"
-        aria-live="polite">
-
-        <img
-          class="logo"
-          src="https://autoauditoriaunifin.github.io/Landing/logoo.png"
-          alt="UNIFIN">
-
-        <div class="spinner"></div>
-
-        <h1>
-          Autoauditoría UNIFIN
-        </h1>
-
-        <p>
-          Cargando auditoría<span class="puntos"></span>
-        </p>
-
-        <div class="aviso">
-          Espere un momento. Estamos preparando la información de su activo.
-        </div>
-
-      </main>
-
-    </body>
-
-    </html>
-  `);
-
-  nuevaVentana.document.close();
-
   /*
-    Permite que la animación se muestre antes
-    de comenzar la navegación.
+    Reemplazar la landing por el formulario.
+    No se mantiene una segunda pestaña abierta.
   */
 
   setTimeout(function() {
 
-    nuevaVentana.location.replace(url);
+    window.location.replace(url);
 
-  }, 500);
+  }, 450);
 
   return false;
 
@@ -1558,6 +1481,30 @@ async function consultarActivo(id) {
 }
 
 </script>
+<div
+  id="pantallaCargaAuditoria"
+  role="status"
+  aria-live="polite">
 
+  <div class="carga-auditoria-contenido">
+
+    <img
+      class="carga-auditoria-logo"
+      src="https://autoauditoriaunifin.github.io/Landing/logoo.png"
+      alt="UNIFIN">
+
+    <div class="carga-auditoria-spinner"></div>
+
+    <div class="carga-auditoria-titulo">
+      Autoauditoría UNIFIN
+    </div>
+
+    <div class="carga-auditoria-texto">
+      Cargando auditoría...
+    </div>
+
+  </div>
+
+</div>
 </body>
 </html>
