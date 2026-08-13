@@ -1726,15 +1726,15 @@ Tipo de activo
     <div class="camara-interna-acciones">
 
       <button
-        type="button"
-        id="btnCapturarCamaraInterna"
-        onclick="capturarFotoInterna()"
-        disabled>
+  type="button"
+  id="btnCapturarCamaraInterna"
+  onclick="capturarFotoInterna()"
+  disabled>
 
-        <i class="fas fa-camera"></i>
-        Capturar fotografía
+  <i class="fas fa-camera"></i>
+  Capturar y proteger fotografía
 
-      </button>
+</button>
 
       <button
         type="button"
@@ -2395,10 +2395,14 @@ function cerrarCamaraInterna(
 
   if (botonCapturar) {
 
-    botonCapturar.disabled =
-      true;
+  botonCapturar.disabled =
+    true;
 
-  }
+  botonCapturar.innerHTML =
+    '<i class="fas fa-camera"></i> ' +
+    "Capturar y proteger fotografía";
+
+}
 
   if (limpiarCampo) {
 
@@ -2564,16 +2568,44 @@ prepararAlmacenamientoPersistente();
   );
 
   const botonCapturar =
-    document.getElementById(
-      "btnCapturarCamaraInterna"
-    );
+  document.getElementById(
+    "btnCapturarCamaraInterna"
+  );
 
-  if (botonCapturar) {
+const botonCamaraNativa =
+  document.getElementById(
+    "btnUsarCamaraNativa"
+  );
 
-    botonCapturar.disabled =
-      true;
+const botonCancelarCamara =
+  document.getElementById(
+    "btnCancelarCamaraInterna"
+  );
 
-  }
+if (botonCapturar) {
+
+  botonCapturar.disabled =
+    true;
+
+  botonCapturar.innerHTML =
+    '<i class="fas fa-camera"></i> ' +
+    "Capturar y proteger fotografía";
+
+}
+
+if (botonCamaraNativa) {
+
+  botonCamaraNativa.disabled =
+    false;
+
+}
+
+if (botonCancelarCamara) {
+
+  botonCancelarCamara.disabled =
+    false;
+
+}
 
   abriendoCamaraInterna =
     true;
@@ -2636,17 +2668,24 @@ frameRate: {
         });
 
     const video =
-      document.getElementById(
-        "videoCamaraInterna"
-      );
+  document.getElementById(
+    "videoCamaraInterna"
+  );
 
-    if (!video) {
+if (video) {
 
-      throw new Error(
-        "No se encontró el visor de la cámara."
-      );
+  video.style.display =
+    "block";
 
-    }
+}
+
+if (!video) {
+
+  throw new Error(
+    "No se encontró el visor de la cámara."
+  );
+
+}
 
     video.srcObject =
       cameraStream;
@@ -2658,9 +2697,9 @@ frameRate: {
     );
 
     mostrarMensajeCamaraInterna(
-      "Centre el activo y presione Capturar fotografía.",
-      false
-    );
+  "Centre el activo y presione Capturar y proteger fotografía.",
+  false
+);
 
     if (botonCapturar) {
 
@@ -3559,9 +3598,8 @@ function mostrarErrorFotografia(
 
 }
 
-
 /* =========================================
-   CAPTURAR DESDE EL VIDEO INTERNO
+   CAPTURAR, PROTEGER Y DESPUÉS SUBIR
 ========================================= */
 
 async function capturarFotoInterna() {
@@ -3609,6 +3647,16 @@ async function capturarFotoInterna() {
       "btnCapturarCamaraInterna"
     );
 
+  const botonCamaraNativa =
+    document.getElementById(
+      "btnUsarCamaraNativa"
+    );
+
+  const botonCancelar =
+    document.getElementById(
+      "btnCancelarCamaraInterna"
+    );
+
   let canvas =
     null;
 
@@ -3621,9 +3669,31 @@ async function capturarFotoInterna() {
   subiendoFotografia =
     true;
 
+  /*
+    Bloquear los controles mientras se protege.
+  */
+
   if (botonCapturar) {
 
     botonCapturar.disabled =
+      true;
+
+    botonCapturar.innerHTML =
+      '<i class="fas fa-spinner fa-spin"></i> ' +
+      "Capturando fotografía...";
+
+  }
+
+  if (botonCamaraNativa) {
+
+    botonCamaraNativa.disabled =
+      true;
+
+  }
+
+  if (botonCancelar) {
+
+    botonCancelar.disabled =
       true;
 
   }
@@ -3701,6 +3771,10 @@ async function capturarFotoInterna() {
       canvas.height
     );
 
+    /*
+      Copiar el cuadro de la cámara al canvas.
+    */
+
     contexto.drawImage(
       video,
       0,
@@ -3710,13 +3784,38 @@ async function capturarFotoInterna() {
     );
 
     /*
-      Detener cámara inmediatamente después
-      de copiar el cuadro.
+      La imagen ya está en el canvas.
+      Liberar inmediatamente la cámara para
+      reducir el consumo de memoria, pero
+      mantener abierto el modal.
     */
 
     detenerCamaraInterna();
 
-    ocultarModalCamaraInterna();
+/*
+  Ocultar el visor detenido para evitar
+  que aparezca un rectángulo negro.
+*/
+
+video.style.display =
+  "none";
+
+mostrarMensajeCamaraInterna(
+  "Protegiendo fotografía en este teléfono...",
+  false
+);
+
+    if (botonCapturar) {
+
+      botonCapturar.innerHTML =
+        '<i class="fas fa-shield-halved"></i> ' +
+        "Protegiendo fotografía...";
+
+    }
+
+    /*
+      Crear el JPEG comprimido.
+    */
 
     blob =
       await convertirCanvasABlob(
@@ -3724,9 +3823,92 @@ async function capturarFotoInterna() {
         calidad
       );
 
+    if (
+      !blob ||
+      blob.size <= 0
+    ) {
+
+      throw new Error(
+        "No fue posible crear la fotografía."
+      );
+
+    }
+
+    /*
+      PASO IMPORTANTE:
+      guardar en IndexedDB mientras el modal
+      de la cámara continúa abierto.
+    */
+
+    const protegida =
+      await guardarFotoPendiente(
+        blob,
+        campoCapturado
+      );
+
+    if (!protegida) {
+
+      throw new Error(
+        "No fue posible proteger la fotografía en el teléfono."
+      );
+
+    }
+
+    /*
+      IndexedDB confirmó la escritura.
+    */
+
+    mostrarMensajeCamaraInterna(
+      "✅ Fotografía protegida correctamente.",
+      false
+    );
+
+    if (botonCapturar) {
+
+      botonCapturar.innerHTML =
+        '<i class="fas fa-circle-check"></i> ' +
+        "Fotografía protegida";
+
+    }
+
+    if (botonFoto) {
+
+      botonFoto.innerHTML =
+        '<i class="fas fa-shield-halved"></i> ' +
+        "Fotografía protegida. Subiendo...";
+
+    }
+
+    /*
+      Mostrar brevemente la confirmación.
+    */
+
+    await new Promise(function(resolve) {
+
+      setTimeout(
+        resolve,
+        350
+      );
+
+    });
+
+    /*
+      Ahora sí cerrar la cámara y regresar
+      visualmente al formulario.
+    */
+
+    ocultarModalCamaraInterna();
+
+    /*
+      Subir a Cloudinary indicando que el Blob
+      ya está protegido. Esto evita guardarlo
+      una segunda vez en IndexedDB.
+    */
+
     await subirFotografiaPreparada(
       blob,
-      campoCapturado
+      campoCapturado,
+      true
     );
 
     campoFotoActual =
@@ -3735,7 +3917,6 @@ async function capturarFotoInterna() {
   } catch (error) {
 
     detenerCamaraInterna();
-
     ocultarModalCamaraInterna();
 
     mostrarErrorFotografia(
@@ -3747,6 +3928,10 @@ async function capturarFotoInterna() {
       "";
 
   } finally {
+
+    /*
+      Liberar todos los recursos de memoria.
+    */
 
     if (
       contexto &&
@@ -3772,6 +3957,31 @@ async function capturarFotoInterna() {
 
     }
 
+    if (botonCapturar) {
+
+      botonCapturar.disabled =
+        true;
+
+      botonCapturar.innerHTML =
+        '<i class="fas fa-camera"></i> ' +
+        "Capturar y proteger fotografía";
+
+    }
+
+    if (botonCamaraNativa) {
+
+      botonCamaraNativa.disabled =
+        false;
+
+    }
+
+    if (botonCancelar) {
+
+      botonCancelar.disabled =
+        false;
+
+    }
+
     contexto =
       null;
 
@@ -3787,7 +3997,6 @@ async function capturarFotoInterna() {
   }
 
 }
-
 
 /* =========================================
    PROCESAR CÁMARA NATIVA DE RESPALDO
