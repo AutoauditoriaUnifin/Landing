@@ -2019,6 +2019,21 @@ let descripcionActivoActual = "";
 
 let evidenciasUrls = {};
 
+/* =========================================
+   FOTOGRAFÍAS PENDIENTES EN INDEXEDDB
+========================================= */
+
+const DB_FOTOS_NOMBRE =
+  "UNIFIN_Autoauditoria";
+
+const DB_FOTOS_VERSION =
+  1;
+
+const DB_FOTOS_ALMACEN =
+  "fotosPendientes";
+
+let reintentandoFotosPendientes =
+  false;
 
 /* =========================================
    NOMBRES DE LAS EVIDENCIAS
@@ -2685,20 +2700,460 @@ function convertirCanvasABlob(
 
 }
 
+/* =========================================
+   ABRIR BASE DE FOTOGRAFÍAS PENDIENTES
+========================================= */
+
+function abrirBaseFotosPendientes() {
+
+  return new Promise(function(
+    resolve,
+    reject
+  ) {
+
+    if (!("indexedDB" in window)) {
+
+      reject(
+        new Error(
+          "Este navegador no permite almacenamiento temporal."
+        )
+      );
+
+      return;
+
+    }
+
+    const solicitud =
+      window.indexedDB.open(
+        DB_FOTOS_NOMBRE,
+        DB_FOTOS_VERSION
+      );
+
+    solicitud.onupgradeneeded =
+      function(evento) {
+
+        const base =
+          evento.target.result;
+
+        let almacen;
+
+        if (
+          !base.objectStoreNames.contains(
+            DB_FOTOS_ALMACEN
+          )
+        ) {
+
+          almacen =
+            base.createObjectStore(
+              DB_FOTOS_ALMACEN,
+              {
+                keyPath: "id"
+              }
+            );
+
+        } else {
+
+          almacen =
+            evento.target.transaction
+              .objectStore(
+                DB_FOTOS_ALMACEN
+              );
+
+        }
+
+        if (
+          !almacen.indexNames.contains(
+            "auditId"
+          )
+        ) {
+
+          almacen.createIndex(
+            "auditId",
+            "auditId",
+            {
+              unique: false
+            }
+          );
+
+        }
+
+      };
+
+    solicitud.onsuccess =
+      function() {
+
+        resolve(
+          solicitud.result
+        );
+
+      };
+
+    solicitud.onerror =
+      function() {
+
+        reject(
+          solicitud.error ||
+          new Error(
+            "No fue posible abrir el almacenamiento temporal."
+          )
+        );
+
+      };
+
+    solicitud.onblocked =
+      function() {
+
+        reject(
+          new Error(
+            "El almacenamiento temporal se encuentra bloqueado."
+          )
+        );
+
+      };
+
+  });
+
+}
+
 
 /* =========================================
-   SUBIR Y GUARDAR UNA FOTO PREPARADA
+   GUARDAR FOTOGRAFÍA COMPRIMIDA
+========================================= */
+
+async function guardarFotoPendiente(
+  blob,
+  campo
+) {
+
+  if (
+    !auditIdActual ||
+    !campo ||
+    !blob
+  ) {
+
+    return false;
+
+  }
+
+  const base =
+    await abrirBaseFotosPendientes();
+
+  return new Promise(function(
+    resolve,
+    reject
+  ) {
+
+    const transaccion =
+      base.transaction(
+        DB_FOTOS_ALMACEN,
+        "readwrite"
+      );
+
+    transaccion.oncomplete =
+      function() {
+
+        base.close();
+        resolve(true);
+
+      };
+
+    transaccion.onerror =
+      function() {
+
+        const error =
+          transaccion.error;
+
+        base.close();
+
+        reject(
+          error ||
+          new Error(
+            "No fue posible proteger la fotografía."
+          )
+        );
+
+      };
+
+    transaccion.onabort =
+      function() {
+
+        const error =
+          transaccion.error;
+
+        base.close();
+
+        reject(
+          error ||
+          new Error(
+            "Se canceló el guardado temporal."
+          )
+        );
+
+      };
+
+    const registro = {
+
+      id:
+        auditIdActual +
+        "__" +
+        campo,
+
+      auditId:
+        auditIdActual,
+
+      campo:
+        campo,
+
+      blob:
+        blob,
+
+      tipo:
+        blob.type ||
+        "image/jpeg",
+
+      tamano:
+        blob.size ||
+        0,
+
+      guardadaEn:
+        Date.now()
+
+    };
+
+    transaccion
+      .objectStore(
+        DB_FOTOS_ALMACEN
+      )
+      .put(registro);
+
+  });
+
+}
+
+
+/* =========================================
+   ELIMINAR UNA FOTOGRAFÍA PENDIENTE
+========================================= */
+
+async function eliminarFotoPendiente(
+  campo
+) {
+
+  if (
+    !auditIdActual ||
+    !campo
+  ) {
+    return;
+  }
+
+  const base =
+    await abrirBaseFotosPendientes();
+
+  return new Promise(function(
+    resolve,
+    reject
+  ) {
+
+    const transaccion =
+      base.transaction(
+        DB_FOTOS_ALMACEN,
+        "readwrite"
+      );
+
+    transaccion.oncomplete =
+      function() {
+
+        base.close();
+        resolve();
+
+      };
+
+    transaccion.onerror =
+      function() {
+
+        const error =
+          transaccion.error;
+
+        base.close();
+        reject(error);
+
+      };
+
+    transaccion.onabort =
+      transaccion.onerror;
+
+    transaccion
+      .objectStore(
+        DB_FOTOS_ALMACEN
+      )
+      .delete(
+        auditIdActual +
+        "__" +
+        campo
+      );
+
+  });
+
+}
+
+
+/* =========================================
+   OBTENER FOTOGRAFÍAS PENDIENTES
+========================================= */
+
+async function obtenerFotosPendientes() {
+
+  if (!auditIdActual) {
+    return [];
+  }
+
+  const base =
+    await abrirBaseFotosPendientes();
+
+  return new Promise(function(
+    resolve,
+    reject
+  ) {
+
+    const transaccion =
+      base.transaction(
+        DB_FOTOS_ALMACEN,
+        "readonly"
+      );
+
+    const almacen =
+      transaccion.objectStore(
+        DB_FOTOS_ALMACEN
+      );
+
+    const indice =
+      almacen.index(
+        "auditId"
+      );
+
+    const solicitud =
+      indice.getAll(
+        auditIdActual
+      );
+
+    transaccion.oncomplete =
+      function() {
+
+        const registros =
+          solicitud.result || [];
+
+        base.close();
+
+        registros.sort(
+          function(a, b) {
+
+            return (
+              Number(a.guardadaEn || 0) -
+              Number(b.guardadaEn || 0)
+            );
+
+          }
+        );
+
+        resolve(registros);
+
+      };
+
+    transaccion.onerror =
+      function() {
+
+        const error =
+          transaccion.error;
+
+        base.close();
+        reject(error);
+
+      };
+
+    transaccion.onabort =
+      transaccion.onerror;
+
+  });
+
+}
+
+
+/* =========================================
+   LIMPIAR PENDIENTES DE LA AUDITORÍA
+========================================= */
+
+async function eliminarFotosPendientesAuditoria() {
+
+  if (!auditIdActual) {
+    return;
+  }
+
+  const registros =
+    await obtenerFotosPendientes();
+
+  for (
+    const registro of registros
+  ) {
+
+    await eliminarFotoPendiente(
+      registro.campo
+    );
+
+  }
+
+}
+
+/* =========================================
+   PROTEGER, SUBIR Y GUARDAR FOTOGRAFÍA
 ========================================= */
 
 async function subirFotografiaPreparada(
   blob,
-  campo
+  campo,
+  fotoYaProtegida
 ) {
 
   const boton =
     obtenerBotonFotografia(
       campo
     );
+
+  let protegidaLocalmente =
+    fotoYaProtegida === true;
+
+  /*
+    Primero proteger el Blob comprimido.
+    Si la página se recarga, seguirá guardado.
+  */
+
+  if (!protegidaLocalmente) {
+
+    try {
+
+      protegidaLocalmente =
+        await guardarFotoPendiente(
+          blob,
+          campo
+        );
+
+    } catch (errorIndexedDB) {
+
+      protegidaLocalmente =
+        false;
+
+      console.warn(
+        "IndexedDB no estuvo disponible:",
+        errorIndexedDB
+      );
+
+      /*
+        La subida continúa normalmente aunque
+        IndexedDB no esté disponible.
+      */
+
+    }
+
+  }
 
   if (boton) {
 
@@ -2712,30 +3167,220 @@ async function subirFotografiaPreparada(
 
   }
 
-  const url =
-    await subirBlobCloudinary(
-      blob,
+  try {
+
+    const url =
+      await subirBlobCloudinary(
+        blob,
+        campo
+      );
+
+    evidenciasUrls[campo] =
+      url;
+
+    localStorage.setItem(
+      claveEvidencias,
+      JSON.stringify(
+        evidenciasUrls
+      )
+    );
+
+    /*
+      La URL ya quedó guardada.
+      El Blob temporal ya no es necesario.
+    */
+
+    try {
+
+      await eliminarFotoPendiente(
+        campo
+      );
+
+    } catch (errorEliminacion) {
+
+      console.warn(
+        "No fue posible eliminar el respaldo temporal:",
+        errorEliminacion
+      );
+
+    }
+
+    mostrarConfirmacionFoto(
       campo
     );
 
-  evidenciasUrls[campo] =
-    url;
+    return url;
 
-  localStorage.setItem(
-    claveEvidencias,
-    JSON.stringify(
-      evidenciasUrls
-    )
-  );
+  } catch (errorSubida) {
 
-  mostrarConfirmacionFoto(
-    campo
-  );
+    if (protegidaLocalmente) {
 
-  return url;
+      const errorProtegido =
+        new Error(
+          (
+            errorSubida &&
+            errorSubida.message
+              ? errorSubida.message
+              : "No fue posible subir la fotografía."
+          ) +
+          " La fotografía quedó protegida en el teléfono " +
+          "y se reintentará automáticamente."
+        );
+
+      errorProtegido.fotoPendiente =
+        true;
+
+      throw errorProtegido;
+
+    }
+
+    throw errorSubida;
+
+  }
 
 }
 
+/* =========================================
+   REINTENTAR FOTOGRAFÍAS PROTEGIDAS
+========================================= */
+
+async function reintentarFotosPendientes() {
+
+  if (
+    reintentandoFotosPendientes ||
+    subiendoFotografia ||
+    !auditIdActual ||
+    navigator.onLine === false
+  ) {
+
+    return;
+
+  }
+
+  let pendientes = [];
+
+  try {
+
+    pendientes =
+      await obtenerFotosPendientes();
+
+  } catch (error) {
+
+    console.warn(
+      "No fue posible consultar fotografías pendientes:",
+      error
+    );
+
+    return;
+
+  }
+
+  if (pendientes.length === 0) {
+    return;
+  }
+
+  reintentandoFotosPendientes =
+    true;
+
+  subiendoFotografia =
+    true;
+
+  const restaurandoAnterior =
+    restaurandoEvidencias;
+
+  /*
+    Evitar desplazamientos automáticos mientras
+    se recuperan fotografías.
+  */
+
+  restaurandoEvidencias =
+    true;
+
+  try {
+
+    for (
+      const registro of pendientes
+    ) {
+
+      if (
+        navigator.onLine === false
+      ) {
+        break;
+      }
+
+      /*
+        Si ya existe una URL, solamente
+        eliminar el respaldo sobrante.
+      */
+
+      if (
+        evidenciasUrls[
+          registro.campo
+        ]
+      ) {
+
+        try {
+
+          await eliminarFotoPendiente(
+            registro.campo
+          );
+
+        } catch (error) {
+
+          console.warn(
+            "No se eliminó un respaldo sobrante:",
+            error
+          );
+
+        }
+
+        continue;
+
+      }
+
+      try {
+
+        await subirFotografiaPreparada(
+          registro.blob,
+          registro.campo,
+          true
+        );
+
+      } catch (errorSubida) {
+
+        /*
+          Restaurar el botón y detener los
+          reintentos para no saturar la conexión.
+        */
+
+        mostrarErrorFotografia(
+          registro.campo,
+          errorSubida
+        );
+
+        break;
+
+      }
+
+    }
+
+  } finally {
+
+    restaurandoEvidencias =
+      restaurandoAnterior;
+
+    subiendoFotografia =
+      false;
+
+    reintentandoFotosPendientes =
+      false;
+
+    verificarFotosParaUbicacion();
+    actualizarGuiaVisual(false);
+
+  }
+
+}
 
 /* =========================================
    RESTAURAR BOTÓN DESPUÉS DE ERROR
@@ -5639,6 +6284,24 @@ actualizarProgreso(
   claveEvidencias
 );
 
+/*
+  La auditoría ya fue recibida.
+  Eliminar cualquier respaldo pendiente.
+*/
+
+try {
+
+  await eliminarFotosPendientesAuditoria();
+
+} catch (errorLimpieza) {
+
+  console.warn(
+    "No fue posible limpiar IndexedDB:",
+    errorLimpieza
+  );
+
+}
+
 localStorage.removeItem(
   claveSesion
 );
@@ -5882,10 +6545,21 @@ mostrarSesionRestaurada();
 actualizarGuiaVisual(false);
 
     estadoInicial.style.display =
-      "none";
+  "none";
 
-    contenido.style.display =
-      "block";
+contenido.style.display =
+  "block";
+
+/*
+  Esperar a que termine de dibujarse el
+  formulario antes de revisar pendientes.
+*/
+
+setTimeout(function() {
+
+  reintentarFotosPendientes();
+
+}, 800);
 
   } catch (error) {
 
@@ -6017,6 +6691,23 @@ function consultarApiJsonp(url) {
   });
 
 }
+
+/* =========================================
+   RECUPERAR SUBIDAS AL REGRESAR INTERNET
+========================================= */
+
+window.addEventListener(
+  "online",
+  function() {
+
+    setTimeout(function() {
+
+      reintentarFotosPendientes();
+
+    }, 700);
+
+  }
+);
 
 cargarAuditoriaDesdeApi();
 
