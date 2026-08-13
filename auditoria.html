@@ -2035,6 +2035,120 @@ const DB_FOTOS_ALMACEN =
 let reintentandoFotosPendientes =
   false;
 
+  /* =========================================
+   ALMACENAMIENTO LOCAL PERSISTENTE
+========================================= */
+
+let solicitudPersistenciaRealizada =
+  false;
+
+let almacenamientoPersistente =
+  false;
+
+
+async function prepararAlmacenamientoPersistente() {
+
+  if (
+    solicitudPersistenciaRealizada
+  ) {
+
+    return almacenamientoPersistente;
+
+  }
+
+  solicitudPersistenciaRealizada =
+    true;
+
+  if (
+    !navigator.storage
+  ) {
+
+    return false;
+
+  }
+
+  try {
+
+    if (
+      navigator.storage.persisted
+    ) {
+
+      almacenamientoPersistente =
+        await navigator.storage.persisted();
+
+    }
+
+    if (
+      !almacenamientoPersistente &&
+      navigator.storage.persist
+    ) {
+
+      almacenamientoPersistente =
+        await navigator.storage.persist();
+
+    }
+
+    console.log(
+      "Almacenamiento persistente:",
+      almacenamientoPersistente
+    );
+
+    return almacenamientoPersistente;
+
+  } catch (error) {
+
+    console.warn(
+      "No fue posible solicitar almacenamiento persistente.",
+      error
+    );
+
+    return false;
+
+  }
+
+}
+
+
+/* =========================================
+   CREAR TRANSACCIÓN DURABLE
+========================================= */
+
+function crearTransaccionFotos(
+  base,
+  modo
+) {
+
+  try {
+
+    /*
+      Solicitar que la escritura se confirme
+      en el almacenamiento del teléfono.
+    */
+
+    return base.transaction(
+      DB_FOTOS_ALMACEN,
+      modo,
+      {
+        durability: "strict"
+      }
+    );
+
+  } catch (error) {
+
+    /*
+      Compatibilidad con navegadores antiguos
+      que no aceptan durability.
+    */
+
+    return base.transaction(
+      DB_FOTOS_ALMACEN,
+      modo
+    );
+
+  }
+
+}
+
 /* =========================================
    NOMBRES DE LAS EVIDENCIAS
 ========================================= */
@@ -2416,6 +2530,13 @@ async function abrirCamara(
     return;
 
   }
+
+  /*
+  Se ejecuta cuando el cliente toca el botón,
+  antes de capturar la primera fotografía.
+*/
+
+prepararAlmacenamientoPersistente();
 
   campoFotoActual =
     campo;
@@ -2844,10 +2965,10 @@ async function guardarFotoPendiente(
   ) {
 
     const transaccion =
-      base.transaction(
-        DB_FOTOS_ALMACEN,
-        "readwrite"
-      );
+  crearTransaccionFotos(
+    base,
+    "readwrite"
+  );
 
     transaccion.oncomplete =
       function() {
@@ -3122,11 +3243,22 @@ async function subirFotografiaPreparada(
     fotoYaProtegida === true;
 
   /*
-    Primero proteger el Blob comprimido.
-    Si la página se recarga, seguirá guardado.
+    Guardar primero en el teléfono.
   */
 
   if (!protegidaLocalmente) {
+
+    if (boton) {
+
+      boton.classList.add(
+        "cargando"
+      );
+
+      boton.innerHTML =
+        '<i class="fas fa-shield-halved"></i> ' +
+        "Protegiendo fotografía...";
+
+    }
 
     try {
 
@@ -3146,14 +3278,14 @@ async function subirFotografiaPreparada(
         errorIndexedDB
       );
 
-      /*
-        La subida continúa normalmente aunque
-        IndexedDB no esté disponible.
-      */
-
     }
 
   }
+
+  /*
+    La transacción local ya terminó.
+    Ahora puede comenzar Cloudinary.
+  */
 
   if (boton) {
 
@@ -3161,9 +3293,19 @@ async function subirFotografiaPreparada(
       "cargando"
     );
 
-    boton.innerHTML =
-      '<i class="fas fa-cloud-arrow-up"></i> ' +
-      "Subiendo fotografía...";
+    if (protegidaLocalmente) {
+
+      boton.innerHTML =
+        '<i class="fas fa-shield-halved"></i> ' +
+        "Fotografía protegida. Subiendo...";
+
+    } else {
+
+      boton.innerHTML =
+        '<i class="fas fa-cloud-arrow-up"></i> ' +
+        "Subiendo fotografía...";
+
+    }
 
   }
 
@@ -3186,8 +3328,8 @@ async function subirFotografiaPreparada(
     );
 
     /*
-      La URL ya quedó guardada.
-      El Blob temporal ya no es necesario.
+      Cloudinary entregó la URL.
+      El respaldo local ya puede eliminarse.
     */
 
     try {
@@ -3215,14 +3357,15 @@ async function subirFotografiaPreparada(
 
     if (protegidaLocalmente) {
 
+      const mensajeOriginal =
+        errorSubida &&
+        errorSubida.message
+          ? errorSubida.message
+          : "No fue posible subir la fotografía.";
+
       const errorProtegido =
         new Error(
-          (
-            errorSubida &&
-            errorSubida.message
-              ? errorSubida.message
-              : "No fue posible subir la fotografía."
-          ) +
+          mensajeOriginal +
           " La fotografía quedó protegida en el teléfono " +
           "y se reintentará automáticamente."
         );
