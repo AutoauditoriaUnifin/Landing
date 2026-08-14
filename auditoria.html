@@ -6324,9 +6324,36 @@ function mostrarDeteccionTipo(
 }
 
 /* =========================
-   GPS
+   GPS ROBUSTO PARA MÓVILES
 ========================= */
-function getLocation() {
+
+/*
+  Convertir getCurrentPosition en promesa
+  para poder realizar dos intentos.
+*/
+
+function solicitarPosicionGPS(
+  opciones
+) {
+
+  return new Promise(function(
+    resolve,
+    reject
+  ) {
+
+    navigator.geolocation
+      .getCurrentPosition(
+        resolve,
+        reject,
+        opciones
+      );
+
+  });
+
+}
+
+
+async function getLocation() {
 
   const botonUbicacion =
     document.getElementById(
@@ -6349,8 +6376,8 @@ function getLocation() {
     );
 
   /*
-    La barra debe permanecer oculta mientras
-    solamente se obtiene la ubicación.
+    La barra solamente debe aparecer
+    al enviar la auditoría.
   */
 
   if (progresoEnvio) {
@@ -6367,130 +6394,350 @@ function getLocation() {
     return;
   }
 
+  if (
+    !navigator.geolocation
+  ) {
+
+    estadoGPS.innerHTML =
+      '<div style="' +
+        'background:#FFF0EC;' +
+        'color:#374757;' +
+        'border-left:6px solid #FF8E72;' +
+        'padding:16px;' +
+        'border-radius:10px;' +
+        'font-size:24px;' +
+        'font-weight:700;' +
+      '">' +
+        '❌ Este navegador no permite obtener la ubicación.' +
+      '</div>';
+
+    return;
+
+  }
+
   botonUbicacion.disabled =
     true;
 
   botonUbicacion.innerHTML =
     '<i class="fas fa-spinner fa-spin"></i>' +
-    ' Obteniendo ubicación...';
+    ' Buscando ubicación...';
 
-  navigator.geolocation.getCurrentPosition(
+  estadoGPS.innerHTML =
+    '<div style="' +
+      'background:#EEF7FB;' +
+      'color:#374757;' +
+      'border-left:6px solid #118AB2;' +
+      'padding:16px;' +
+      'border-radius:10px;' +
+      'font-size:22px;' +
+      'font-weight:700;' +
+    '">' +
+      '📍 Buscando una ubicación disponible...' +
+    '</div>';
 
-    function(position) {
+  try {
 
-      latitud =
-        position.coords.latitude;
+    let position =
+      null;
 
-      longitud =
-        position.coords.longitude;
+    /*
+      PRIMER INTENTO:
+      ubicación aproximada o reciente.
 
-      precisionGPS =
-        position.coords.accuracy;
+      Funciona mejor dentro de edificios
+      y en teléfonos de poca capacidad.
+    */
 
-      guardarSesionLocal();
+    try {
 
-      estadoGPS.innerHTML =
-        '<div style="' +
-          'background:#EFFBE9;' +
-          'color:#374757;' +
-          'border-left:6px solid #8EDD65;' +
-          'padding:16px;' +
-          'border-radius:10px;' +
-          'font-size:24px;' +
-          'font-weight:700;' +
-        '">' +
-          '✅ Ubicación capturada correctamente' +
-        '</div>';
+      position =
+        await solicitarPosicionGPS({
 
-      botonUbicacion.disabled =
-        false;
+          enableHighAccuracy:
+            false,
 
-      botonUbicacion.innerHTML =
-        '<i class="fas fa-location-dot"></i>' +
-        ' Actualizar ubicación';
+          timeout:
+            12000,
+
+          /*
+            Permitir una ubicación obtenida
+            durante los últimos 10 minutos.
+          */
+
+          maximumAge:
+            600000
+
+        });
+
+    } catch (primerError) {
 
       /*
-        Mostrar Enviar autoauditoría,
-        pero conservar oculta la barra.
+        Si está bloqueada, un segundo intento
+        no puede saltar el permiso.
       */
 
-      if (botonEnviar) {
+      if (
+        primerError &&
+        primerError.code === 1
+      ) {
 
-        botonEnviar.style.display =
-          "flex";
-
-        actualizarGuiaVisual(
-          false
-        );
-
-        setTimeout(function() {
-
-          botonEnviar.scrollIntoView({
-            behavior:
-              modoLigero
-                ? "auto"
-                : "smooth",
-
-            block:
-              "center"
-          });
-
-        }, 300);
+        throw primerError;
 
       }
 
-    },
+      /*
+        SEGUNDO INTENTO:
+        activar GPS de alta precisión.
+      */
 
-    function(errorGPS) {
-
-      console.warn(
-        "Error de ubicación:",
-        errorGPS
-      );
+      botonUbicacion.innerHTML =
+        '<i class="fas fa-spinner fa-spin"></i>' +
+        ' Reintentando con GPS...';
 
       estadoGPS.innerHTML =
         '<div style="' +
-          'background:#FFF0EC;' +
+          'background:#FFF7E5;' +
           'color:#374757;' +
-          'border-left:6px solid #FF8E72;' +
+          'border-left:6px solid #FFD071;' +
           'padding:16px;' +
           'border-radius:10px;' +
-          'font-size:24px;' +
+          'font-size:22px;' +
           'font-weight:700;' +
         '">' +
-          '❌ Debe permitir el acceso a la ubicación GPS.' +
+          '📡 Primer intento sin respuesta. Buscando con GPS...' +
         '</div>';
 
-      botonUbicacion.disabled =
-        false;
+      await new Promise(function(resolve) {
 
-      botonUbicacion.innerHTML =
-        '<i class="fas fa-location-dot"></i>' +
-        ' Intentar compartir ubicación nuevamente';
+        setTimeout(
+          resolve,
+          500
+        );
 
-      if (botonEnviar) {
+      });
 
-        botonEnviar.style.display =
-          "none";
+      position =
+        await solicitarPosicionGPS({
 
-      }
+          enableHighAccuracy:
+            true,
 
-    },
+          timeout:
+            30000,
 
-    {
-      enableHighAccuracy:
-        true,
+          /*
+            También aceptar una ubicación
+            precisa obtenida recientemente.
+          */
 
-      timeout:
-        20000,
+          maximumAge:
+            600000
 
-      maximumAge:
-        0
+        });
+
     }
 
-  );
+    if (
+      !position ||
+      !position.coords
+    ) {
+
+      throw new Error(
+        "El teléfono no devolvió las coordenadas."
+      );
+
+    }
+
+    latitud =
+      Number(
+        position.coords.latitude
+      );
+
+    longitud =
+      Number(
+        position.coords.longitude
+      );
+
+    precisionGPS =
+      Number(
+        position.coords.accuracy || 0
+      );
+
+    if (
+      !Number.isFinite(latitud) ||
+      !Number.isFinite(longitud)
+    ) {
+
+      throw new Error(
+        "Las coordenadas recibidas no son válidas."
+      );
+
+    }
+
+    guardarSesionLocal();
+
+    const precisionMostrar =
+      precisionGPS > 0
+        ? Math.round(precisionGPS)
+        : 0;
+
+    estadoGPS.innerHTML =
+      '<div style="' +
+        'background:#EFFBE9;' +
+        'color:#374757;' +
+        'border-left:6px solid #8EDD65;' +
+        'padding:16px;' +
+        'border-radius:10px;' +
+        'font-size:24px;' +
+        'font-weight:700;' +
+      '">' +
+        '✅ Ubicación capturada correctamente' +
+        (
+          precisionMostrar > 0
+            ? '<br><span style="' +
+                'font-size:18px;' +
+                'font-weight:400;' +
+              '">' +
+                'Precisión aproximada: ' +
+                precisionMostrar +
+                ' metros' +
+              '</span>'
+            : ''
+        ) +
+      '</div>';
+
+    botonUbicacion.disabled =
+      false;
+
+    botonUbicacion.innerHTML =
+      '<i class="fas fa-location-dot"></i>' +
+      ' Actualizar ubicación';
+
+    if (botonEnviar) {
+
+      botonEnviar.style.display =
+        "flex";
+
+      actualizarGuiaVisual(
+        false
+      );
+
+      setTimeout(function() {
+
+        botonEnviar.scrollIntoView({
+
+          behavior:
+            modoLigero
+              ? "auto"
+              : "smooth",
+
+          block:
+            "center"
+
+        });
+
+      }, 300);
+
+    }
+
+  } catch (errorGPS) {
+
+    console.warn(
+      "Error de ubicación:",
+      errorGPS
+    );
+
+    let mensajeGPS =
+      "No fue posible obtener la ubicación.";
+
+    /*
+      Código 1: permiso bloqueado.
+    */
+
+    if (
+      errorGPS &&
+      errorGPS.code === 1
+    ) {
+
+      mensajeGPS =
+        "La ubicación está bloqueada para este navegador. " +
+        "Abra el enlace directamente en Chrome o Safari " +
+        "y permita el acceso a la ubicación.";
+
+    /*
+      Código 2: ubicación no disponible.
+    */
+
+    } else if (
+      errorGPS &&
+      errorGPS.code === 2
+    ) {
+
+      mensajeGPS =
+        "El teléfono no pudo determinar la ubicación. " +
+        "Active la ubicación, el Wi-Fi y los datos móviles, " +
+        "y vuelva a intentarlo.";
+
+    /*
+      Código 3: tiempo agotado.
+    */
+
+    } else if (
+      errorGPS &&
+      errorGPS.code === 3
+    ) {
+
+      mensajeGPS =
+        "El GPS tardó demasiado en responder. " +
+        "Acérquese a una ventana o salga al exterior " +
+        "y vuelva a intentarlo.";
+
+    }
+
+    estadoGPS.innerHTML =
+      '<div style="' +
+        'background:#FFF0EC;' +
+        'color:#374757;' +
+        'border-left:6px solid #FF8E72;' +
+        'padding:16px;' +
+        'border-radius:10px;' +
+        'font-size:22px;' +
+        'font-weight:700;' +
+        'line-height:1.45;' +
+      '">' +
+        '❌ ' +
+        mensajeGPS +
+      '</div>';
+
+    botonUbicacion.disabled =
+      false;
+
+    botonUbicacion.innerHTML =
+      '<i class="fas fa-location-dot"></i>' +
+      ' Intentar compartir ubicación nuevamente';
+
+    /*
+      Si anteriormente no existe una ubicación
+      válida, mantener oculto Enviar.
+    */
+
+    if (
+      botonEnviar &&
+      (
+        !latitud ||
+        !longitud
+      )
+    ) {
+
+      botonEnviar.style.display =
+        "none";
+
+    }
+
+  }
 
 }
+
 /* =========================
    ACTUALIZAR PROGRESO
 ========================= */
