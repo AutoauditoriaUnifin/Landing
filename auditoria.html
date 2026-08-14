@@ -1801,48 +1801,149 @@ Tipo de activo
 </div>
 
 <!-- =========================
-     UBICACIÓN DE RESPALDO
+     UBICACIÓN MANUAL
 ========================= -->
 
 <div
-  id="contenedorUbicacionReferencia"
+  id="contenedorUbicacionManual"
   style="
     display:none;
     margin-top:18px;
+    padding:20px;
+    background:#FFF7E5;
+    border-left:6px solid #FFD071;
+    border-radius:14px;
   ">
 
   <div style="
-    padding:18px;
-    background:#FFF7E5;
     color:#374757;
-    border-left:6px solid #FFD071;
-    border-radius:12px;
-    font-size:20px;
+    font-size:21px;
     font-weight:700;
     line-height:1.45;
+    margin-bottom:18px;
     overflow-wrap:anywhere;
   ">
 
-    ⚠️ El navegador no proporcionó el GPS.
+    📍 Ingrese su ubicación manualmente
 
     <br><br>
 
-    Puede utilizar la ubicación previamente
-    registrada para este activo.
+    <span style="
+      font-size:17px;
+      font-weight:400;
+    ">
+      La dirección será convertida en coordenadas aproximadas al enviar la autoauditoría.
+    </span>
 
+  </div>
+
+  <label for="estadoManual">
+    Estado <span class="required-star">*</span>
+  </label>
+
+  <input
+    type="text"
+    id="estadoManual"
+    maxlength="100"
+    autocomplete="address-level1"
+    placeholder="Ejemplo: Nuevo León"
+    oninput="guardarSesionLocal()">
+
+  <label
+    for="municipioManual"
+    style="display:block;margin-top:15px;">
+    Municipio o alcaldía
+    <span class="required-star">*</span>
+  </label>
+
+  <input
+    type="text"
+    id="municipioManual"
+    maxlength="120"
+    autocomplete="address-level2"
+    placeholder="Ejemplo: Monterrey"
+    oninput="guardarSesionLocal()">
+
+  <label
+    for="ciudadManual"
+    style="display:block;margin-top:15px;">
+    Ciudad o localidad
+    <span class="required-star">*</span>
+  </label>
+
+  <input
+    type="text"
+    id="ciudadManual"
+    maxlength="120"
+    autocomplete="address-level2"
+    placeholder="Ejemplo: Monterrey"
+    oninput="guardarSesionLocal()">
+
+  <label
+    for="coloniaManual"
+    style="display:block;margin-top:15px;">
+    Colonia
+  </label>
+
+  <input
+    type="text"
+    id="coloniaManual"
+    maxlength="150"
+    autocomplete="address-level3"
+    placeholder="Ejemplo: Centro"
+    oninput="guardarSesionLocal()">
+
+  <label
+    for="codigoPostalManual"
+    style="display:block;margin-top:15px;">
+    Código postal
+  </label>
+
+  <input
+    type="text"
+    id="codigoPostalManual"
+    maxlength="10"
+    inputmode="numeric"
+    autocomplete="postal-code"
+    placeholder="Ejemplo: 64000"
+    oninput="guardarSesionLocal()">
+
+  <label
+    for="direccionManual"
+    style="display:block;margin-top:15px;">
+    Calle, número o referencia
+    <span class="required-star">*</span>
+  </label>
+
+  <textarea
+    id="direccionManual"
+    maxlength="250"
+    rows="3"
+    autocomplete="street-address"
+    placeholder="Ejemplo: Macroplaza, calle Zaragoza y Padre Mier"
+    oninput="guardarSesionLocal()"></textarea>
+
+  <div
+    id="mensajeUbicacionManual"
+    style="
+      margin-top:15px;
+      font-size:18px;
+      font-weight:700;
+      line-height:1.4;
+    ">
   </div>
 
   <button
     type="button"
-    id="btnUsarUbicacionReferencia"
-    onclick="usarUbicacionReferencia()"
+    id="btnConfirmarUbicacionManual"
+    onclick="confirmarUbicacionManual()"
     style="
       background:#374757;
-      margin-top:15px;
+      margin-top:18px;
     ">
 
     <i class="fas fa-map-pin"></i>
-    Usar ubicación registrada del activo
+    Confirmar ubicación escrita
 
   </button>
 
@@ -1943,7 +2044,7 @@ Preparando envío...
 <script>
 
 const API_URL =
-  "https://script.google.com/macros/s/AKfycbxQJvmOuhEmL4PTYG-jBZI56Jo43FY8Es6VvR-GCk0S_rtYsZZltz0NBHnexuSCnz6ncw/exec";
+  "https://script.google.com/macros/s/AKfycbyswe0E4hEy8KD0NEsPkpwBaxBJxp4kF57Tw5EXfq_pT_6QU09oDA-Hn7PGJ5gHPkoFwA/exec";
 
   const CLOUDINARY_CLOUD_NAME = "b3bnfknd";
   const CLOUDINARY_UPLOAD_PRESET = "autoauditorias";
@@ -1952,13 +2053,7 @@ const API_URL =
 let latitud = "";
 let longitud = "";
 let precisionGPS = "";
-
 let origenUbicacion = "";
-let confirmacionUbicacionReferencia = "No";
-
-let tieneUbicacionReferencia = false;
-let latitudReferencia = "";
-let longitudReferencia = "";
 
 /* =========================================
    CÁMARA OPTIMIZADA
@@ -5451,7 +5546,6 @@ function restaurarConfirmaciones() {
 /* =========================================
    GUARDAR Y RECUPERAR LA SESIÓN
 ========================================= */
-
 function guardarSesionLocal() {
 
   if (!claveSesion) {
@@ -5462,6 +5556,9 @@ function guardarSesionLocal() {
     document.getElementById(
       "tipoActivo"
     );
+
+  const ubicacionManual =
+    obtenerDatosUbicacionManual();
 
   const sesion = {
 
@@ -5477,16 +5574,31 @@ function guardarSesionLocal() {
       longitud || "",
 
     precisionGPS:
-  precisionGPS || "",
+      precisionGPS || "",
 
-origenUbicacion:
-  origenUbicacion || "",
+    origenUbicacion:
+      origenUbicacion || "",
 
-confirmacionUbicacionReferencia:
-  confirmacionUbicacionReferencia || "No",
+    estadoManual:
+      ubicacionManual.estado,
 
-ultimaActualizacion:
-  Date.now()
+    municipioManual:
+      ubicacionManual.municipio,
+
+    ciudadManual:
+      ubicacionManual.ciudad,
+
+    coloniaManual:
+      ubicacionManual.colonia,
+
+    codigoPostalManual:
+      ubicacionManual.codigoPostal,
+
+    direccionManual:
+      ubicacionManual.direccion,
+
+    ultimaActualizacion:
+      Date.now()
 
   };
 
@@ -5507,7 +5619,6 @@ ultimaActualizacion:
   }
 
 }
-
 
 function restaurarSesionLocal() {
 
@@ -5560,72 +5671,128 @@ function restaurarSesionLocal() {
 
   }
 
-  if (
+  latitud =
     sesion.latitud !== undefined &&
-    sesion.latitud !== null &&
-    sesion.latitud !== ""
-  ) {
+    sesion.latitud !== null
+      ? String(sesion.latitud)
+      : "";
 
-    latitud =
-      String(sesion.latitud);
-
-  }
-
-  if (
+  longitud =
     sesion.longitud !== undefined &&
-    sesion.longitud !== null &&
-    sesion.longitud !== ""
-  ) {
-
-    longitud =
-      String(sesion.longitud);
-
-  }
-
-  if (
-  sesion.precisionGPS !== undefined &&
-  sesion.precisionGPS !== null
-) {
+    sesion.longitud !== null
+      ? String(sesion.longitud)
+      : "";
 
   precisionGPS =
+    sesion.precisionGPS !== undefined &&
+    sesion.precisionGPS !== null
+      ? String(sesion.precisionGPS)
+      : "";
+
+  const camposManuales = {
+
+    estadoManual:
+      sesion.estadoManual || "",
+
+    municipioManual:
+      sesion.municipioManual || "",
+
+    ciudadManual:
+      sesion.ciudadManual || "",
+
+    coloniaManual:
+      sesion.coloniaManual || "",
+
+    codigoPostalManual:
+      sesion.codigoPostalManual || "",
+
+    direccionManual:
+      sesion.direccionManual || ""
+
+  };
+
+  Object.keys(camposManuales)
+    .forEach(function(id) {
+
+      const campo =
+        document.getElementById(id);
+
+      if (campo) {
+
+        campo.value =
+          camposManuales[id];
+
+      }
+
+    });
+
+  origenUbicacion =
     String(
-      sesion.precisionGPS || ""
-    );
+      sesion.origenUbicacion ||
+      (
+        latitud && longitud
+          ? "GPS"
+          : ""
+      )
+    )
+    .trim()
+    .toUpperCase();
+
+  const hayDatosUbicacionManual =
+  Object.keys(camposManuales)
+    .some(function(id) {
+
+      return Boolean(
+        String(
+          camposManuales[id] || ""
+        ).trim()
+      );
+
+    });
+
+/*
+  Mostrar nuevamente el formulario manual
+  aunque el teléfono se haya recargado antes
+  de presionar Confirmar.
+*/
+
+if (hayDatosUbicacionManual) {
+
+  mostrarFormularioUbicacionManual();
 
 }
 
-origenUbicacion =
-  String(
-    sesion.origenUbicacion ||
-    (
-      latitud && longitud
-        ? "GPS"
-        : ""
-    )
-  );
+if (
+  origenUbicacion ===
+    "MANUAL_GEOCODIFICADA" &&
+  !ubicacionManualCompleta()
+) {
 
-confirmacionUbicacionReferencia =
-  String(
-    sesion
-      .confirmacionUbicacionReferencia ||
-    (
-      origenUbicacion ===
-      "REFERENCIA_ACTIVO"
-        ? "Sí"
-        : "No"
-    )
-  );
-
-return sesion;
+  origenUbicacion =
+    "";
 
 }
 
+  return sesion;
+
+}
 
 function mostrarSesionRestaurada() {
 
+  const ubicacionGPSLista =
+    Boolean(
+      latitud &&
+      longitud
+    );
+
+  const ubicacionManualLista =
+    origenUbicacion ===
+      "MANUAL_GEOCODIFICADA" &&
+    ubicacionManualCompleta();
+
   if (
-    !latitud ||
-    !longitud
+    !ubicacionGPSLista &&
+    !ubicacionManualLista
   ) {
     return;
   }
@@ -5666,6 +5833,12 @@ function mostrarSesionRestaurada() {
       "btnEnviar"
     );
 
+  if (ubicacionManualLista) {
+
+    mostrarFormularioUbicacionManual();
+
+  }
+
   if (estadoGPS) {
 
     estadoGPS.innerHTML =
@@ -5675,11 +5848,21 @@ function mostrarSesionRestaurada() {
         'border-left:6px solid #8EDD65;' +
         'padding:16px;' +
         'border-radius:10px;' +
-        'font-size:22px;' +
+        'font-size:21px;' +
         'font-weight:700;' +
         'line-height:1.4;' +
       '">' +
-        '✅ Ubicación recuperada correctamente' +
+        (
+          ubicacionManualLista
+            ? '✅ Ubicación manual recuperada correctamente' +
+              '<br><span style="' +
+                'font-size:17px;' +
+                'font-weight:400;' +
+              '">' +
+                'Se convertirá en coordenadas al enviar.' +
+              '</span>'
+            : '✅ Ubicación GPS recuperada correctamente'
+        ) +
       '</div>';
 
   }
@@ -5690,8 +5873,11 @@ function mostrarSesionRestaurada() {
       "flex";
 
     botonUbicacion.innerHTML =
-      '<i class="fas fa-location-dot"></i>' +
-      ' Actualizar ubicación';
+      ubicacionManualLista
+        ? '<i class="fas fa-location-dot"></i>' +
+          ' Intentar obtener ubicación GPS'
+        : '<i class="fas fa-location-dot"></i>' +
+          ' Actualizar ubicación';
 
   }
 
@@ -5703,6 +5889,7 @@ function mostrarSesionRestaurada() {
   }
 
 }
+
 /* =========================================
    MOSTRAR ERROR
 ========================================= */
@@ -5784,6 +5971,17 @@ function actualizarGuiaVisual(moverPantalla) {
 
   let siguienteBoton = null;
 
+  const ubicacionLista =
+  Boolean(
+    latitud &&
+    longitud
+  ) ||
+  (
+    origenUbicacion ===
+      "MANUAL_GEOCODIFICADA" &&
+    ubicacionManualCompleta()
+  );
+
   const faltantes =
     obtenerEvidenciasFaltantes(
       selector.value
@@ -5804,17 +6002,26 @@ function actualizarGuiaVisual(moverPantalla) {
       );
 
   } else if (
-    !latitud ||
-    !longitud
-  ) {
+  !ubicacionLista
+) {
 
     /*
       Después de las fotos,
       señalar ubicación.
     */
 
-    siguienteBoton =
-      document.getElementById(
+    const contenedorManual =
+  document.getElementById(
+    "contenedorUbicacionManual"
+  );
+
+siguienteBoton =
+  contenedorManual &&
+  contenedorManual.style.display !== "none"
+    ? document.getElementById(
+        "btnConfirmarUbicacionManual"
+      )
+    : document.getElementById(
         "btnCompartirUbicacion"
       );
 
@@ -6407,95 +6614,100 @@ function mostrarDeteccionTipo(
 }
 
 /* =========================================
-   UBICACIÓN REGISTRADA DEL ACTIVO
+   UBICACIÓN MANUAL
 ========================================= */
 
-function convertirCoordenadaLocal(
-  valor
-) {
+function obtenerValorUbicacionManual(id) {
 
-  if (
-    valor === "" ||
-    valor === null ||
-    valor === undefined
-  ) {
-    return NaN;
-  }
+  const campo =
+    document.getElementById(id);
 
-  return Number(
-    String(valor)
-      .trim()
-      .replace(/\s/g, "")
-      .replace(",", ".")
+  return campo
+    ? String(campo.value || "")
+        .replace(/\s+/g, " ")
+        .trim()
+    : "";
+
+}
+
+
+function obtenerDatosUbicacionManual() {
+
+  return {
+
+    estado:
+      obtenerValorUbicacionManual(
+        "estadoManual"
+      ),
+
+    municipio:
+      obtenerValorUbicacionManual(
+        "municipioManual"
+      ),
+
+    ciudad:
+      obtenerValorUbicacionManual(
+        "ciudadManual"
+      ),
+
+    colonia:
+      obtenerValorUbicacionManual(
+        "coloniaManual"
+      ),
+
+    codigoPostal:
+      obtenerValorUbicacionManual(
+        "codigoPostalManual"
+      ),
+
+    direccion:
+      obtenerValorUbicacionManual(
+        "direccionManual"
+      )
+
+  };
+
+}
+
+
+function ubicacionManualCompleta(datos) {
+
+  const ubicacion =
+    datos ||
+    obtenerDatosUbicacionManual();
+
+  return Boolean(
+    ubicacion.estado &&
+    ubicacion.municipio &&
+    ubicacion.ciudad &&
+    ubicacion.direccion
   );
 
 }
 
 
-function ubicacionReferenciaDisponible() {
-
-  const latitudValidar =
-    convertirCoordenadaLocal(
-      latitudReferencia
-    );
-
-  const longitudValidar =
-    convertirCoordenadaLocal(
-      longitudReferencia
-    );
-
-  return (
-    tieneUbicacionReferencia === true &&
-    Number.isFinite(latitudValidar) &&
-    Number.isFinite(longitudValidar) &&
-    latitudValidar >= -90 &&
-    latitudValidar <= 90 &&
-    longitudValidar >= -180 &&
-    longitudValidar <= 180 &&
-    !(
-      latitudValidar === 0 &&
-      longitudValidar === 0
-    )
-  );
-
-}
-
-
-function mostrarOpcionUbicacionReferencia() {
+function mostrarFormularioUbicacionManual() {
 
   const contenedor =
     document.getElementById(
-      "contenedorUbicacionReferencia"
+      "contenedorUbicacionManual"
     );
 
-  if (!contenedor) {
-    return false;
-  }
-
-  if (
-    !ubicacionReferenciaDisponible()
-  ) {
+  if (contenedor) {
 
     contenedor.style.display =
-      "none";
-
-    return false;
+      "block";
 
   }
-
-  contenedor.style.display =
-    "block";
-
-  return true;
 
 }
 
 
-function ocultarOpcionUbicacionReferencia() {
+function ocultarFormularioUbicacionManual() {
 
   const contenedor =
     document.getElementById(
-      "contenedorUbicacionReferencia"
+      "contenedorUbicacionManual"
     );
 
   if (contenedor) {
@@ -6508,54 +6720,131 @@ function ocultarOpcionUbicacionReferencia() {
 }
 
 
-function usarUbicacionReferencia() {
+function limpiarCamposUbicacionManual() {
 
-  if (
-    !ubicacionReferenciaDisponible()
-  ) {
+  [
+    "estadoManual",
+    "municipioManual",
+    "ciudadManual",
+    "coloniaManual",
+    "codigoPostalManual",
+    "direccionManual"
+  ].forEach(function(id) {
 
-    mostrarError(
-      "Este activo no tiene una ubicación de respaldo válida."
+    const campo =
+      document.getElementById(id);
+
+    if (campo) {
+
+      campo.value =
+        "";
+
+    }
+
+  });
+
+  const mensaje =
+    document.getElementById(
+      "mensajeUbicacionManual"
     );
+
+  if (mensaje) {
+
+    mensaje.innerHTML =
+      "";
+
+  }
+
+}
+
+
+function confirmarUbicacionManual() {
+
+  const datos =
+    obtenerDatosUbicacionManual();
+
+  const mensaje =
+    document.getElementById(
+      "mensajeUbicacionManual"
+    );
+
+  const faltantes = [];
+
+  if (!datos.estado) {
+    faltantes.push("Estado");
+  }
+
+  if (!datos.municipio) {
+    faltantes.push("Municipio o alcaldía");
+  }
+
+  if (!datos.ciudad) {
+    faltantes.push("Ciudad o localidad");
+  }
+
+  if (!datos.direccion) {
+    faltantes.push("Calle, dirección o referencia");
+  }
+
+  if (faltantes.length > 0) {
+
+    if (mensaje) {
+
+      mensaje.innerHTML =
+        '<div style="' +
+          'background:#FFE8E8;' +
+          'color:#B00020;' +
+          'padding:14px;' +
+          'border-left:5px solid #B00020;' +
+          'border-radius:10px;' +
+        '">' +
+          'Complete los siguientes campos:<br><br>' +
+          faltantes.join("<br>") +
+        '</div>';
+
+    }
 
     return;
 
   }
 
+  /*
+    Las coordenadas todavía no existen.
+    Apps Script las generará al enviar.
+  */
+
   latitud =
-    convertirCoordenadaLocal(
-      latitudReferencia
-    );
+    "";
 
   longitud =
-    convertirCoordenadaLocal(
-      longitudReferencia
-    );
+    "";
 
   precisionGPS =
     "";
 
   origenUbicacion =
-    "REFERENCIA_ACTIVO";
-
-  confirmacionUbicacionReferencia =
-    "Sí";
+    "MANUAL_GEOCODIFICADA";
 
   guardarSesionLocal();
+
+  if (mensaje) {
+
+    mensaje.innerHTML =
+      '<div style="' +
+        'background:#EFFBE9;' +
+        'color:#374757;' +
+        'padding:14px;' +
+        'border-left:5px solid #8EDD65;' +
+        'border-radius:10px;' +
+      '">' +
+        '✅ Ubicación escrita guardada correctamente' +
+      '</div>';
+
+  }
 
   const estadoGPS =
     document.getElementById(
       "gpsStatus"
-    );
-
-  const botonUbicacion =
-    document.getElementById(
-      "btnCompartirUbicacion"
-    );
-
-  const botonEnviar =
-    document.getElementById(
-      "btnEnviar"
     );
 
   if (estadoGPS) {
@@ -6567,23 +6856,26 @@ function usarUbicacionReferencia() {
         'border-left:6px solid #FFD071;' +
         'padding:18px;' +
         'border-radius:12px;' +
-        'font-size:22px;' +
+        'font-size:21px;' +
         'font-weight:700;' +
         'line-height:1.45;' +
-        'overflow-wrap:anywhere;' +
       '">' +
-        '✅ Ubicación registrada del activo seleccionada' +
-        '<br><span style="' +
+        '✅ Ubicación manual preparada' +
+        '<br>' +
+        '<span style="' +
           'font-size:17px;' +
           'font-weight:400;' +
         '">' +
-          'Esta ubicación no fue obtenida del GPS actual.' +
+          'Se convertirá en coordenadas aproximadas al enviar.' +
         '</span>' +
       '</div>';
 
   }
 
-  ocultarOpcionUbicacionReferencia();
+  const botonUbicacion =
+    document.getElementById(
+      "btnCompartirUbicacion"
+    );
 
   if (botonUbicacion) {
 
@@ -6596,14 +6888,17 @@ function usarUbicacionReferencia() {
 
   }
 
+  const botonEnviar =
+    document.getElementById(
+      "btnEnviar"
+    );
+
   if (botonEnviar) {
 
     botonEnviar.style.display =
       "flex";
 
-    actualizarGuiaVisual(
-      false
-    );
+    actualizarGuiaVisual(false);
 
     setTimeout(function() {
 
@@ -6713,7 +7008,7 @@ async function getLocation() {
         '❌ Este navegador no permite obtener la ubicación.' +
 '</div>';
 
-mostrarOpcionUbicacionReferencia();
+mostrarFormularioUbicacionManual();
 
 return;
 
@@ -6881,10 +7176,8 @@ return;
     origenUbicacion =
   "GPS";
 
-confirmacionUbicacionReferencia =
-  "No";
-
-ocultarOpcionUbicacionReferencia();
+limpiarCamposUbicacionManual();
+ocultarFormularioUbicacionManual();
 
 guardarSesionLocal();
 
@@ -7028,25 +7321,31 @@ const precisionMostrar =
   '<i class="fas fa-location-dot"></i>' +
   ' Intentar compartir ubicación nuevamente';
 
-mostrarOpcionUbicacionReferencia();
+mostrarFormularioUbicacionManual();
 
     /*
       Si anteriormente no existe una ubicación
       válida, mantener oculto Enviar.
     */
 
-    if (
-      botonEnviar &&
-      (
-        !latitud ||
-        !longitud
-      )
-    ) {
+    const ubicacionManualPreparada =
+  origenUbicacion ===
+    "MANUAL_GEOCODIFICADA" &&
+  ubicacionManualCompleta();
 
-      botonEnviar.style.display =
-        "none";
+if (
+  botonEnviar &&
+  (
+    !latitud ||
+    !longitud
+  ) &&
+  !ubicacionManualPreparada
+) {
 
-    }
+  botonEnviar.style.display =
+    "none";
+
+}
 
   }
 
@@ -7525,13 +7824,32 @@ let temporizadorProgreso = null;
 
 try {
 
-        if (!latitud || !longitud) {
+        const datosUbicacionManual =
+  obtenerDatosUbicacionManual();
 
-          throw new Error(
-            "Debe compartir su ubicación antes de enviar."
-          );
+const usaUbicacionManual =
+  origenUbicacion ===
+    "MANUAL_GEOCODIFICADA" &&
+  ubicacionManualCompleta(
+    datosUbicacionManual
+  );
 
-        }
+const usaUbicacionGPS =
+  Boolean(
+    latitud &&
+    longitud
+  );
+
+if (
+  !usaUbicacionGPS &&
+  !usaUbicacionManual
+) {
+
+  throw new Error(
+    "Debe compartir su ubicación GPS o completar la ubicación manual."
+  );
+
+}
 
         const tipoActivo =
           document.getElementById("tipoActivo").value;
@@ -7595,17 +7913,55 @@ if (progresoEnvio) {
 
           tipoActivo,
 
-          latitud,
+          latitud:
+  usaUbicacionGPS
+    ? latitud
+    : "",
 
-          longitud,
+longitud:
+  usaUbicacionGPS
+    ? longitud
+    : "",
 
-          precisionGPS,
+precisionGPS:
+  usaUbicacionGPS
+    ? precisionGPS
+    : "",
 
 origenUbicacion:
-  origenUbicacion || "GPS",
+  usaUbicacionManual
+    ? "MANUAL_GEOCODIFICADA"
+    : "GPS",
 
-confirmacionUbicacionReferencia:
-  confirmacionUbicacionReferencia || "No",
+estadoManual:
+  usaUbicacionManual
+    ? datosUbicacionManual.estado
+    : "",
+
+municipioManual:
+  usaUbicacionManual
+    ? datosUbicacionManual.municipio
+    : "",
+
+ciudadManual:
+  usaUbicacionManual
+    ? datosUbicacionManual.ciudad
+    : "",
+
+coloniaManual:
+  usaUbicacionManual
+    ? datosUbicacionManual.colonia
+    : "",
+
+codigoPostalManual:
+  usaUbicacionManual
+    ? datosUbicacionManual.codigoPostal
+    : "",
+
+direccionManual:
+  usaUbicacionManual
+    ? datosUbicacionManual.direccion
+    : "",
 
           fotoFrontal:
             evidenciasUrls.fotoFrontal || "",
@@ -7790,12 +8146,13 @@ function mostrarPantallaFinal() {
 
   // Ocultar formulario, ubicación y barra de progreso
   const elementosOcultar = [
-    "auditForm",
-    "btnCompartirUbicacion",
-    "gpsStatus",
-    "loading",
-    "btnEnviar"
-  ];
+  "auditForm",
+  "btnCompartirUbicacion",
+  "gpsStatus",
+  "contenedorUbicacionManual",
+  "loading",
+  "btnEnviar"
+];
 
   elementosOcultar.forEach(function(id) {
 
@@ -7931,18 +8288,6 @@ async function cargarAuditoriaDesdeApi() {
 
     descripcionActivoActual =
       audit.activo || "";
-
-      tieneUbicacionReferencia =
-  audit.tieneUbicacionReferencia === true ||
-  String(
-    audit.tieneUbicacionReferencia
-  ).toLowerCase() === "true";
-
-latitudReferencia =
-  audit.latitudReferencia || "";
-
-longitudReferencia =
-  audit.longitudReferencia || "";
 
     try {
 
