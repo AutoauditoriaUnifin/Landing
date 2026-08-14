@@ -1801,6 +1801,54 @@ Tipo de activo
 </div>
 
 <!-- =========================
+     UBICACIÓN DE RESPALDO
+========================= -->
+
+<div
+  id="contenedorUbicacionReferencia"
+  style="
+    display:none;
+    margin-top:18px;
+  ">
+
+  <div style="
+    padding:18px;
+    background:#FFF7E5;
+    color:#374757;
+    border-left:6px solid #FFD071;
+    border-radius:12px;
+    font-size:20px;
+    font-weight:700;
+    line-height:1.45;
+    overflow-wrap:anywhere;
+  ">
+
+    ⚠️ El navegador no proporcionó el GPS.
+
+    <br><br>
+
+    Puede utilizar la ubicación previamente
+    registrada para este activo.
+
+  </div>
+
+  <button
+    type="button"
+    id="btnUsarUbicacionReferencia"
+    onclick="usarUbicacionReferencia()"
+    style="
+      background:#374757;
+      margin-top:15px;
+    ">
+
+    <i class="fas fa-map-pin"></i>
+    Usar ubicación registrada del activo
+
+  </button>
+
+</div>
+
+<!-- =========================
      ESCANEAR OTRO ACTIVO
 ========================= -->
 
@@ -1895,15 +1943,22 @@ Preparando envío...
 <script>
 
 const API_URL =
-  "https://script.google.com/macros/s/AKfycbyh_X1wdE_GV222UeN6EkJ-rPFEMr9J2pUL98xpIVKjDQKn2GJuAXBDum8apktEgoGRdQ/exec";
+  "https://script.google.com/macros/s/AKfycbxQJvmOuhEmL4PTYG-jBZI56Jo43FY8Es6VvR-GCk0S_rtYsZZltz0NBHnexuSCnz6ncw/exec";
 
   const CLOUDINARY_CLOUD_NAME = "b3bnfknd";
   const CLOUDINARY_UPLOAD_PRESET = "autoauditorias";
 
 
-let latitud = '';
-let longitud = '';
-let precisionGPS = '';
+let latitud = "";
+let longitud = "";
+let precisionGPS = "";
+
+let origenUbicacion = "";
+let confirmacionUbicacionReferencia = "No";
+
+let tieneUbicacionReferencia = false;
+let latitudReferencia = "";
+let longitudReferencia = "";
 
 /* =========================================
    CÁMARA OPTIMIZADA
@@ -5422,10 +5477,16 @@ function guardarSesionLocal() {
       longitud || "",
 
     precisionGPS:
-      precisionGPS || "",
+  precisionGPS || "",
 
-    ultimaActualizacion:
-      Date.now()
+origenUbicacion:
+  origenUbicacion || "",
+
+confirmacionUbicacionReferencia:
+  confirmacionUbicacionReferencia || "No",
+
+ultimaActualizacion:
+  Date.now()
 
   };
 
@@ -5522,18 +5583,40 @@ function restaurarSesionLocal() {
   }
 
   if (
-    sesion.precisionGPS !== undefined &&
-    sesion.precisionGPS !== null
-  ) {
+  sesion.precisionGPS !== undefined &&
+  sesion.precisionGPS !== null
+) {
 
-    precisionGPS =
-      String(
-        sesion.precisionGPS || ""
-      );
+  precisionGPS =
+    String(
+      sesion.precisionGPS || ""
+    );
 
-  }
+}
 
-  return sesion;
+origenUbicacion =
+  String(
+    sesion.origenUbicacion ||
+    (
+      latitud && longitud
+        ? "GPS"
+        : ""
+    )
+  );
+
+confirmacionUbicacionReferencia =
+  String(
+    sesion
+      .confirmacionUbicacionReferencia ||
+    (
+      origenUbicacion ===
+      "REFERENCIA_ACTIVO"
+        ? "Sí"
+        : "No"
+    )
+  );
+
+return sesion;
 
 }
 
@@ -6323,6 +6406,225 @@ function mostrarDeteccionTipo(
 
 }
 
+/* =========================================
+   UBICACIÓN REGISTRADA DEL ACTIVO
+========================================= */
+
+function convertirCoordenadaLocal(
+  valor
+) {
+
+  if (
+    valor === "" ||
+    valor === null ||
+    valor === undefined
+  ) {
+    return NaN;
+  }
+
+  return Number(
+    String(valor)
+      .trim()
+      .replace(/\s/g, "")
+      .replace(",", ".")
+  );
+
+}
+
+
+function ubicacionReferenciaDisponible() {
+
+  const latitudValidar =
+    convertirCoordenadaLocal(
+      latitudReferencia
+    );
+
+  const longitudValidar =
+    convertirCoordenadaLocal(
+      longitudReferencia
+    );
+
+  return (
+    tieneUbicacionReferencia === true &&
+    Number.isFinite(latitudValidar) &&
+    Number.isFinite(longitudValidar) &&
+    latitudValidar >= -90 &&
+    latitudValidar <= 90 &&
+    longitudValidar >= -180 &&
+    longitudValidar <= 180 &&
+    !(
+      latitudValidar === 0 &&
+      longitudValidar === 0
+    )
+  );
+
+}
+
+
+function mostrarOpcionUbicacionReferencia() {
+
+  const contenedor =
+    document.getElementById(
+      "contenedorUbicacionReferencia"
+    );
+
+  if (!contenedor) {
+    return false;
+  }
+
+  if (
+    !ubicacionReferenciaDisponible()
+  ) {
+
+    contenedor.style.display =
+      "none";
+
+    return false;
+
+  }
+
+  contenedor.style.display =
+    "block";
+
+  return true;
+
+}
+
+
+function ocultarOpcionUbicacionReferencia() {
+
+  const contenedor =
+    document.getElementById(
+      "contenedorUbicacionReferencia"
+    );
+
+  if (contenedor) {
+
+    contenedor.style.display =
+      "none";
+
+  }
+
+}
+
+
+function usarUbicacionReferencia() {
+
+  if (
+    !ubicacionReferenciaDisponible()
+  ) {
+
+    mostrarError(
+      "Este activo no tiene una ubicación de respaldo válida."
+    );
+
+    return;
+
+  }
+
+  latitud =
+    convertirCoordenadaLocal(
+      latitudReferencia
+    );
+
+  longitud =
+    convertirCoordenadaLocal(
+      longitudReferencia
+    );
+
+  precisionGPS =
+    "";
+
+  origenUbicacion =
+    "REFERENCIA_ACTIVO";
+
+  confirmacionUbicacionReferencia =
+    "Sí";
+
+  guardarSesionLocal();
+
+  const estadoGPS =
+    document.getElementById(
+      "gpsStatus"
+    );
+
+  const botonUbicacion =
+    document.getElementById(
+      "btnCompartirUbicacion"
+    );
+
+  const botonEnviar =
+    document.getElementById(
+      "btnEnviar"
+    );
+
+  if (estadoGPS) {
+
+    estadoGPS.innerHTML =
+      '<div style="' +
+        'background:#FFF7E5;' +
+        'color:#374757;' +
+        'border-left:6px solid #FFD071;' +
+        'padding:18px;' +
+        'border-radius:12px;' +
+        'font-size:22px;' +
+        'font-weight:700;' +
+        'line-height:1.45;' +
+        'overflow-wrap:anywhere;' +
+      '">' +
+        '✅ Ubicación registrada del activo seleccionada' +
+        '<br><span style="' +
+          'font-size:17px;' +
+          'font-weight:400;' +
+        '">' +
+          'Esta ubicación no fue obtenida del GPS actual.' +
+        '</span>' +
+      '</div>';
+
+  }
+
+  ocultarOpcionUbicacionReferencia();
+
+  if (botonUbicacion) {
+
+    botonUbicacion.disabled =
+      false;
+
+    botonUbicacion.innerHTML =
+      '<i class="fas fa-location-dot"></i>' +
+      ' Intentar obtener ubicación GPS';
+
+  }
+
+  if (botonEnviar) {
+
+    botonEnviar.style.display =
+      "flex";
+
+    actualizarGuiaVisual(
+      false
+    );
+
+    setTimeout(function() {
+
+      botonEnviar.scrollIntoView({
+
+        behavior:
+          modoLigero
+            ? "auto"
+            : "smooth",
+
+        block:
+          "center"
+
+      });
+
+    }, 250);
+
+  }
+
+}
+
 /* =========================
    GPS ROBUSTO PARA MÓVILES
 ========================= */
@@ -6409,9 +6711,11 @@ async function getLocation() {
         'font-weight:700;' +
       '">' +
         '❌ Este navegador no permite obtener la ubicación.' +
-      '</div>';
+'</div>';
 
-    return;
+mostrarOpcionUbicacionReferencia();
+
+return;
 
   }
 
@@ -6574,9 +6878,17 @@ async function getLocation() {
 
     }
 
-    guardarSesionLocal();
+    origenUbicacion =
+  "GPS";
 
-    const precisionMostrar =
+confirmacionUbicacionReferencia =
+  "No";
+
+ocultarOpcionUbicacionReferencia();
+
+guardarSesionLocal();
+
+const precisionMostrar =
       precisionGPS > 0
         ? Math.round(precisionGPS)
         : 0;
@@ -6713,8 +7025,10 @@ async function getLocation() {
       false;
 
     botonUbicacion.innerHTML =
-      '<i class="fas fa-location-dot"></i>' +
-      ' Intentar compartir ubicación nuevamente';
+  '<i class="fas fa-location-dot"></i>' +
+  ' Intentar compartir ubicación nuevamente';
+
+mostrarOpcionUbicacionReferencia();
 
     /*
       Si anteriormente no existe una ubicación
@@ -7287,6 +7601,12 @@ if (progresoEnvio) {
 
           precisionGPS,
 
+origenUbicacion:
+  origenUbicacion || "GPS",
+
+confirmacionUbicacionReferencia:
+  confirmacionUbicacionReferencia || "No",
+
           fotoFrontal:
             evidenciasUrls.fotoFrontal || "",
 
@@ -7611,6 +7931,18 @@ async function cargarAuditoriaDesdeApi() {
 
     descripcionActivoActual =
       audit.activo || "";
+
+      tieneUbicacionReferencia =
+  audit.tieneUbicacionReferencia === true ||
+  String(
+    audit.tieneUbicacionReferencia
+  ).toLowerCase() === "true";
+
+latitudReferencia =
+  audit.latitudReferencia || "";
+
+longitudReferencia =
+  audit.longitudReferencia || "";
 
     try {
 
