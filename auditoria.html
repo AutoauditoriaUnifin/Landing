@@ -1151,6 +1151,16 @@ html.modo-ligero #videoCamaraInterna {
   }
 }
 
+/* Cámara nativa oculta mientras funcione
+   correctamente la cámara interna */
+#btnUsarCamaraNativa {
+  display: none;
+}
+
+#btnUsarCamaraNativa.mostrar-respaldo {
+  display: flex;
+}
+
 </style>
 
 </head>
@@ -1915,7 +1925,7 @@ let temporizadorRegresoCamara =
 let restaurandoEvidencias = false;
 
 /* =========================================
-   MODO LIGERO AUTOMÁTICO
+   MODO LIGERO Y ULTRALIGERO AUTOMÁTICO
 ========================================= */
 
 const agenteDispositivo =
@@ -1939,11 +1949,8 @@ const esMovil =
   esIOS || esAndroid;
 
 /*
-  Chrome puede reportar aproximadamente:
-  1, 2, 4 u 8 GB.
-
-  Safari normalmente no reporta la RAM,
-  por lo que iPhone utilizará modo ligero.
+  deviceMemory es aproximado y Safari
+  normalmente no informa la memoria RAM.
 */
 
 const memoriaReportada =
@@ -1951,9 +1958,53 @@ const memoriaReportada =
     navigator.deviceMemory || 0
   );
 
+const nucleosReportados =
+  Number(
+    navigator.hardwareConcurrency || 0
+  );
+
+const conexionDispositivo =
+  navigator.connection ||
+  navigator.mozConnection ||
+  navigator.webkitConnection ||
+  null;
+
+const ahorroDatosActivo =
+  Boolean(
+    conexionDispositivo &&
+    conexionDispositivo.saveData
+  );
+
+/*
+  Se activa en teléfonos Android que reportan
+  hasta 4 GB, equipos con pocos núcleos o
+  cuando el ahorro de datos está activado.
+*/
+
+const modoUltraLigero =
+  esMovil &&
+  (
+    (
+      memoriaReportada > 0 &&
+      memoriaReportada <= 4
+    ) ||
+    (
+      memoriaReportada === 0 &&
+      nucleosReportados > 0 &&
+      nucleosReportados <= 4
+    ) ||
+    ahorroDatosActivo
+  );
+
+/*
+  iPhone usa por lo menos modo ligero
+  porque Safari no informa la memoria RAM.
+*/
+
 const modoLigero =
   esMovil &&
   (
+    modoUltraLigero ||
     memoriaReportada === 0 ||
     memoriaReportada <= 4
   );
@@ -1963,51 +2014,86 @@ const modoLigero =
 ========================================= */
 
 const ajustesImagen =
-  modoLigero
+  modoUltraLigero
     ? {
 
         /*
-          Android de gama baja y iPhone.
+          Teléfonos de aproximadamente
+          2, 3 o 4 GB de RAM.
         */
 
         dimension:
-          640,
+          540,
 
         calidad:
-          0.34,
-
-        dimensionDetalle:
-          800,
-
-        calidadDetalle:
-          0.40
-
-      }
-    : {
+          0.30,
 
         /*
-          Teléfonos con más memoria.
+          Serie, QR, odómetro y contador
+          conservan un poco más de detalle.
         */
 
-        dimension:
-          900,
-
-        calidad:
-          0.45,
-
         dimensionDetalle:
-          900,
+          720,
 
         calidadDetalle:
-          0.45
+          0.36
 
-      };
+      }
+    : modoLigero
+      ? {
+
+          /*
+            iPhone y teléfonos intermedios.
+          */
+
+          dimension:
+            640,
+
+          calidad:
+            0.34,
+
+          dimensionDetalle:
+            800,
+
+          calidadDetalle:
+            0.40
+
+        }
+      : {
+
+          /*
+            Teléfonos con más recursos.
+          */
+
+          dimension:
+            900,
+
+          calidad:
+            0.45,
+
+          dimensionDetalle:
+            900,
+
+          calidadDetalle:
+            0.45
+
+        };
 
 if (modoLigero) {
 
   document.documentElement
     .classList.add(
       "modo-ligero"
+    );
+
+}
+
+if (modoUltraLigero) {
+
+  document.documentElement
+    .classList.add(
+      "modo-ultra-ligero"
     );
 
 }
@@ -2517,7 +2603,6 @@ function esperarVideoCamara(
 
 }
 
-
 /* =========================================
    ABRIR CÁMARA DENTRO DE LA PÁGINA
 ========================================= */
@@ -2530,24 +2615,17 @@ async function abrirCamara(
     subiendoFotografia ||
     abriendoCamaraInterna
   ) {
-
     return;
-
   }
 
-  /*
-  Se ejecuta cuando el cliente toca el botón,
-  antes de capturar la primera fotografía.
-*/
-
-prepararAlmacenamientoPersistente();
+  prepararAlmacenamientoPersistente();
 
   campoFotoActual =
     campo;
 
   /*
     Si el navegador no permite cámara interna,
-    utilizar el respaldo nativo.
+    utilizar la cámara nativa como respaldo.
   */
 
   if (
@@ -2568,44 +2646,48 @@ prepararAlmacenamientoPersistente();
   );
 
   const botonCapturar =
-  document.getElementById(
-    "btnCapturarCamaraInterna"
-  );
+    document.getElementById(
+      "btnCapturarCamaraInterna"
+    );
 
-const botonCamaraNativa =
-  document.getElementById(
-    "btnUsarCamaraNativa"
-  );
+  const botonCamaraNativa =
+    document.getElementById(
+      "btnUsarCamaraNativa"
+    );
 
-const botonCancelarCamara =
-  document.getElementById(
-    "btnCancelarCamaraInterna"
-  );
+  const botonCancelarCamara =
+    document.getElementById(
+      "btnCancelarCamaraInterna"
+    );
 
-if (botonCapturar) {
+  if (botonCapturar) {
 
-  botonCapturar.disabled =
-    true;
+    botonCapturar.disabled =
+      true;
 
-  botonCapturar.innerHTML =
-    '<i class="fas fa-camera"></i> ' +
-    "Capturar y proteger fotografía";
+    botonCapturar.innerHTML =
+      '<i class="fas fa-camera"></i> ' +
+      "Capturar y proteger fotografía";
 
-}
+  }
 
-if (botonCamaraNativa) {
+  if (botonCamaraNativa) {
 
   botonCamaraNativa.disabled =
     false;
 
-}
-
-if (botonCancelarCamara) {
-
-  botonCancelarCamara.disabled =
-    false;
+  botonCamaraNativa.classList.remove(
+    "mostrar-respaldo"
+  );
 
 }
+
+  if (botonCancelarCamara) {
+
+    botonCancelarCamara.disabled =
+      false;
+
+  }
 
   abriendoCamaraInterna =
     true;
@@ -2619,73 +2701,156 @@ if (botonCancelarCamara) {
         campo
       );
 
-    const anchoIdeal =
-      modoLigero
-        ? (
-            necesitaDetalle
-              ? 960
-              : 640
-          )
-        : 1280;
+    let anchoIdeal;
+    let altoIdeal;
+    let fpsIdeal;
 
-    const altoIdeal =
-      modoLigero
-        ? (
-            necesitaDetalle
-              ? 720
-              : 480
-          )
-        : 720;
+    if (modoUltraLigero) {
 
-    cameraStream =
-      await navigator
-        .mediaDevices
-        .getUserMedia({
+      anchoIdeal =
+        necesitaDetalle
+          ? 800
+          : 640;
 
-          video: {
+      altoIdeal =
+        necesitaDetalle
+          ? 600
+          : 480;
 
-            facingMode: {
-              ideal: "environment"
+      fpsIdeal =
+        10;
+
+    } else if (modoLigero) {
+
+      anchoIdeal =
+        necesitaDetalle
+          ? 960
+          : 640;
+
+      altoIdeal =
+        necesitaDetalle
+          ? 720
+          : 480;
+
+      fpsIdeal =
+        12;
+
+    } else {
+
+      anchoIdeal =
+        1280;
+
+      altoIdeal =
+        720;
+
+      fpsIdeal =
+        15;
+
+    }
+
+    /*
+      PRIMER INTENTO:
+      cámara trasera con resolución adaptada.
+    */
+
+    try {
+
+      cameraStream =
+        await navigator
+          .mediaDevices
+          .getUserMedia({
+
+            video: {
+
+              facingMode: {
+                ideal: "environment"
+              },
+
+              width: {
+                ideal: anchoIdeal
+              },
+
+              height: {
+                ideal: altoIdeal
+              },
+
+              frameRate: {
+                ideal: fpsIdeal
+              }
+
             },
 
-            width: {
-  ideal: anchoIdeal
-},
+            audio:
+              false
 
-height: {
-  ideal: altoIdeal
-},
+          });
 
-frameRate: {
-  ideal: 15
-}
+    } catch (primerError) {
 
-          },
+      console.warn(
+        "Primer intento de cámara fallido:",
+        primerError
+      );
 
-          audio:
-            false
+      detenerCamaraInterna();
 
-        });
+      mostrarMensajeCamaraInterna(
+        "Ajustando la cámara para este teléfono...",
+        false
+      );
+
+      /*
+        SEGUNDO INTENTO:
+        configuración sencilla de bajo consumo.
+      */
+
+      cameraStream =
+        await navigator
+          .mediaDevices
+          .getUserMedia({
+
+            video: {
+
+              facingMode: {
+                ideal: "environment"
+              },
+
+              width: {
+                ideal: 640
+              },
+
+              height: {
+                ideal: 480
+              },
+
+              frameRate: {
+                ideal: 10
+              }
+
+            },
+
+            audio:
+              false
+
+          });
+
+    }
 
     const video =
-  document.getElementById(
-    "videoCamaraInterna"
-  );
+      document.getElementById(
+        "videoCamaraInterna"
+      );
 
-if (video) {
+    if (!video) {
 
-  video.style.display =
-    "block";
+      throw new Error(
+        "No se encontró el visor de la cámara."
+      );
 
-}
+    }
 
-if (!video) {
-
-  throw new Error(
-    "No se encontró el visor de la cámara."
-  );
-
-}
+    video.style.display =
+      "block";
 
     video.srcObject =
       cameraStream;
@@ -2701,44 +2866,81 @@ if (!video) {
   false
 );
 
-    if (botonCapturar) {
+/*
+  La cámara interna abrió correctamente.
+  Habilitar el botón de captura.
+*/
 
-      botonCapturar.disabled =
-        false;
+if (botonCapturar) {
 
-    }
-
-  } catch (error) {
-
-    detenerCamaraInterna();
-
-    mostrarMensajeCamaraInterna(
-      "No fue posible abrir la cámara interna. " +
-      "Puede usar la cámara del teléfono.",
-      true
-    );
-
-    if (botonCapturar) {
-
-      botonCapturar.disabled =
-        true;
-
-    }
-
-    console.warn(
-      "Error de cámara interna:",
-      error
-    );
-
-  } finally {
-
-    abriendoCamaraInterna =
-      false;
-
-  }
+  botonCapturar.disabled =
+    false;
 
 }
 
+/*
+  La cámara interna funciona, por lo tanto
+  mantener oculto el respaldo nativo.
+*/
+
+if (botonCamaraNativa) {
+
+  botonCamaraNativa.disabled =
+    false;
+
+  botonCamaraNativa.classList.remove(
+    "mostrar-respaldo"
+  );
+
+}
+
+} catch (error) {
+
+  detenerCamaraInterna();
+
+  mostrarMensajeCamaraInterna(
+    "No fue posible abrir la cámara interna. " +
+    "Puede usar la cámara del teléfono.",
+    true
+  );
+
+  if (botonCapturar) {
+
+    botonCapturar.disabled =
+      true;
+
+  }
+
+  /*
+    Mostrar la cámara nativa solamente cuando
+    realmente fallaron los dos intentos de
+    cámara interna.
+  */
+
+  if (botonCamaraNativa) {
+
+    botonCamaraNativa.disabled =
+      false;
+
+    botonCamaraNativa.classList.add(
+      "mostrar-respaldo"
+    );
+
+  }
+
+  console.warn(
+  "Error de cámara interna:",
+  error
+);
+
+} finally {
+
+  abriendoCamaraInterna =
+    false;
+
+}
+
+}
 
 /* =========================================
    USAR CÁMARA NATIVA COMO RESPALDO
@@ -3596,6 +3798,70 @@ function mostrarErrorFotografia(
       : "No fue posible guardar la fotografía."
   );
 
+  /*
+    Identificar a qué fotografía pertenece
+    el mensaje rojo.
+  */
+
+  const mensaje =
+    document.getElementById(
+      "mensaje"
+    );
+
+  if (mensaje) {
+
+    mensaje.dataset.tipoMensaje =
+      "fotografia";
+
+    mensaje.dataset.campoFoto =
+      campo;
+
+  }
+
+}
+
+/* =========================================
+   OCULTAR ERROR DE FOTO YA RECUPERADA
+========================================= */
+
+function ocultarErrorFotografia(
+  campo
+) {
+
+  const mensaje =
+    document.getElementById(
+      "mensaje"
+    );
+
+  if (!mensaje) {
+    return;
+  }
+
+  /*
+    Solamente borrar el error si pertenece
+    a la fotografía que acaba de subirse.
+  */
+
+  if (
+    mensaje.dataset.tipoMensaje ===
+      "fotografia" &&
+    mensaje.dataset.campoFoto ===
+      campo
+  ) {
+
+    mensaje.innerHTML =
+      "";
+
+    mensaje.removeAttribute(
+      "data-tipo-mensaje"
+    );
+
+    mensaje.removeAttribute(
+      "data-campo-foto"
+    );
+
+  }
+
 }
 
 /* =========================================
@@ -3824,21 +4090,59 @@ mostrarMensajeCamaraInterna(
       );
 
     if (
-      !blob ||
-      blob.size <= 0
-    ) {
+  !blob ||
+  blob.size <= 0
+) {
 
-      throw new Error(
-        "No fue posible crear la fotografía."
-      );
+  throw new Error(
+    "No fue posible crear la fotografía."
+  );
 
-    }
+}
 
-    /*
-      PASO IMPORTANTE:
-      guardar en IndexedDB mientras el modal
-      de la cámara continúa abierto.
-    */
+/*
+  El JPEG ya fue creado.
+
+  Liberar inmediatamente el canvas antes
+  de guardar en IndexedDB y antes de subir
+  la fotografía a Cloudinary.
+*/
+
+if (
+  contexto &&
+  canvas
+) {
+
+  contexto.clearRect(
+    0,
+    0,
+    canvas.width,
+    canvas.height
+  );
+
+}
+
+if (canvas) {
+
+  canvas.width =
+    1;
+
+  canvas.height =
+    1;
+
+}
+
+contexto =
+  null;
+
+canvas =
+  null;
+
+/*
+  PASO IMPORTANTE:
+  guardar en IndexedDB mientras el modal
+  de la cámara continúa abierto.
+*/
 
     const protegida =
       await guardarFotoPendiente(
@@ -4167,47 +4471,149 @@ function verificarRegresoCamaraNativa() {
 
 }
 
-
 /* =========================================
-   LIBERAR CÁMARA AL SALIR
+   LIBERAR Y RECUPERAR LA PÁGINA
 ========================================= */
+
+let temporizadorRecuperacionPagina =
+  null;
+
+function programarRecuperacionPagina() {
+
+  if (document.hidden) {
+    return;
+  }
+
+  /*
+    Revisar si el usuario regresó desde
+    la cámara nativa del teléfono.
+  */
+
+  verificarRegresoCamaraNativa();
+
+  if (
+    navigator.onLine === false
+  ) {
+    return;
+  }
+
+  /*
+    Evitar que focus, pageshow y visibilitychange
+    creen varios reintentos al mismo tiempo.
+  */
+
+  if (temporizadorRecuperacionPagina) {
+
+    clearTimeout(
+      temporizadorRecuperacionPagina
+    );
+
+  }
+
+  temporizadorRecuperacionPagina =
+    setTimeout(
+      function() {
+
+        temporizadorRecuperacionPagina =
+          null;
+
+        reintentarFotosPendientes();
+
+      },
+      800
+    );
+
+}
+
+
+/*
+  Cuando la página pasa a segundo plano,
+  liberar inmediatamente la cámara.
+*/
 
 document.addEventListener(
   "visibilitychange",
   function() {
 
-    if (
-      document.hidden &&
-      cameraStream
-    ) {
+    if (document.hidden) {
 
-      cerrarCamaraInterna(
-        true
-      );
+      if (cameraStream) {
+
+        cerrarCamaraInterna(
+          true
+        );
+
+      }
 
       return;
 
     }
 
-    if (!document.hidden) {
-
-      verificarRegresoCamaraNativa();
-
-    }
+    programarRecuperacionPagina();
 
   }
 );
 
+
+/*
+  Cuando el navegador vuelve a tener el foco.
+*/
+
 window.addEventListener(
   "focus",
-  verificarRegresoCamaraNativa
+  programarRecuperacionPagina
 );
+
+
+/*
+  Cuando Android o Safari restauran una página
+  suspendida o conservada en memoria.
+*/
+
+window.addEventListener(
+  "pageshow",
+  function() {
+
+    programarRecuperacionPagina();
+
+  }
+);
+
+
+/*
+  Liberar la cámara cuando la página se oculta
+  o el navegador decide congelarla.
+*/
 
 window.addEventListener(
   "pagehide",
   function() {
 
     detenerCamaraInterna();
+
+  }
+);
+
+document.addEventListener(
+  "freeze",
+  function() {
+
+    detenerCamaraInterna();
+
+  }
+);
+
+
+/*
+  Compatibilidad adicional con navegadores
+  móviles y aplicaciones híbridas.
+*/
+
+document.addEventListener(
+  "resume",
+  function() {
+
+    programarRecuperacionPagina();
 
   }
 );
@@ -4866,21 +5272,42 @@ async function subirBlobCloudinary(
   }
 
   if (
-    ultimoError &&
-    ultimoError.name === "AbortError"
-  ) {
-
-    throw new Error(
-      "La fotografía tardó demasiado en subir. " +
-      "Revise su conexión e intente nuevamente."
-    );
-
-  }
+  navigator.onLine === false
+) {
 
   throw new Error(
-    "No fue posible subir la fotografía después de 3 intentos. " +
-    "Abra la auditoría directamente en Safari y revise su conexión."
+    "El teléfono perdió la conexión a Internet. " +
+    "La fotografía se reintentará cuando vuelva la conexión."
   );
+
+}
+
+if (
+  ultimoError &&
+  ultimoError.name === "AbortError"
+) {
+
+  throw new Error(
+    "La fotografía tardó demasiado en subir. " +
+    "Se reintentará automáticamente."
+  );
+
+}
+
+/*
+  Registrar la causa técnica sin mostrar
+  información complicada al cliente.
+*/
+
+console.warn(
+  "Último error de Cloudinary:",
+  ultimoError
+);
+
+throw new Error(
+  "No fue posible enviar la fotografía en este momento. " +
+  "Revise su conexión a Internet."
+);
 
 }
 /* =========================================
@@ -4888,6 +5315,16 @@ async function subirBlobCloudinary(
 ========================================= */
 
 function mostrarConfirmacionFoto(campo) {
+
+  /*
+    Si anteriormente apareció un error rojo
+    para esta fotografía, ocultarlo porque
+    Cloudinary ya confirmó la subida.
+  */
+
+  ocultarErrorFotografia(
+    campo
+  );
 
   const nombreEstado =
     "estado" +
@@ -5193,11 +5630,24 @@ function mostrarError(texto) {
     document.getElementById("mensaje");
 
   if (!mensaje) {
-    alert(texto);
-    return;
-  }
+  alert(texto);
+  return;
+}
 
-  mensaje.innerHTML =
+/*
+  Un nuevo error general sustituye cualquier
+  identificación anterior de fotografía.
+*/
+
+mensaje.removeAttribute(
+  "data-tipo-mensaje"
+);
+
+mensaje.removeAttribute(
+  "data-campo-foto"
+);
+
+mensaje.innerHTML =
     '<div style="' +
       'background:#FFE8E8;' +
       'color:#B00020;' +
@@ -5878,21 +6328,47 @@ function mostrarDeteccionTipo(
 ========================= */
 function getLocation() {
 
-    actualizarProgreso(
-    10,
-    "Obteniendo ubicación GPS..."
-  );
-
   const botonUbicacion =
-    document.getElementById("btnCompartirUbicacion");
+    document.getElementById(
+      "btnCompartirUbicacion"
+    );
 
   const botonEnviar =
-    document.getElementById("btnEnviar");
+    document.getElementById(
+      "btnEnviar"
+    );
 
   const estadoGPS =
-    document.getElementById("gpsStatus");
+    document.getElementById(
+      "gpsStatus"
+    );
 
-  botonUbicacion.disabled = true;
+  const progresoEnvio =
+    document.getElementById(
+      "loading"
+    );
+
+  /*
+    La barra debe permanecer oculta mientras
+    solamente se obtiene la ubicación.
+  */
+
+  if (progresoEnvio) {
+
+    progresoEnvio.style.display =
+      "none";
+
+  }
+
+  if (
+    !botonUbicacion ||
+    !estadoGPS
+  ) {
+    return;
+  }
+
+  botonUbicacion.disabled =
+    true;
 
   botonUbicacion.innerHTML =
     '<i class="fas fa-spinner fa-spin"></i>' +
@@ -5910,11 +6386,8 @@ function getLocation() {
 
       precisionGPS =
         position.coords.accuracy;
-        guardarSesionLocal();
-        actualizarProgreso(
-  20,
-  "Ubicación capturada. Lista para enviar."
-);
+
+      guardarSesionLocal();
 
       estadoGPS.innerHTML =
         '<div style="' +
@@ -5929,33 +6402,51 @@ function getLocation() {
           '✅ Ubicación capturada correctamente' +
         '</div>';
 
-      botonUbicacion.disabled = false;
+      botonUbicacion.disabled =
+        false;
 
       botonUbicacion.innerHTML =
         '<i class="fas fa-location-dot"></i>' +
         ' Actualizar ubicación';
 
+      /*
+        Mostrar Enviar autoauditoría,
+        pero conservar oculta la barra.
+      */
+
       if (botonEnviar) {
 
-  botonEnviar.style.display =
-    "flex";
+        botonEnviar.style.display =
+          "flex";
 
-  actualizarGuiaVisual(false);
+        actualizarGuiaVisual(
+          false
+        );
 
-  setTimeout(function() {
+        setTimeout(function() {
 
-    botonEnviar.scrollIntoView({
-      behavior: "smooth",
-      block: "center"
-    });
+          botonEnviar.scrollIntoView({
+            behavior:
+              modoLigero
+                ? "auto"
+                : "smooth",
 
-  }, 300);
+            block:
+              "center"
+          });
 
-}
+        }, 300);
+
+      }
 
     },
 
-    function() {
+    function(errorGPS) {
+
+      console.warn(
+        "Error de ubicación:",
+        errorGPS
+      );
 
       estadoGPS.innerHTML =
         '<div style="' +
@@ -5970,22 +6461,31 @@ function getLocation() {
           '❌ Debe permitir el acceso a la ubicación GPS.' +
         '</div>';
 
-      botonUbicacion.disabled = false;
+      botonUbicacion.disabled =
+        false;
 
       botonUbicacion.innerHTML =
         '<i class="fas fa-location-dot"></i>' +
         ' Intentar compartir ubicación nuevamente';
 
       if (botonEnviar) {
-        botonEnviar.style.display = "none";
+
+        botonEnviar.style.display =
+          "none";
+
       }
 
     },
 
     {
-      enableHighAccuracy: true,
-      timeout: 20000,
-      maximumAge: 0
+      enableHighAccuracy:
+        true,
+
+      timeout:
+        20000,
+
+      maximumAge:
+        0
     }
 
   );
