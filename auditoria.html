@@ -1865,19 +1865,128 @@ Tipo de activo
     oninput="guardarSesionLocal()">
 
   <label
-    for="ciudadManual"
-    style="display:block;margin-top:15px;">
-    Ciudad o localidad
-    <span class="required-star">*</span>
-  </label>
+  for="ciudadManual"
+  style="display:block;margin-top:15px;">
 
-  <input
-    type="text"
-    id="ciudadManual"
-    maxlength="120"
-    autocomplete="address-level2"
-    placeholder="Ejemplo: Monterrey"
-    oninput="guardarSesionLocal()">
+  Ciudad
+  <span class="required-star">*</span>
+
+</label>
+
+<input
+  type="text"
+  id="ciudadManual"
+  list="listaCiudadesMexico"
+  maxlength="120"
+  autocomplete="address-level2"
+  placeholder="Seleccione o escriba una ciudad"
+  oninput="guardarSesionLocal()"
+  onchange="continuarDespuesDeCiudad()">
+
+<datalist id="listaCiudadesMexico">
+
+  <option value="Aguascalientes">
+  <option value="Mexicali">
+  <option value="Tijuana">
+  <option value="Ensenada">
+  <option value="La Paz">
+  <option value="Los Cabos">
+  <option value="San José del Cabo">
+  <option value="Cabo San Lucas">
+  <option value="Campeche">
+  <option value="Ciudad del Carmen">
+  <option value="Saltillo">
+  <option value="Torreón">
+  <option value="Monclova">
+  <option value="Piedras Negras">
+  <option value="Colima">
+  <option value="Manzanillo">
+  <option value="Tuxtla Gutiérrez">
+  <option value="Tapachula">
+  <option value="San Cristóbal de las Casas">
+  <option value="Chihuahua">
+  <option value="Ciudad Juárez">
+  <option value="Delicias">
+  <option value="Cuauhtémoc">
+  <option value="Ciudad de México">
+  <option value="Durango">
+  <option value="Gómez Palacio">
+  <option value="León">
+  <option value="Guanajuato">
+  <option value="Irapuato">
+  <option value="Celaya">
+  <option value="Salamanca">
+  <option value="Acapulco">
+  <option value="Chilpancingo">
+  <option value="Iguala">
+  <option value="Pachuca">
+  <option value="Tula de Allende">
+  <option value="Tulancingo">
+  <option value="Guadalajara">
+  <option value="Zapopan">
+  <option value="Tlaquepaque">
+  <option value="Tonalá">
+  <option value="Puerto Vallarta">
+  <option value="Toluca">
+  <option value="Ecatepec">
+  <option value="Naucalpan">
+  <option value="Tlalnepantla">
+  <option value="Nezahualcóyotl">
+  <option value="Cuautitlán Izcalli">
+  <option value="Metepec">
+  <option value="Morelia">
+  <option value="Uruapan">
+  <option value="Zamora">
+  <option value="Lázaro Cárdenas">
+  <option value="Cuernavaca">
+  <option value="Jiutepec">
+  <option value="Tepic">
+  <option value="Monterrey">
+  <option value="San Pedro Garza García">
+  <option value="San Nicolás de los Garza">
+  <option value="Guadalupe">
+  <option value="Santa Catarina">
+  <option value="Apodaca">
+  <option value="General Escobedo">
+  <option value="Oaxaca de Juárez">
+  <option value="Salina Cruz">
+  <option value="Puebla">
+  <option value="Tehuacán">
+  <option value="Querétaro">
+  <option value="San Juan del Río">
+  <option value="Cancún">
+  <option value="Playa del Carmen">
+  <option value="Chetumal">
+  <option value="Tulum">
+  <option value="San Luis Potosí">
+  <option value="Ciudad Valles">
+  <option value="Culiacán">
+  <option value="Mazatlán">
+  <option value="Los Mochis">
+  <option value="Hermosillo">
+  <option value="Ciudad Obregón">
+  <option value="Nogales">
+  <option value="San Luis Río Colorado">
+  <option value="Villahermosa">
+  <option value="Reynosa">
+  <option value="Matamoros">
+  <option value="Nuevo Laredo">
+  <option value="Tampico">
+  <option value="Ciudad Victoria">
+  <option value="Tlaxcala">
+  <option value="Apizaco">
+  <option value="Veracruz">
+  <option value="Xalapa">
+  <option value="Coatzacoalcos">
+  <option value="Poza Rica">
+  <option value="Córdoba">
+  <option value="Orizaba">
+  <option value="Mérida">
+  <option value="Valladolid">
+  <option value="Zacatecas">
+  <option value="Fresnillo">
+
+</datalist>
 
   <label
     for="coloniaManual"
@@ -6610,6 +6719,69 @@ function mostrarDeteccionTipo(
 
   mensaje.style.display =
     "block";
+
+}
+
+/* =========================================
+   CONTINUAR DESPUÉS DE ELEGIR CIUDAD
+========================================= */
+
+function continuarDespuesDeCiudad() {
+
+  const ciudad =
+    document.getElementById(
+      "ciudadManual"
+    );
+
+  const colonia =
+    document.getElementById(
+      "coloniaManual"
+    );
+
+  if (
+    !ciudad ||
+    !String(ciudad.value || "").trim()
+  ) {
+    return;
+  }
+
+  guardarSesionLocal();
+
+  if (!colonia) {
+    return;
+  }
+
+  setTimeout(function() {
+
+    colonia.scrollIntoView({
+
+      behavior:
+        modoLigero
+          ? "auto"
+          : "smooth",
+
+      block:
+        "center"
+
+    });
+
+    /*
+      Después de terminar la animación,
+      activar el campo Colonia.
+    */
+
+    setTimeout(function() {
+
+      colonia.focus({
+
+        preventScroll:
+          true
+
+      });
+
+    }, modoLigero ? 100 : 550);
+
+  }, 150);
 
 }
 
