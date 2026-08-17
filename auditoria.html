@@ -6874,6 +6874,49 @@ function mostrarFormularioUbicacionManual() {
 
 }
 
+/* =========================================
+   MOSTRAR UBICACIÓN MANUAL Y BAJAR
+========================================= */
+
+function mostrarFormularioUbicacionManualYBajar() {
+
+  mostrarFormularioUbicacionManual();
+
+  const contenedor =
+    document.getElementById(
+      "contenedorUbicacionManual"
+    );
+
+  if (!contenedor) {
+    return;
+  }
+
+  /*
+    Esperar a que el navegador muestre
+    completamente el formulario.
+  */
+
+  setTimeout(function() {
+
+    contenedor.scrollIntoView({
+
+      behavior:
+        modoLigero
+          ? "auto"
+          : "smooth",
+
+      block:
+        "start"
+
+    });
+
+    contenedor.classList.add(
+      "paso-actual"
+    );
+
+  }, 250);
+
+}
 
 function ocultarFormularioUbicacionManual() {
 
@@ -7180,7 +7223,7 @@ async function getLocation() {
         '❌ Este navegador no permite obtener la ubicación.' +
 '</div>';
 
-mostrarFormularioUbicacionManual();
+mostrarFormularioUbicacionManualYBajar();
 
 return;
 
@@ -7493,7 +7536,7 @@ const precisionMostrar =
   '<i class="fas fa-location-dot"></i>' +
   ' Intentar compartir ubicación nuevamente';
 
-mostrarFormularioUbicacionManual();
+mostrarFormularioUbicacionManualYBajar();
 
     /*
       Si anteriormente no existe una ubicación
