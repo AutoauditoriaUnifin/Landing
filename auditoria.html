@@ -1160,6 +1160,92 @@ html.modo-ligero #videoCamaraInterna {
 #btnUsarCamaraNativa.mostrar-respaldo {
   display: flex;
 }
+/* Cámara nativa de video oculta normalmente */
+
+#btnCamaraNativaVideo {
+  display: none;
+}
+
+#btnCamaraNativaVideo.mostrar-respaldo {
+  display: flex;
+}
+
+/* =========================================
+   CÁMARA INTERNA DE VIDEO
+========================================= */
+
+.camara-video-modal {
+  display:none;
+  position:fixed;
+  inset:0;
+  z-index:12000;
+  background:rgba(0,0,0,.82);
+  padding:18px;
+  box-sizing:border-box;
+  align-items:center;
+  justify-content:center;
+}
+
+.camara-video-panel {
+  width:100%;
+  max-width:720px;
+  max-height:95vh;
+  overflow-y:auto;
+  background:#FFFFFF;
+  border-radius:18px;
+  padding:22px;
+  box-sizing:border-box;
+  text-align:center;
+}
+
+.camara-video-panel h2 {
+  color:#374757;
+  font-size:32px;
+  margin:0 0 12px;
+}
+
+#mensajeVideoInterno {
+  color:#374757;
+  font-size:24px;
+  line-height:1.4;
+}
+
+#contadorVideoInterno {
+  background:#374757;
+  color:#FFFFFF;
+  border-radius:10px;
+  padding:10px;
+  margin-bottom:12px;
+  font-size:26px;
+  font-weight:700;
+}
+
+#visorVideoInterno {
+  width:100%;
+  max-height:55vh;
+  display:block;
+  background:#000000;
+  border-radius:14px;
+  object-fit:contain;
+}
+
+.camara-video-panel button {
+  font-size:25px;
+  margin-top:14px;
+}
+
+.camara-video-panel button:disabled {
+  opacity:.55;
+  cursor:not-allowed;
+}
+
+.camara-video-panel .boton-secundario {
+  background:#118AB2;
+}
+
+.camara-video-panel .boton-cancelar {
+  background:#7A8793;
+}
 
 </style>
 
@@ -1865,6 +1951,74 @@ Tipo de activo
 
 <div id="mensaje"></div>
 
+<!-- =========================================
+     CÁMARA INTERNA PARA VIDEO
+========================================= -->
+
+<div
+  id="modalVideoInterno"
+  class="camara-video-modal"
+  aria-hidden="true"
+>
+  <div class="camara-video-panel">
+
+    <h2>Video del activo</h2>
+
+    <p id="mensajeVideoInterno">
+      Coloque el teléfono horizontalmente y presione “Iniciar grabación”.
+    </p>
+
+    <div id="contadorVideoInterno">
+      00:00 / 01:00
+    </div>
+
+    <!-- Solo muestra la cámara en vivo.
+         No reproduce el video terminado. -->
+    <video
+      id="visorVideoInterno"
+      autoplay
+      muted
+      playsinline
+    ></video>
+
+    <button
+      type="button"
+      id="btnIniciarVideoInterno"
+      onclick="iniciarGrabacionVideoInterno()"
+    >
+      🔴 Iniciar grabación
+    </button>
+
+    <button
+      type="button"
+      id="btnDetenerVideoInterno"
+      onclick="detenerYProtegerVideoInterno()"
+      disabled
+    >
+      ⏹ Detener y proteger video
+    </button>
+
+    <button
+  type="button"
+  id="btnCamaraNativaVideo"
+  class="boton-secundario"
+  onclick="usarCamaraNativaVideo()"
+>
+  📱 Usar cámara del teléfono
+</button>
+
+    <button
+      type="button"
+      id="btnCancelarVideoInterno"
+      class="boton-cancelar"
+      onclick="cancelarCamaraVideoInterna()"
+    >
+      Cancelar
+    </button>
+
+  </div>
+</div>
+
 <!-- =========================
      UBICACIÓN GPS
 ========================= -->
@@ -2245,7 +2399,7 @@ Preparando envío...
 <script>
 
 const API_URL =
-  "https://script.google.com/macros/s/AKfycbx_4eOc2GmfaxJcp5aLs2HYCbA2pWReQEtFW5DOuXkFCZS5W9G4esdxJkJIqAn-kc1XKg/exec";
+  "https://script.google.com/macros/s/AKfycbzrSCIBLxBsEaBVkshEvJ0J5Uy7yAAfGi538H1Db1tLN3IQAlTiN0y7PQbtxzIwmDfpKA/exec";
 
   const CLOUDINARY_CLOUD_NAME = "b3bnfknd";
   const CLOUDINARY_UPLOAD_PRESET = "autoauditorias";
@@ -2466,6 +2620,18 @@ let subiendoVideo = false;
 
 const VIDEO_MAX_SEGUNDOS = 60;
 const VIDEO_MAX_BYTES = 80 * 1024 * 1024;
+let streamVideoInterno = null;
+let grabadorVideoInterno = null;
+let partesVideoInterno = [];
+
+let grabandoVideoInterno = false;
+let procesandoVideoInterno = false;
+let reintentandoVideoPendiente = false;
+
+let intervaloVideoInterno = null;
+let inicioGrabacionVideoInterno = 0;
+
+const VIDEO_BITRATE_INTERNO = 2000000;
 
 /* =========================================
    FOTOGRAFÍAS PENDIENTES EN INDEXEDDB
@@ -2482,6 +2648,49 @@ const DB_FOTOS_ALMACEN =
 
 let reintentandoFotosPendientes =
   false;
+
+/* =========================================
+   VIDEO PENDIENTE PROTEGIDO
+========================================= */
+
+async function guardarVideoPendiente(blob) {
+
+  if (!auditIdActual) {
+    throw new Error(
+      "No se pudo identificar la auditoría para proteger el video."
+    );
+  }
+
+  await guardarFotoPendiente(
+    blob,
+    "videoActivo"
+  );
+
+}
+
+async function obtenerVideoPendiente() {
+
+  const registros =
+    await obtenerFotosPendientes();
+
+  return registros.find(function(registro) {
+
+    return (
+      registro &&
+      registro.campo === "videoActivo"
+    );
+
+  }) || null;
+
+}
+
+async function eliminarVideoPendiente() {
+
+  await eliminarFotoPendiente(
+    "videoActivo"
+  );
+
+}
 
   /* =========================================
    ALMACENAMIENTO LOCAL PERSISTENTE
@@ -4010,6 +4219,13 @@ async function reintentarFotosPendientes() {
     pendientes =
       await obtenerFotosPendientes();
 
+      pendientes =
+  pendientes.filter(function(registro) {
+
+    return registro.campo !== "videoActivo";
+
+  });
+
   } catch (error) {
 
     console.warn(
@@ -4880,6 +5096,7 @@ function programarRecuperacionPagina() {
           null;
 
         reintentarFotosPendientes();
+reintentarVideoPendiente();
 
       },
       800
@@ -4898,6 +5115,24 @@ document.addEventListener(
   function() {
 
     if (document.hidden) {
+
+      /*
+        Si el video está grabándose,
+        detenerlo e intentar protegerlo.
+      */
+
+      if (grabandoVideoInterno) {
+
+        detenerYProtegerVideoInterno();
+
+      } else if (
+        streamVideoInterno
+      ) {
+
+        liberarCamaraVideoInterna();
+        ocultarModalVideoInterno();
+
+      }
 
       if (cameraStream) {
 
@@ -4953,6 +5188,16 @@ window.addEventListener(
 
     detenerCamaraInterna();
 
+    if (grabandoVideoInterno) {
+
+      detenerYProtegerVideoInterno();
+
+    } else {
+
+      liberarCamaraVideoInterna();
+
+    }
+
   }
 );
 
@@ -4962,9 +5207,18 @@ document.addEventListener(
 
     detenerCamaraInterna();
 
+    if (grabandoVideoInterno) {
+
+      detenerYProtegerVideoInterno();
+
+    } else {
+
+      liberarCamaraVideoInterna();
+
+    }
+
   }
 );
-
 
 /*
   Compatibilidad adicional con navegadores
@@ -7845,9 +8099,26 @@ function mostrarEstadoVideo(
 
   };
 
-  const estilo =
-    estilos[tipo] ||
-    estilos.cargando;
+  const aliasTipo = {
+
+  info:
+    "cargando",
+
+  success:
+    "correcto",
+
+  warning:
+    "aviso"
+
+};
+
+const tipoFinal =
+  aliasTipo[tipo] ||
+  tipo;
+
+const estilo =
+  estilos[tipoFinal] ||
+  estilos.cargando;
 
   estado.style.display =
     "block";
@@ -7866,55 +8137,882 @@ function mostrarEstadoVideo(
 
 }
 
-
 /* =========================================
-   ABRIR CÁMARA PARA VIDEO
-========================================== */
+   CÁMARA INTERNA DE VIDEO
+========================================= */
 
-function abrirCamaraVideo() {
-
-  if (subiendoVideo) {
-
-    mostrarEstadoVideo(
-      "Espere a que termine la carga del video.",
-      "aviso"
-    );
-
-    return;
-  }
+function obtenerMimeTypeVideo() {
 
   if (
-    typeof subiendoFotografia !== "undefined" &&
-    subiendoFotografia
+    typeof MediaRecorder === "undefined"
+  ) {
+    return "";
+  }
+
+  const tipos = [
+    "video/mp4;codecs=avc1",
+    "video/mp4",
+    "video/webm;codecs=vp8",
+    "video/webm"
+  ];
+
+  for (
+    let i = 0;
+    i < tipos.length;
+    i++
+  ) {
+
+    if (
+      MediaRecorder.isTypeSupported(
+        tipos[i]
+      )
+    ) {
+      return tipos[i];
+    }
+
+  }
+
+  return "";
+
+}
+
+function mostrarRespaldoCamaraVideo(
+  mensaje
+) {
+
+  grabandoVideoInterno =
+    false;
+
+  clearInterval(
+    intervaloVideoInterno
+  );
+
+  intervaloVideoInterno =
+    null;
+
+  liberarCamaraVideoInterna();
+
+  const modal =
+    document.getElementById(
+      "modalVideoInterno"
+    );
+
+  const mensajeElemento =
+    document.getElementById(
+      "mensajeVideoInterno"
+    );
+
+  const botonIniciar =
+    document.getElementById(
+      "btnIniciarVideoInterno"
+    );
+
+  const botonDetener =
+    document.getElementById(
+      "btnDetenerVideoInterno"
+    );
+
+  const botonNativo =
+    document.getElementById(
+      "btnCamaraNativaVideo"
+    );
+
+  const botonCancelar =
+    document.getElementById(
+      "btnCancelarVideoInterno"
+    );
+
+  if (modal) {
+
+    modal.style.display =
+      "flex";
+
+    modal.setAttribute(
+      "aria-hidden",
+      "false"
+    );
+
+  }
+
+  if (mensajeElemento) {
+
+    mensajeElemento.textContent =
+      mensaje ||
+      "No fue posible abrir la cámara interna.";
+
+  }
+
+  if (botonIniciar) {
+    botonIniciar.disabled = true;
+  }
+
+  if (botonDetener) {
+    botonDetener.disabled = true;
+  }
+
+  if (botonCancelar) {
+    botonCancelar.disabled = false;
+  }
+
+  if (botonNativo) {
+
+    botonNativo.disabled =
+      false;
+
+    botonNativo.classList.add(
+      "mostrar-respaldo"
+    );
+
+  }
+
+}
+
+async function abrirCamaraVideo() {
+
+  if (
+    subiendoVideo ||
+    procesandoVideoInterno
   ) {
 
     mostrarEstadoVideo(
-      "Espere a que termine la carga de la fotografía.",
-      "aviso"
+      "Espere a que termine el procesamiento del video.",
+      "info"
     );
 
     return;
+
   }
 
-  const input =
+  const modal =
+    document.getElementById(
+      "modalVideoInterno"
+    );
+
+  const visor =
+    document.getElementById(
+      "visorVideoInterno"
+    );
+
+  const mensaje =
+    document.getElementById(
+      "mensajeVideoInterno"
+    );
+
+  const botonNativo =
+    document.getElementById(
+      "btnCamaraNativaVideo"
+    );
+
+  /*
+    El botón nativo inicia oculto.
+  */
+
+  if (botonNativo) {
+
+    botonNativo.classList.remove(
+      "mostrar-respaldo"
+    );
+
+  }
+
+  modal.style.display =
+    "flex";
+
+  modal.setAttribute(
+    "aria-hidden",
+    "false"
+  );
+
+  mensaje.textContent =
+    "Activando cámara...";
+
+  if (
+    !navigator.mediaDevices ||
+    !navigator.mediaDevices.getUserMedia ||
+    typeof MediaRecorder === "undefined"
+  ) {
+
+    mostrarRespaldoCamaraVideo(
+      "Este teléfono no permite grabar dentro del formulario. Utilice la cámara del teléfono."
+    );
+
+    return;
+
+  }
+
+  try {
+
+    streamVideoInterno =
+      await navigator.mediaDevices
+        .getUserMedia({
+
+          video: {
+
+            facingMode: {
+              ideal: "environment"
+            },
+
+            width: {
+              ideal: 1280,
+              max: 1280
+            },
+
+            height: {
+              ideal: 720,
+              max: 720
+            },
+
+            frameRate: {
+              ideal: 24,
+              max: 30
+            }
+
+          },
+
+          audio:
+            false
+
+        });
+
+    visor.srcObject =
+      streamVideoInterno;
+
+    await visor.play();
+
+    mensaje.textContent =
+      "Cámara preparada. Presione “Iniciar grabación”.";
+
+    document.getElementById(
+      "btnIniciarVideoInterno"
+    ).disabled = false;
+
+    /*
+      La cámara interna funcionó.
+      El respaldo continúa oculto.
+    */
+
+    if (botonNativo) {
+
+      botonNativo.classList.remove(
+        "mostrar-respaldo"
+      );
+
+    }
+
+  } catch (error) {
+
+    mostrarEstadoVideo(
+      "No fue posible abrir la cámara interna.",
+      "error"
+    );
+
+    mostrarRespaldoCamaraVideo(
+      "No fue posible abrir la cámara interna. Puede utilizar la cámara del teléfono."
+    );
+
+  }
+
+}
+
+function iniciarGrabacionVideoInterno() {
+
+  if (
+    grabandoVideoInterno ||
+    procesandoVideoInterno ||
+    !streamVideoInterno
+  ) {
+    return;
+  }
+
+  try {
+
+    partesVideoInterno = [];
+
+    const mimeType =
+      obtenerMimeTypeVideo();
+
+    const opciones = {
+
+      videoBitsPerSecond:
+        VIDEO_BITRATE_INTERNO
+
+    };
+
+    if (mimeType) {
+
+      opciones.mimeType =
+        mimeType;
+
+    }
+
+    grabadorVideoInterno =
+      new MediaRecorder(
+        streamVideoInterno,
+        opciones
+      );
+
+    grabadorVideoInterno
+      .addEventListener(
+        "dataavailable",
+        function(evento) {
+
+          if (
+            evento.data &&
+            evento.data.size > 0
+          ) {
+
+            partesVideoInterno.push(
+              evento.data
+            );
+
+          }
+
+        }
+      );
+
+    grabadorVideoInterno
+      .addEventListener(
+        "stop",
+        function() {
+
+          const partes =
+            partesVideoInterno.slice();
+
+          partesVideoInterno = [];
+
+          const tipoFinal =
+            grabadorVideoInterno.mimeType ||
+            mimeType ||
+            "video/webm";
+
+          procesarVideoGrabadoInterno(
+            partes,
+            tipoFinal
+          );
+
+        }
+      );
+
+    grabadorVideoInterno
+      .addEventListener(
+        "error",
+        function() {
+
+          grabandoVideoInterno = false;
+
+          mostrarEstadoVideo(
+  "Ocurrió un problema durante la grabación.",
+  "error"
+);
+
+mostrarRespaldoCamaraVideo(
+  "La grabación interna se interrumpió. Utilice la cámara del teléfono."
+);
+
+          liberarCamaraVideoInterna();
+
+        }
+      );
+
+    grabadorVideoInterno.start(
+      1000
+    );
+
+    grabandoVideoInterno = true;
+
+    inicioGrabacionVideoInterno =
+      Date.now();
+
+    document.getElementById(
+      "btnIniciarVideoInterno"
+    ).disabled = true;
+
+    document.getElementById(
+      "btnDetenerVideoInterno"
+    ).disabled = false;
+
+    document.getElementById(
+      "btnCancelarVideoInterno"
+    ).disabled = true;
+
+    document.getElementById(
+      "btnCamaraNativaVideo"
+    ).disabled = true;
+
+    document.getElementById(
+      "mensajeVideoInterno"
+    ).textContent =
+      "🔴 Grabando video...";
+
+    actualizarContadorVideoInterno();
+
+    intervaloVideoInterno =
+      setInterval(
+        actualizarContadorVideoInterno,
+        250
+      );
+
+  } catch (error) {
+
+    mostrarEstadoVideo(
+      "Este navegador no pudo iniciar la grabación interna.",
+      "error"
+    );
+
+    mostrarRespaldoCamaraVideo(
+  "No fue posible iniciar la grabación interna. Utilice la cámara del teléfono."
+);
+
+  }
+
+}
+
+
+function actualizarContadorVideoInterno() {
+
+  if (!grabandoVideoInterno) {
+    return;
+  }
+
+  const segundos =
+    Math.floor(
+      (
+        Date.now() -
+        inicioGrabacionVideoInterno
+      ) / 1000
+    );
+
+  const segundosMostrados =
+    Math.min(
+      segundos,
+      VIDEO_MAX_SEGUNDOS
+    );
+
+  const textoSegundos =
+    String(
+      segundosMostrados
+    ).padStart(
+      2,
+      "0"
+    );
+
+  document.getElementById(
+    "contadorVideoInterno"
+  ).textContent =
+    "00:" +
+    textoSegundos +
+    " / 01:00";
+
+  if (
+    segundos >=
+    VIDEO_MAX_SEGUNDOS
+  ) {
+
+    detenerYProtegerVideoInterno();
+
+  }
+
+}
+
+
+function detenerYProtegerVideoInterno() {
+
+  if (
+    !grabadorVideoInterno ||
+    grabadorVideoInterno.state ===
+      "inactive"
+  ) {
+    return;
+  }
+
+  grabandoVideoInterno = false;
+
+  clearInterval(
+    intervaloVideoInterno
+  );
+
+  intervaloVideoInterno = null;
+
+  document.getElementById(
+    "btnDetenerVideoInterno"
+  ).disabled = true;
+
+  document.getElementById(
+    "mensajeVideoInterno"
+  ).textContent =
+    "Protegiendo video. No cierre esta ventana...";
+
+  try {
+
+    grabadorVideoInterno
+      .requestData();
+
+  } catch (error) {
+    // Algunos navegadores no requieren requestData.
+  }
+
+  grabadorVideoInterno.stop();
+
+}
+
+
+async function procesarVideoGrabadoInterno(
+  partes,
+  tipoVideo
+) {
+
+  procesandoVideoInterno = true;
+
+  liberarCamaraVideoInterna();
+
+  try {
+
+    if (
+      !partes ||
+      partes.length === 0
+    ) {
+
+      throw new Error(
+        "No se generó el archivo de video."
+      );
+
+    }
+
+    const blobVideo =
+      new Blob(
+        partes,
+        {
+          type:
+            tipoVideo ||
+            "video/webm"
+        }
+      );
+
+    if (
+      !blobVideo.size
+    ) {
+
+      throw new Error(
+        "El video grabado está vacío."
+      );
+
+    }
+
+    if (
+      blobVideo.size >
+      VIDEO_MAX_BYTES
+    ) {
+
+      throw new Error(
+        "El video supera el tamaño permitido. Intente grabarlo nuevamente."
+      );
+
+    }
+
+    /*
+      Primero se protege en IndexedDB.
+      Después comienza la subida.
+    */
+
+    await guardarVideoPendiente(
+      blobVideo
+    );
+
+    document.getElementById(
+      "mensajeVideoInterno"
+    ).textContent =
+      "✅ Video protegido correctamente.";
+
+    ocultarModalVideoInterno();
+
+    await subirVideoProtegido(
+      blobVideo,
+      true
+    );
+
+  } catch (error) {
+
+    mostrarEstadoVideo(
+      error.message ||
+      "No fue posible proteger el video.",
+      "error"
+    );
+
+    document.getElementById(
+      "mensajeVideoInterno"
+    ).textContent =
+      error.message ||
+      "No fue posible proteger el video.";
+
+    document.getElementById(
+      "btnIniciarVideoInterno"
+    ).disabled = false;
+
+    document.getElementById(
+      "btnCancelarVideoInterno"
+    ).disabled = false;
+
+    document.getElementById(
+      "btnCamaraNativaVideo"
+    ).disabled = false;
+
+  } finally {
+
+    procesandoVideoInterno = false;
+
+  }
+
+}
+
+
+function ocultarModalVideoInterno() {
+
+  const modal =
+    document.getElementById(
+      "modalVideoInterno"
+    );
+
+  modal.style.display =
+    "none";
+
+  modal.setAttribute(
+    "aria-hidden",
+    "true"
+  );
+
+  document.getElementById(
+    "contadorVideoInterno"
+  ).textContent =
+    "00:00 / 01:00";
+
+  document.getElementById(
+    "btnIniciarVideoInterno"
+  ).disabled = false;
+
+  document.getElementById(
+    "btnDetenerVideoInterno"
+  ).disabled = true;
+
+  document.getElementById(
+    "btnCancelarVideoInterno"
+  ).disabled = false;
+
+  const botonNativo =
+    document.getElementById(
+      "btnCamaraNativaVideo"
+    );
+
+  if (botonNativo) {
+
+    botonNativo.disabled =
+      false;
+
+    botonNativo.classList.remove(
+      "mostrar-respaldo"
+    );
+
+  }
+
+}
+
+/* =========================================
+   LIBERAR CÁMARA INTERNA DE VIDEO
+========================================= */
+
+function liberarCamaraVideoInterna() {
+
+  if (streamVideoInterno) {
+
+    streamVideoInterno
+      .getTracks()
+      .forEach(function(track) {
+
+        track.stop();
+
+      });
+
+  }
+
+  streamVideoInterno =
+    null;
+
+  const visor =
+    document.getElementById(
+      "visorVideoInterno"
+    );
+
+  if (visor) {
+
+    visor.pause();
+    visor.srcObject = null;
+
+  }
+
+}
+
+
+/* =========================================
+   CANCELAR CÁMARA INTERNA DE VIDEO
+========================================= */
+
+function cancelarCamaraVideoInterna() {
+
+  if (
+    grabandoVideoInterno ||
+    procesandoVideoInterno
+  ) {
+    return;
+  }
+
+  liberarCamaraVideoInterna();
+  ocultarModalVideoInterno();
+
+}
+
+
+/* =========================================
+   USAR CÁMARA NATIVA DE RESPALDO
+========================================= */
+
+function usarCamaraNativaVideo() {
+
+  if (
+    grabandoVideoInterno ||
+    procesandoVideoInterno
+  ) {
+    return;
+  }
+
+  liberarCamaraVideoInterna();
+  ocultarModalVideoInterno();
+
+  const inputVideo =
     document.getElementById(
       "videoActivo"
     );
 
-  if (!input) {
-    return;
+  if (inputVideo) {
+
+    inputVideo.click();
+
   }
-
-  /*
-    Se limpia el input para permitir
-    volver a grabar el mismo archivo.
-  */
-
-  input.value = "";
-  input.click();
 
 }
 
+/* =========================================
+   SUBIR VIDEO YA PROTEGIDO
+========================================= */
+
+async function subirVideoProtegido(
+  archivo,
+  yaProtegido
+) {
+
+  if (subiendoVideo) {
+    return "";
+  }
+
+  subiendoVideo = true;
+
+  const boton =
+    document.getElementById(
+      "btnVideoActivo"
+    );
+
+  if (boton) {
+    boton.disabled = true;
+  }
+
+  try {
+
+    if (!yaProtegido) {
+
+      mostrarEstadoVideo(
+        "Protegiendo video en este dispositivo...",
+        "info"
+      );
+
+      await guardarVideoPendiente(
+        archivo
+      );
+
+    }
+
+    mostrarEstadoVideo(
+      "Video protegido. Subiendo a UNIFIN...",
+      "info"
+    );
+
+    const url =
+      await subirVideoCloudinaryDirecto(
+        archivo
+      );
+
+    if (!url) {
+
+      throw new Error(
+        "Cloudinary no devolvió la URL del video."
+      );
+
+    }
+
+    videoActivoUrl =
+      String(url).trim();
+
+    localStorage.setItem(
+      claveVideo,
+      videoActivoUrl
+    );
+
+    await eliminarVideoPendiente();
+
+    mostrarEstadoVideo(
+  "✅ Video cargado y protegido correctamente.",
+  "success"
+);
+
+if (boton) {
+
+  boton.style.background =
+    "#1B7F3A";
+
+  boton.style.color =
+    "#FFFFFF";
+
+  boton.innerHTML =
+    '<i class="fas fa-check-circle"></i>' +
+    " Volver a grabar video";
+
+}
+
+verificarFotosParaUbicacion();
+
+actualizarGuiaVisual(
+  !document.hidden
+);
+
+return videoActivoUrl;
+
+  } catch (error) {
+
+    mostrarEstadoVideo(
+      "⚠️ El video quedó protegido en este dispositivo. Se volverá a subir automáticamente cuando exista conexión estable.",
+      "warning"
+    );
+
+    return "";
+
+  } finally {
+
+    subiendoVideo = false;
+
+    if (boton) {
+      boton.disabled = false;
+    }
+
+  }
+
+}
 
 /* =========================================
    LEER DURACIÓN SIN MOSTRAR EL VIDEO
@@ -8131,12 +9229,28 @@ async function subirVideoCloudinaryDirecto(
             const datos =
               new FormData();
 
-            datos.append(
-              "file",
-              archivo,
-              archivo.name ||
-              "video_activo.mp4"
-            );
+            const tipoArchivo =
+  String(
+    archivo.type || ""
+  ).toLowerCase();
+
+const extension =
+  tipoArchivo.includes("mp4")
+    ? "mp4"
+    : "webm";
+
+const nombreArchivo =
+  archivo.name ||
+  (
+    "video_activo." +
+    extension
+  );
+
+datos.append(
+  "file",
+  archivo,
+  nombreArchivo
+);
 
             datos.append(
               "upload_preset",
@@ -8357,37 +9471,19 @@ async function subirVideoCloudinaryDirecto(
 /* =========================================
    PROCESAR VIDEO SELECCIONADO
 ========================================== */
-
 async function procesarVideoSeleccionado(
   input
 ) {
 
-  if (
-    !input.files ||
-    !input.files[0]
-  ) {
+  const archivo =
+    input.files &&
+    input.files[0];
+
+  if (!archivo) {
     return;
   }
 
-  const archivo =
-    input.files[0];
-
-  const urlAnterior =
-    videoActivoUrl;
-
-  const boton =
-    document.getElementById(
-      "btnVideoActivo"
-    );
-
   try {
-
-    subiendoVideo =
-      true;
-
-    if (boton) {
-      boton.disabled = true;
-    }
 
     mostrarEstadoVideo(
       "⏳ Verificando video...",
@@ -8423,116 +9519,114 @@ async function procesarVideoSeleccionado(
 
     }
 
-    mostrarEstadoVideo(
-      "⏳ Video válido. Preparando carga...",
-      "cargando"
-    );
+    /*
+      Primero protege el archivo.
+      Después lo sube a Cloudinary.
+    */
 
     const urlNueva =
-      await subirVideoCloudinaryDirecto(
-        archivo
+      await subirVideoProtegido(
+        archivo,
+        false
       );
 
-    videoActivoUrl =
-      urlNueva;
+    if (urlNueva) {
 
-    if (claveVideo) {
+      const boton =
+        document.getElementById(
+          "btnVideoActivo"
+        );
 
-      localStorage.setItem(
-        claveVideo,
-        videoActivoUrl
+      if (boton) {
+
+        boton.style.background =
+          "#1B7F3A";
+
+        boton.style.color =
+          "#FFFFFF";
+
+        boton.innerHTML =
+          '<i class="fas fa-check-circle"></i>' +
+          " Volver a grabar video";
+
+      }
+
+      verificarFotosParaUbicacion();
+
+      actualizarGuiaVisual(
+        true
       );
-
-    }
-
-    mostrarEstadoVideo(
-      "✅ Video cargado correctamente. Ya puede continuar.",
-      "correcto"
-    );
-
-    if (boton) {
-
-      boton.style.background =
-        "#1B7F3A";
-
-      boton.style.color =
-        "#FFFFFF";
-
-      boton.innerHTML =
-        '<i class="fas fa-check-circle"></i>' +
-        " Volver a grabar video";
 
     }
 
   } catch (error) {
 
-    /*
-      Si ya existía un video correcto,
-      se conserva mientras se intenta
-      grabar uno nuevo.
-    */
-
-    videoActivoUrl =
-      urlAnterior;
-
-    if (urlAnterior) {
-
-      mostrarEstadoVideo(
-        "⚠️ " +
-        error.message +
-        " Se conservará el video cargado anteriormente.",
-        "aviso"
-      );
-
-    } else {
-
-      mostrarEstadoVideo(
-        "❌ " +
-        error.message,
-        "error"
-      );
-
-    }
+    mostrarEstadoVideo(
+      "❌ " +
+      (
+        error.message ||
+        "No fue posible procesar el video."
+      ),
+      "error"
+    );
 
   } finally {
 
-    subiendoVideo =
-      false;
-
-    /*
-      El navegador libera la referencia
-      al archivo pesado después de subirlo.
-    */
-
     input.value = "";
-
-    if (boton) {
-
-      boton.disabled =
-        false;
-
-      if (!videoActivoUrl) {
-
-        boton.style.background =
-          "#374757";
-
-        boton.innerHTML =
-          '<i class="fas fa-video"></i>' +
-          " Grabar video del activo";
-
-      }
-
-    }
-
-    verificarFotosParaUbicacion();
-actualizarGuiaVisual(
-  Boolean(videoActivoUrl)
-);
 
   }
 
 }
 
+async function reintentarVideoPendiente() {
+
+  if (
+    reintentandoVideoPendiente ||
+    subiendoVideo ||
+    !auditIdActual ||
+    !navigator.onLine
+  ) {
+    return;
+  }
+
+  reintentandoVideoPendiente = true;
+
+  try {
+
+    const registro =
+      await obtenerVideoPendiente();
+
+    if (
+      !registro ||
+      !registro.blob
+    ) {
+      return;
+    }
+
+    mostrarEstadoVideo(
+      "Se encontró un video protegido. Reanudando la carga...",
+      "info"
+    );
+
+    await subirVideoProtegido(
+      registro.blob,
+      true
+    );
+
+  } catch (error) {
+
+    mostrarEstadoVideo(
+      "El video continúa protegido. Se intentará subir nuevamente.",
+      "warning"
+    );
+
+  } finally {
+
+    reintentandoVideoPendiente = false;
+
+  }
+
+}
 
 /* =========================================
    RESTAURAR VIDEO YA CARGADO
@@ -9473,7 +10567,9 @@ restaurarConfirmaciones();
 restaurarVideoGuardado();
 verificarFotosParaUbicacion();
 mostrarSesionRestaurada();
-actualizarGuiaVisual(false);
+actualizarGuiaVisual(
+  Boolean(videoActivoUrl)
+);
 
     estadoInicial.style.display =
   "none";
@@ -9489,6 +10585,7 @@ contenido.style.display =
 setTimeout(function() {
 
   reintentarFotosPendientes();
+reintentarVideoPendiente();
 
 }, 800);
 
@@ -9634,6 +10731,7 @@ window.addEventListener(
     setTimeout(function() {
 
       reintentarFotosPendientes();
+reintentarVideoPendiente();
 
     }, 700);
 
