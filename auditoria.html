@@ -1685,6 +1685,98 @@ Tipo de activo
 
 </div>
 
+<!-- Aquí termina bloqueContadorHoras -->
+
+<!-- =========================================
+     VIDEO DEL ACTIVO
+========================================== -->
+
+<div
+  id="bloqueVideoActivo"
+  style="
+    margin-top:28px;
+    padding:22px;
+    background:#EEF7FB;
+    border-left:6px solid #118AB2;
+    border-radius:12px;
+  "
+>
+  <label
+    style="
+      margin-top:0;
+      color:#1F3557;
+    "
+  >
+    Video del activo
+    <span class="required-star">*</span>
+  </label>
+
+  <div
+    style="
+      color:#374757;
+      font-size:27px;
+      line-height:1.55;
+      margin-top:15px;
+    "
+  >
+    <b>📹 Instrucciones:</b>
+
+    <ul style="padding-left:32px;margin-bottom:0;">
+      <li>
+        Comience mostrando la placa de identificación,
+        número de serie o VIN.
+      </li>
+
+      <li>
+        Después aléjese para mostrar completamente el activo.
+      </li>
+
+      <li>
+        Si aplica, muestre el activo funcionando.
+      </li>
+
+      <li>
+        El video puede durar máximo 60 segundos.
+      </li>
+    </ul>
+  </div>
+
+  <button
+    type="button"
+    id="btnVideoActivo"
+    onclick="abrirCamaraVideo()"
+    style="
+      background:#374757;
+      margin-top:20px;
+    "
+  >
+    <i class="fas fa-video"></i>
+    Grabar video del activo
+  </button>
+
+  <input
+    type="file"
+    id="videoActivo"
+    accept="video/*"
+    capture="environment"
+    onchange="procesarVideoSeleccionado(this)"
+    style="display:none;"
+  >
+
+  <div
+    id="estadoVideoActivo"
+    style="
+      display:none;
+      margin-top:15px;
+      padding:15px;
+      border-radius:10px;
+      font-size:25px;
+      font-weight:700;
+      line-height:1.4;
+    "
+  ></div>
+</div>
+
 <input
   type="file"
   id="capturaFoto"
@@ -2363,6 +2455,17 @@ let claveSesion = "";
 let descripcionActivoActual = "";
 
 let evidenciasUrls = {};
+
+/* =========================================
+   CONFIGURACIÓN DEL VIDEO
+========================================== */
+
+let videoActivoUrl = "";
+let claveVideo = "";
+let subiendoVideo = false;
+
+const VIDEO_MAX_SEGUNDOS = 60;
+const VIDEO_MAX_BYTES = 80 * 1024 * 1024;
 
 /* =========================================
    FOTOGRAFÍAS PENDIENTES EN INDEXEDDB
@@ -6103,16 +6206,26 @@ function actualizarGuiaVisual(moverPantalla) {
 
   if (faltantes.length > 0) {
 
-    siguienteBoton =
-      document.querySelector(
-        '[data-campo="' +
-        faltantes[0] +
-        '"]'
-      );
+  siguienteBoton =
+    document.querySelector(
+      '[data-campo="' +
+      faltantes[0] +
+      '"]'
+    );
 
-  } else if (
-  !ubicacionLista
-) {
+} else if (!videoActivoUrl) {
+
+  /*
+    Después de las fotografías,
+    señalar el video.
+  */
+
+  siguienteBoton =
+    document.getElementById(
+      "btnVideoActivo"
+    );
+
+} else if (!ubicacionLista) {
 
     /*
       Después de las fotos,
@@ -6346,7 +6459,6 @@ function validarTipoActivo() {
       );
 
   }
-
 
   /* =========================================
      VERIFICAR SI SE PUEDE MOSTRAR EL GPS
@@ -7687,6 +7799,777 @@ async function ejecutarConReintentos(
 
 }
 
+/* =========================================
+   MOSTRAR ESTADO DEL VIDEO
+========================================== */
+
+function mostrarEstadoVideo(
+  mensaje,
+  tipo
+) {
+
+  const estado =
+    document.getElementById(
+      "estadoVideoActivo"
+    );
+
+  if (!estado) {
+    return;
+  }
+
+  const estilos = {
+
+    cargando: {
+      fondo: "#FFF3CD",
+      color: "#665200",
+      borde: "#F2C94C"
+    },
+
+    correcto: {
+      fondo: "#E8F6EE",
+      color: "#1B7F3A",
+      borde: "#1B7F3A"
+    },
+
+    error: {
+      fondo: "#FFE5E5",
+      color: "#B42318",
+      borde: "#FF4D4D"
+    },
+
+    aviso: {
+      fondo: "#FFF3CD",
+      color: "#665200",
+      borde: "#F2C94C"
+    }
+
+  };
+
+  const estilo =
+    estilos[tipo] ||
+    estilos.cargando;
+
+  estado.style.display =
+    "block";
+
+  estado.style.background =
+    estilo.fondo;
+
+  estado.style.color =
+    estilo.color;
+
+  estado.style.borderLeft =
+    "6px solid " + estilo.borde;
+
+  estado.textContent =
+    mensaje;
+
+}
+
+
+/* =========================================
+   ABRIR CÁMARA PARA VIDEO
+========================================== */
+
+function abrirCamaraVideo() {
+
+  if (subiendoVideo) {
+
+    mostrarEstadoVideo(
+      "Espere a que termine la carga del video.",
+      "aviso"
+    );
+
+    return;
+  }
+
+  if (
+    typeof subiendoFotografia !== "undefined" &&
+    subiendoFotografia
+  ) {
+
+    mostrarEstadoVideo(
+      "Espere a que termine la carga de la fotografía.",
+      "aviso"
+    );
+
+    return;
+  }
+
+  const input =
+    document.getElementById(
+      "videoActivo"
+    );
+
+  if (!input) {
+    return;
+  }
+
+  /*
+    Se limpia el input para permitir
+    volver a grabar el mismo archivo.
+  */
+
+  input.value = "";
+  input.click();
+
+}
+
+
+/* =========================================
+   LEER DURACIÓN SIN MOSTRAR EL VIDEO
+========================================== */
+
+function obtenerDuracionVideo(
+  archivo
+) {
+
+  return new Promise(
+    function(resolve, reject) {
+
+      const elementoVideo =
+        document.createElement(
+          "video"
+        );
+
+      const urlTemporal =
+        URL.createObjectURL(
+          archivo
+        );
+
+      let terminado =
+        false;
+
+      let temporizador =
+        null;
+
+      function finalizar(
+        error,
+        duracion
+      ) {
+
+        if (terminado) {
+          return;
+        }
+
+        terminado =
+          true;
+
+        clearTimeout(
+          temporizador
+        );
+
+        elementoVideo.onloadedmetadata =
+          null;
+
+        elementoVideo.ontimeupdate =
+          null;
+
+        elementoVideo.onerror =
+          null;
+
+        elementoVideo.removeAttribute(
+          "src"
+        );
+
+        try {
+          elementoVideo.load();
+        } catch (errorCarga) {
+          // No requiere acción.
+        }
+
+        URL.revokeObjectURL(
+          urlTemporal
+        );
+
+        if (error) {
+          reject(error);
+        } else {
+          resolve(duracion);
+        }
+
+      }
+
+      elementoVideo.preload =
+        "metadata";
+
+      elementoVideo.muted =
+        true;
+
+      elementoVideo.playsInline =
+        true;
+
+      elementoVideo.onloadedmetadata =
+        function() {
+
+          const duracion =
+            Number(
+              elementoVideo.duration
+            );
+
+          if (
+            Number.isFinite(duracion) &&
+            duracion > 0
+          ) {
+
+            finalizar(
+              null,
+              duracion
+            );
+
+            return;
+          }
+
+          /*
+            Respaldo para algunos dispositivos
+            que inicialmente devuelven Infinity.
+          */
+
+          elementoVideo.ontimeupdate =
+            function() {
+
+              const duracionCorregida =
+                Number(
+                  elementoVideo.duration
+                );
+
+              if (
+                Number.isFinite(
+                  duracionCorregida
+                ) &&
+                duracionCorregida > 0
+              ) {
+
+                finalizar(
+                  null,
+                  duracionCorregida
+                );
+
+              }
+
+            };
+
+          try {
+
+            elementoVideo.currentTime =
+              100000000;
+
+          } catch (errorTiempo) {
+
+            finalizar(
+              new Error(
+                "No fue posible comprobar la duración del video."
+              )
+            );
+
+          }
+
+        };
+
+      elementoVideo.onerror =
+        function() {
+
+          finalizar(
+            new Error(
+              "No fue posible leer el video grabado."
+            )
+          );
+
+        };
+
+      temporizador =
+        setTimeout(
+          function() {
+
+            finalizar(
+              new Error(
+                "El teléfono tardó demasiado en leer el video. Intente grabarlo nuevamente."
+              )
+            );
+
+          },
+          20000
+        );
+
+      elementoVideo.src =
+        urlTemporal;
+
+    }
+  );
+
+}
+
+
+/* =========================================
+   SUBIR VIDEO DIRECTAMENTE A CLOUDINARY
+========================================== */
+
+async function subirVideoCloudinaryDirecto(
+  archivo
+) {
+
+  const endpoint =
+    "https://api.cloudinary.com/v1_1/" +
+    CLOUDINARY_CLOUD_NAME +
+    "/video/upload";
+
+  let ultimoError =
+    null;
+
+  for (
+    let intento = 1;
+    intento <= 3;
+    intento++
+  ) {
+
+    try {
+
+      const urlVideo =
+        await new Promise(
+          function(resolve, reject) {
+
+            const datos =
+              new FormData();
+
+            datos.append(
+              "file",
+              archivo,
+              archivo.name ||
+              "video_activo.mp4"
+            );
+
+            datos.append(
+              "upload_preset",
+              CLOUDINARY_UPLOAD_PRESET
+            );
+
+            const xhr =
+              new XMLHttpRequest();
+
+            xhr.open(
+              "POST",
+              endpoint,
+              true
+            );
+
+            /*
+              Cinco minutos máximos por intento.
+            */
+
+            xhr.timeout =
+              300000;
+
+            xhr.upload.onprogress =
+              function(evento) {
+
+                if (
+                  !evento.lengthComputable
+                ) {
+                  return;
+                }
+
+                const porcentaje =
+                  Math.min(
+                    99,
+                    Math.round(
+                      (
+                        evento.loaded /
+                        evento.total
+                      ) * 100
+                    )
+                  );
+
+                mostrarEstadoVideo(
+                  "⏳ Subiendo video: " +
+                  porcentaje +
+                  "%",
+                  "cargando"
+                );
+
+                const boton =
+                  document.getElementById(
+                    "btnVideoActivo"
+                  );
+
+                if (boton) {
+
+                  boton.innerHTML =
+                    '<i class="fas fa-spinner fa-spin"></i>' +
+                    " Subiendo " +
+                    porcentaje +
+                    "%";
+
+                }
+
+              };
+
+            xhr.onload =
+              function() {
+
+                if (
+                  xhr.status >= 200 &&
+                  xhr.status < 300
+                ) {
+
+                  try {
+
+                    const respuesta =
+                      JSON.parse(
+                        xhr.responseText
+                      );
+
+                    if (
+                      !respuesta.secure_url
+                    ) {
+
+                      reject(
+                        new Error(
+                          "Cloudinary no devolvió la URL del video."
+                        )
+                      );
+
+                      return;
+                    }
+
+                    resolve(
+                      respuesta.secure_url
+                    );
+
+                  } catch (errorJson) {
+
+                    reject(
+                      new Error(
+                        "Cloudinary devolvió una respuesta no válida."
+                      )
+                    );
+
+                  }
+
+                  return;
+                }
+
+                let mensajeCloudinary =
+                  "No fue posible subir el video.";
+
+                try {
+
+                  const respuestaError =
+                    JSON.parse(
+                      xhr.responseText
+                    );
+
+                  if (
+                    respuestaError.error &&
+                    respuestaError.error.message
+                  ) {
+
+                    mensajeCloudinary =
+                      respuestaError.error.message;
+
+                  }
+
+                } catch (errorRespuesta) {
+                  // Utilizar mensaje general.
+                }
+
+                reject(
+                  new Error(
+                    mensajeCloudinary
+                  )
+                );
+
+              };
+
+            xhr.onerror =
+              function() {
+
+                reject(
+                  new Error(
+                    "Se perdió la conexión mientras se subía el video."
+                  )
+                );
+
+              };
+
+            xhr.ontimeout =
+              function() {
+
+                reject(
+                  new Error(
+                    "La subida del video tardó demasiado."
+                  )
+                );
+
+              };
+
+            xhr.onabort =
+              function() {
+
+                reject(
+                  new Error(
+                    "La carga del video fue cancelada."
+                  )
+                );
+
+              };
+
+            xhr.send(datos);
+
+          }
+        );
+
+      return urlVideo;
+
+    } catch (error) {
+
+      ultimoError =
+        error;
+
+      if (intento < 3) {
+
+        mostrarEstadoVideo(
+          "⚠️ Problema de conexión. Reintentando carga del video (" +
+          (intento + 1) +
+          " de 3)...",
+          "aviso"
+        );
+
+        await esperar(
+          intento * 3000
+        );
+
+      }
+
+    }
+
+  }
+
+  throw (
+    ultimoError ||
+    new Error(
+      "No fue posible subir el video."
+    )
+  );
+
+}
+
+
+/* =========================================
+   PROCESAR VIDEO SELECCIONADO
+========================================== */
+
+async function procesarVideoSeleccionado(
+  input
+) {
+
+  if (
+    !input.files ||
+    !input.files[0]
+  ) {
+    return;
+  }
+
+  const archivo =
+    input.files[0];
+
+  const urlAnterior =
+    videoActivoUrl;
+
+  const boton =
+    document.getElementById(
+      "btnVideoActivo"
+    );
+
+  try {
+
+    subiendoVideo =
+      true;
+
+    if (boton) {
+      boton.disabled = true;
+    }
+
+    mostrarEstadoVideo(
+      "⏳ Verificando video...",
+      "cargando"
+    );
+
+    if (
+      archivo.size >
+      VIDEO_MAX_BYTES
+    ) {
+
+      throw new Error(
+        "El video pesa más de 80 MB. Grábelo nuevamente con menor resolución o duración."
+      );
+
+    }
+
+    const duracion =
+      await obtenerDuracionVideo(
+        archivo
+      );
+
+    if (
+      duracion >
+      VIDEO_MAX_SEGUNDOS + 0.5
+    ) {
+
+      throw new Error(
+        "El video dura " +
+        Math.ceil(duracion) +
+        " segundos. El máximo permitido es de 60 segundos."
+      );
+
+    }
+
+    mostrarEstadoVideo(
+      "⏳ Video válido. Preparando carga...",
+      "cargando"
+    );
+
+    const urlNueva =
+      await subirVideoCloudinaryDirecto(
+        archivo
+      );
+
+    videoActivoUrl =
+      urlNueva;
+
+    if (claveVideo) {
+
+      localStorage.setItem(
+        claveVideo,
+        videoActivoUrl
+      );
+
+    }
+
+    mostrarEstadoVideo(
+      "✅ Video cargado correctamente. Ya puede continuar.",
+      "correcto"
+    );
+
+    if (boton) {
+
+      boton.style.background =
+        "#1B7F3A";
+
+      boton.style.color =
+        "#FFFFFF";
+
+      boton.innerHTML =
+        '<i class="fas fa-check-circle"></i>' +
+        " Volver a grabar video";
+
+    }
+
+  } catch (error) {
+
+    /*
+      Si ya existía un video correcto,
+      se conserva mientras se intenta
+      grabar uno nuevo.
+    */
+
+    videoActivoUrl =
+      urlAnterior;
+
+    if (urlAnterior) {
+
+      mostrarEstadoVideo(
+        "⚠️ " +
+        error.message +
+        " Se conservará el video cargado anteriormente.",
+        "aviso"
+      );
+
+    } else {
+
+      mostrarEstadoVideo(
+        "❌ " +
+        error.message,
+        "error"
+      );
+
+    }
+
+  } finally {
+
+    subiendoVideo =
+      false;
+
+    /*
+      El navegador libera la referencia
+      al archivo pesado después de subirlo.
+    */
+
+    input.value = "";
+
+    if (boton) {
+
+      boton.disabled =
+        false;
+
+      if (!videoActivoUrl) {
+
+        boton.style.background =
+          "#374757";
+
+        boton.innerHTML =
+          '<i class="fas fa-video"></i>' +
+          " Grabar video del activo";
+
+      }
+
+    }
+
+    verificarFotosParaUbicacion();
+actualizarGuiaVisual(
+  Boolean(videoActivoUrl)
+);
+
+  }
+
+}
+
+
+/* =========================================
+   RESTAURAR VIDEO YA CARGADO
+========================================== */
+
+function restaurarVideoGuardado() {
+
+  if (!videoActivoUrl) {
+    return;
+  }
+
+  const boton =
+    document.getElementById(
+      "btnVideoActivo"
+    );
+
+  mostrarEstadoVideo(
+    "✅ Video cargado correctamente.",
+    "correcto"
+  );
+
+  if (boton) {
+
+    boton.style.background =
+      "#1B7F3A";
+
+    boton.style.color =
+      "#FFFFFF";
+
+    boton.innerHTML =
+      '<i class="fas fa-check-circle"></i>' +
+      " Volver a grabar video";
+
+  }
+
+}
+
 /* =========================
    ENVIAR DATOS A APPS SCRIPT
 ========================= */
@@ -7999,7 +8882,13 @@ function verificarFotosParaUbicacion() {
       tipoActivo
     );
 
-  if (faltantes.length === 0) {
+  const videoListo =
+  Boolean(videoActivoUrl);
+
+if (
+  faltantes.length === 0 &&
+  videoListo
+) {
 
     botonUbicacion.style.display =
       "flex";
@@ -8032,12 +8921,31 @@ if (formulario) {
 
       evento.preventDefault();
 
-      const botonEnviar =
-  document.getElementById("btnEnviar");
+const botonEnviar =
+  document.getElementById(
+    "btnEnviar"
+  );
 
-let temporizadorProgreso = null;
+let temporizadorProgreso =
+  null;
 
 try {
+
+  if (subiendoVideo) {
+
+    throw new Error(
+      "Espere a que termine de subir el video."
+    );
+
+  }
+
+  if (!videoActivoUrl) {
+
+    throw new Error(
+      "Debe grabar y cargar el video del activo antes de enviar."
+    );
+
+  }
 
         const datosUbicacionManual =
   obtenerDatosUbicacionManual();
@@ -8200,7 +9108,10 @@ direccionManual:
             evidenciasUrls.fotoOdometro || "",
 
           fotoContadorHoras:
-            evidenciasUrls.fotoContadorHoras || ""
+            evidenciasUrls.fotoContadorHoras || "",
+
+            videoURL:
+            videoActivoUrl
 
         };
 
@@ -8295,6 +9206,16 @@ try {
 localStorage.removeItem(
   claveSesion
 );
+
+if (claveVideo) {
+
+  localStorage.removeItem(
+    claveVideo
+  );
+
+}
+
+videoActivoUrl = "";
 
         formulario.style.display =
           "none";
@@ -8491,15 +9412,33 @@ async function cargarAuditoriaDesdeApi() {
       audit.anexo || "Sin información";
 
     auditIdActual =
-      audit.auditId;
+  audit.auditId;
 
-    claveEvidencias =
-      "evidenciasAutoauditoria_" +
-      auditIdActual;
+claveEvidencias =
+  "evidenciasAutoauditoria_" +
+  auditIdActual;
 
-      claveSesion =
+claveSesion =
   "sesionAutoauditoria_" +
   auditIdActual;
+
+claveVideo =
+  "videoAutoauditoria_" +
+  auditIdActual;
+
+try {
+
+  videoActivoUrl =
+    localStorage.getItem(
+      claveVideo
+    ) || "";
+
+} catch (errorStorage) {
+
+  videoActivoUrl =
+    "";
+
+}
 
     descripcionActivoActual =
       audit.activo || "";
@@ -8531,6 +9470,7 @@ if (
 }
 
 restaurarConfirmaciones();
+restaurarVideoGuardado();
 verificarFotosParaUbicacion();
 mostrarSesionRestaurada();
 actualizarGuiaVisual(false);
