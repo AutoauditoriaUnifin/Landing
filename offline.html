@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1">
+
+  <meta
+    name="theme-color"
+    content="#374757">
+
+  <title>Sin conexión - UNIFIN</title>
+
+  <style>
+
+    * {
+      box-sizing:border-box;
+    }
+
+    body {
+      min-height:100vh;
+      margin:0;
+      padding:20px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background:#F4F6F8;
+      color:#374757;
+      font-family:Arial, sans-serif;
+    }
+
+    .contenido {
+      width:100%;
+      max-width:580px;
+      padding:30px 22px;
+      background:#FFFFFF;
+      border-left:7px solid #118AB2;
+      border-radius:18px;
+      text-align:center;
+      box-shadow:0 10px 30px rgba(55,71,87,.14);
+    }
+
+    img {
+      display:block;
+      width:min(250px, 75%);
+      height:auto;
+      margin:0 auto 28px;
+    }
+
+    h1 {
+      margin:0 0 18px;
+      color:#374757;
+      font-size:clamp(30px, 8vw, 42px);
+    }
+
+    p {
+      font-size:clamp(19px, 5vw, 24px);
+      line-height:1.5;
+    }
+
+    .aviso {
+      margin-top:22px;
+      padding:17px;
+      background:#FFF7E6;
+      border-left:6px solid #FFD071;
+      border-radius:12px;
+    }
+
+    button,
+    a {
+      display:flex;
+      width:100%;
+      min-height:60px;
+      margin-top:18px;
+      padding:16px;
+      align-items:center;
+      justify-content:center;
+      background:#118AB2;
+      color:#FFFFFF;
+      border:none;
+      border-radius:12px;
+      font-size:21px;
+      font-weight:700;
+      text-decoration:none;
+      cursor:pointer;
+    }
+
+    a {
+      background:#374757;
+    }
+
+  </style>
+
+</head>
+
+<body>
+
+  <main class="contenido">
+
+    <img
+      src="./logoo.png"
+      alt="UNIFIN">
+
+    <h1>Sin conexión</h1>
+
+    <p>
+      En este momento no fue posible conectar con el sistema de UNIFIN.
+    </p>
+
+    <div class="aviso">
+      Las fotografías protegidas permanecerán guardadas en el teléfono.
+      No elimine la aplicación ni borre sus datos.
+    </div>
+
+    <button
+      type="button"
+      onclick="window.location.reload()">
+
+      🔄 Intentar nuevamente
+
+    </button>
+
+    <a href="./index.html">
+      Volver al inicio
+    </a>
+
+  </main>
+
+</body>
+
+</html>
