@@ -1829,14 +1829,16 @@ Tipo de activo
   </div>
 
   <button
-    type="button"
-    id="btnVideoActivo"
-    onclick="abrirCamaraVideo()"
-    style="
-      background:#374757;
-      margin-top:20px;
-    "
-  >
+  type="button"
+  id="btnVideoActivo"
+  class="btnFoto"
+  onclick="abrirCamaraVideo()"
+  style="
+    background:#118AB2;
+    color:#FFFFFF;
+    margin-top:20px;
+  "
+>
     <i class="fas fa-video"></i>
     Grabar video del activo
   </button>
@@ -8081,10 +8083,10 @@ function mostrarEstadoVideo(
   },
 
   correcto: {
-    fondo: "#8EDD65",
-    color: "#374757",
-    borde: "#8EDD65"
-  },
+  fondo: "#EFFBE9",
+  color: "#374757",
+  borde: "#8EDD65"
+},
 
   error: {
     fondo: "#FF8E72",
@@ -8974,14 +8976,22 @@ async function subirVideoProtegido(
 
 if (boton) {
 
+  boton.classList.remove(
+    "cargando"
+  );
+
+  boton.classList.add(
+    "completada"
+  );
+
   boton.style.background =
-    "#1B7F3A";
+    "#8EDD65";
 
   boton.style.color =
-    "#FFFFFF";
+    "#374757";
 
   boton.innerHTML =
-    '<i class="fas fa-check-circle"></i>' +
+    '<i class="fas fa-check"></i>' +
     " Volver a grabar video";
 
 }
@@ -9540,18 +9550,25 @@ async function procesarVideoSeleccionado(
 
       if (boton) {
 
-        boton.style.background =
-          "#1B7F3A";
+  boton.classList.remove(
+    "cargando"
+  );
 
-        boton.style.color =
-          "#FFFFFF";
+  boton.classList.add(
+    "completada"
+  );
 
-        boton.innerHTML =
-          '<i class="fas fa-check-circle"></i>' +
-          " Volver a grabar video";
+  boton.style.background =
+    "#8EDD65";
 
-      }
+  boton.style.color =
+    "#374757";
 
+  boton.innerHTML =
+    '<i class="fas fa-check"></i>' +
+    " Volver a grabar video";
+
+}
       verificarFotosParaUbicacion();
 
       actualizarGuiaVisual(
@@ -9651,17 +9668,25 @@ function restaurarVideoGuardado() {
 
   if (boton) {
 
-    boton.style.background =
-      "#1B7F3A";
+  boton.classList.remove(
+    "cargando"
+  );
 
-    boton.style.color =
-      "#FFFFFF";
+  boton.classList.add(
+    "completada"
+  );
 
-    boton.innerHTML =
-      '<i class="fas fa-check-circle"></i>' +
-      " Volver a grabar video";
+  boton.style.background =
+    "#8EDD65";
 
-  }
+  boton.style.color =
+    "#374757";
+
+  boton.innerHTML =
+    '<i class="fas fa-check"></i>' +
+    " Volver a grabar video";
+
+}
 
 }
 
