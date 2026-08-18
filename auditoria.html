@@ -18,308 +18,52 @@
 
 <style>
 
-  .required-star{
-  color:#FF8E72;
-  font-weight:700;
-}
+  /* =========================================
+   BASE ESTRUCTURAL
+========================================= */
 
-body{
-
-  font-family:'Rubik',Arial,sans-serif;
-  font-size:20px;
-  background:#fcfeff;
-  margin:0;
-  padding:30px;
-
-}
-
-.container{
-
-  max-width:700px;
-  margin:auto;
-  background:#405366;
-  padding:25px;
-  border-radius:10px;
-
-}
-
-h1 {
-
-  font-size: 26px;
-  margin-bottom: 20px;
-
-}
-
-.info{
-
-  background:#EEF2F5;      /* Gris claro */
-  color:#374757;           /* Gris Unifin */
-  border-left:8px solid #118AB2;
-  padding:25px;
-  border-radius:12px;
-  margin-bottom:25px;
-  box-shadow:0 4px 15px rgba(0,0,0,.08);
-
-}
-
-.info p{
-
-  margin:14px 0;
-  font-size:24px;
-  color:#374757;
-  font-weight:400;
-
-}
-
-.info p strong{
-
-  color:#1F3557;          /* Azul oscuro Unifin */
-  font-weight:700;
-
-}
-
-button{
-
+button,
+.btn {
   width:100%;
-  padding:18px;
-  margin-top:20px;
-
-  background:#118AB2;
-  color:white;
-
-  border:none;
-  border-radius:12px;
-
-  font-size:22px;
-  font-weight:600;
-
-  cursor:pointer;
-
-  transition:.3s;
-
   display:flex;
   justify-content:center;
   align-items:center;
   gap:12px;
-
 }
 
-button:hover{
-
+button:hover {
   background:#0D6E8C;
-
-}
-
-button i{
-
-  font-size:28px;
-
 }
 
 select,
 textarea,
-input{
-
+input {
   width:100%;
-  padding:18px;
-  font-size:20px;
-
-  border:2px solid #118AB2;
-  border-radius:12px;
-  background:#FFFFFF;
-  color:#374757;
   box-sizing:border-box;
-  transition:all .25s ease;
-
 }
 
 select:focus,
 textarea:focus,
-input:focus{
-
+input:focus {
   outline:none;
   border-color:#1F3557;
   box-shadow:0 0 0 4px rgba(17,138,178,.18);
-
 }
 
-/* ===== TEXTO BLANCO ===== */
-
-label{
-
-  color:#118AB2;
-  font-weight:700;
+label {
   display:block;
   margin-top:25px;
-  font-size:22px;
-
 }
 
 form {
-
-  color: white;
-
-}
-
-#gpsStatus{
-
-  color:#374757;
-  font-size:22px;
-  font-weight:bold;
-  margin-top:15px;
-
-}
-
-input[type="file"] {
-
-  color:#374757;
-  font-size:18px;
-
-}
-
-/* ===== MENSAJES ===== */
-
-.success {
-
-  color:#8EDD65;
-  font-weight: bold;
-  margin-top: 30px;
-
-}
-
-.error {
-
-  color:#FF8E72;
-  font-weight: bold;
-  margin-top: 30px;
-
-}
-
-.bloqueado {
-
-  background: #ffe6e6;
-  border: 2px solid red;
-  padding: 15px;
-  border-radius: 10px;
-  margin-bottom: 20px;
-  color: red;
-  font-weight: bold;
-
-}
-
-/* ===== FIRMA ===== */
-
-canvas {
-
-  background: white;
-  border: 1px solid #ccc;
-  border-radius: 10px;
-  width: 100%;
-  height: 200px;
-  margin-top: 10px;
-
-}
-
-/* =========================================
-   AUMENTAR TAMAÑO DE TEXTOS
-========================================= */
-
-body{
-  font-size:32px;
-}
-
-h1{
-  font-size:46px !important;
-}
-
-.info p{
-  font-size:37px;
-  line-height:1.5;
-}
-
-label{
-  font-size:35px;
-  line-height:1.4;
-}
-
-select,
-textarea,
-input{
-  font-size:33px;
-}
-
-input[type="file"]{
-  font-size:31px;
-}
-
-button{
-  font-size:34px;
-}
-
-#gpsStatus{
-  font-size:34px;
-}
-
-#loadingPercent{
-  font-size:35px !important;
-}
-
-#loadingText{
-  font-size:32px !important;
-  line-height:1.4;
-}
-
-.bloqueado{
-  font-size:32px;
-  line-height:1.5;
-}
-
-/* =========================================
-   CÁMARA Y CONFIRMACIONES
-========================================= */
-
-.estado-foto{
-  display:none;
-  margin-top:12px;
-  padding:14px;
-  background:#EFFBE9;
-  color:#374757;
-  border-left:6px solid #8EDD65;
-  border-radius:10px;
-  font-size:25px;
-  font-weight:700;
-  line-height:1.4;
-}
-
-.btnFoto.cargando{
-  background:#8A98A6;
-  pointer-events:none;
-}
-
-.btnFoto.completada{
-  background:#8EDD65;
-  color:#374757;
-}
-
-.camara-contenido{
   width:100%;
-  max-width:600px;
-  padding:18px;
-  background:#FFFFFF;
-  border-radius:16px;
-  box-sizing:border-box;
+  color:inherit;
 }
 
-
-.botones-camara{
-  display:flex;
-  gap:12px;
+/* Ocultar mensajes hasta que la fotografía sea guardada */
+.estado-foto {
+  display:none;
 }
-
-.botones-camara button{
-  width:50%;
-}
-
 /* =========================================
    DISEÑO RESPONSIVO UNIFIN
 ========================================= */
@@ -1270,11 +1014,144 @@ html.modo-ligero #videoCamaraInterna {
   }
 }
 
+/* =========================================
+   CONEXIÓN, VERSIÓN Y RESUMEN DE EVIDENCIAS
+========================================= */
+
+/* Aviso sin conexión */
+
+#avisoSinConexion {
+  display:none;
+  position:fixed;
+  top:max(10px, env(safe-area-inset-top));
+  left:50%;
+  transform:translateX(-50%);
+  z-index:50000;
+
+  width:min(calc(100% - 24px), 900px) !important;
+  max-width:900px !important;
+  margin:0 !important;
+  padding:15px 18px;
+
+  background:#FFF7E5;
+  color:#374757;
+  border:2px solid #FFD071;
+  border-left:7px solid #FFD071;
+  border-radius:12px;
+
+  font-size:clamp(17px, 4.6vw, 22px);
+  font-weight:700;
+  line-height:1.4;
+  text-align:center;
+
+  box-shadow:0 6px 20px rgba(55,71,87,.20);
+}
+
+/* Versión del formulario */
+
+#versionFormulario {
+  margin:-15px auto 25px;
+  color:#617181;
+  font-size:clamp(14px, 3.8vw, 18px);
+  font-weight:500;
+  text-align:center;
+}
+
+/* Panel del contador */
+
+#panelResumenEvidencias {
+  width:100%;
+  margin-top:20px;
+  padding:18px;
+  box-sizing:border-box;
+
+  background:#EEF7FB;
+  color:#374757;
+  border-left:6px solid #118AB2;
+  border-radius:12px;
+}
+
+#contadorEvidencias {
+  font-size:clamp(20px, 5.5vw, 27px);
+  font-weight:700;
+  line-height:1.35;
+}
+
+#fondoProgresoEvidencias {
+  width:100%;
+  height:14px;
+  margin-top:12px;
+  overflow:hidden;
+
+  background:#D7E3E9;
+  border-radius:20px;
+}
+
+#barraProgresoEvidencias {
+  width:0%;
+  height:100%;
+
+  background:#118AB2;
+  border-radius:20px;
+  transition:width .3s ease;
+}
+
+/* Fotografías protegidas pendientes */
+
+#pendientesProtegidas {
+  display:none;
+  margin-top:15px;
+  padding:14px;
+
+  background:#FFF7E5;
+  color:#374757;
+  border-left:6px solid #FFD071;
+  border-radius:10px;
+
+  font-size:clamp(17px, 4.7vw, 21px);
+  font-weight:600;
+  line-height:1.4;
+}
+
+#pendientesProtegidasTitulo {
+  font-weight:700;
+}
+
+#listaPendientesProtegidas {
+  margin:10px 0 0;
+  padding-left:28px;
+}
+
+#listaPendientesProtegidas li {
+  margin:6px 0;
+}
+
+@media (max-width:600px) {
+
+  #panelResumenEvidencias {
+    padding:15px 13px;
+  }
+
+  #avisoSinConexion {
+    padding:13px;
+  }
+}
+
 </style>
 
 </head>
 
 <body>
+  <div
+  id="avisoSinConexion"
+  role="status"
+  aria-live="assertive">
+
+  <i class="fas fa-wifi"></i>
+
+  Sin conexión a Internet. Las fotografías se protegerán en este teléfono y se subirán automáticamente cuando regrese la conexión.
+
+</div>
 <!-- =========================
      LOGO UNIFIN
 ========================== -->
@@ -1302,6 +1179,7 @@ margin-bottom:30px;
   Autoauditoría UNIFIN
 </h1>
 
+<div id="versionFormulario"></div>
 
 <div
   id="estadoInicial"
@@ -1404,6 +1282,33 @@ Tipo de activo
     line-height:1.4;
   ">
 </div>
+
+</div>
+
+<div
+  id="panelResumenEvidencias"
+  aria-live="polite">
+
+  <div id="contadorEvidencias">
+    Seleccione el tipo de activo para calcular las fotografías.
+  </div>
+
+  <div id="fondoProgresoEvidencias">
+
+    <div id="barraProgresoEvidencias"></div>
+
+  </div>
+
+  <div id="pendientesProtegidas">
+
+    <div id="pendientesProtegidasTitulo">
+      <i class="fas fa-shield-halved"></i>
+      Fotografías protegidas pendientes de subir:
+    </div>
+
+    <ul id="listaPendientesProtegidas"></ul>
+
+  </div>
 
 </div>
 
@@ -3890,6 +3795,12 @@ async function subirFotografiaPreparada(
 
   }
 
+  if (protegidaLocalmente) {
+
+  actualizarPanelEvidencias();
+
+}
+
   /*
     La transacción local ya terminó.
     Ahora puede comenzar Cloudinary.
@@ -5728,8 +5639,11 @@ function mostrarConfirmacionFoto(campo) {
   verificarFotosParaUbicacion();
 
   actualizarGuiaVisual(
-    !restaurandoEvidencias
-  );
+  !restaurandoEvidencias
+);
+
+actualizarPanelEvidencias();
+
 }
 
 
@@ -5757,7 +5671,8 @@ function restaurarConfirmaciones() {
   restaurandoEvidencias = false;
 
   verificarFotosParaUbicacion();
-  actualizarGuiaVisual(false);
+actualizarGuiaVisual(false);
+actualizarPanelEvidencias();
 
 }
 /* =========================================
@@ -6463,6 +6378,7 @@ function validarTipoActivo() {
 verificarFotosParaUbicacion();
 guardarSesionLocal();
 actualizarGuiaVisual(false);
+actualizarPanelEvidencias();
 
 }
 
@@ -7992,29 +7908,33 @@ async function enviarDatosAppsScript(formData) {
   });
 
 }
+
 /* =========================================
-   VALIDAR EVIDENCIAS
+   CAMPOS REQUERIDOS SEGÚN EL ACTIVO
 ========================================= */
 
-function obtenerEvidenciasFaltantes(tipoActivo) {
+function obtenerCamposRequeridos(
+  tipoActivo
+) {
 
-  const obligatorias = [];
+  if (!tipoActivo) {
+    return [];
+  }
 
-  // Primera fotografía
-  obligatorias.push(
+  const campos = [
     "fotoFrontal"
-  );
+  ];
 
-  // Laterales y trasera
-  if (
+  const requiereLaterales =
     tipoActivo === "VEHICULO" ||
     tipoActivo === "TRACTOCAMION" ||
     tipoActivo === "TRANSPORTE" ||
     tipoActivo === "MAQUINARIA" ||
-    tipoActivo === "AGRICOLA"
-  ) {
+    tipoActivo === "AGRICOLA";
 
-    obligatorias.push(
+  if (requiereLaterales) {
+
+    campos.push(
       "fotoIzquierdo",
       "fotoDerecho",
       "fotoTrasera"
@@ -8022,44 +7942,241 @@ function obtenerEvidenciasFaltantes(tipoActivo) {
 
   }
 
-  // Serie y código QR
-  obligatorias.push(
+  campos.push(
     "fotoSerie",
     "fotoQr"
   );
 
-  // Odómetro
-  if (
+  const requiereOdometro =
     tipoActivo === "VEHICULO" ||
     tipoActivo === "TRACTOCAMION" ||
-    tipoActivo === "TRANSPORTE"
-  ) {
+    tipoActivo === "TRANSPORTE";
 
-    obligatorias.push(
+  if (requiereOdometro) {
+
+    campos.push(
       "fotoOdometro"
     );
 
   }
 
-  // Contador de horas
-  if (
+  const requiereContador =
     tipoActivo === "MAQUINARIA" ||
-    tipoActivo === "AGRICOLA"
-  ) {
+    tipoActivo === "AGRICOLA";
 
-    obligatorias.push(
+  if (requiereContador) {
+
+    campos.push(
       "fotoContadorHoras"
     );
 
   }
 
-  return obligatorias.filter(
+  return campos;
+
+}
+
+
+/* =========================================
+   VALIDAR EVIDENCIAS FALTANTES
+========================================= */
+
+function obtenerEvidenciasFaltantes(
+  tipoActivo
+) {
+
+  return obtenerCamposRequeridos(
+    tipoActivo
+  ).filter(function(campo) {
+
+    return !evidenciasUrls[campo];
+
+  });
+
+}
+
+
+/* =========================================
+   ACTUALIZAR CONTADOR Y PENDIENTES
+========================================= */
+
+let revisionPanelEvidencias = 0;
+
+async function actualizarPanelEvidencias() {
+
+  const revisionActual =
+    ++revisionPanelEvidencias;
+
+  const selector =
+    document.getElementById(
+      "tipoActivo"
+    );
+
+  const contador =
+    document.getElementById(
+      "contadorEvidencias"
+    );
+
+  const barra =
+    document.getElementById(
+      "barraProgresoEvidencias"
+    );
+
+  const contenedorPendientes =
+    document.getElementById(
+      "pendientesProtegidas"
+    );
+
+  const listaPendientes =
+    document.getElementById(
+      "listaPendientesProtegidas"
+    );
+
+  if (
+    !contador ||
+    !barra ||
+    !contenedorPendientes ||
+    !listaPendientes
+  ) {
+    return;
+  }
+
+  const tipoActivo =
+    selector
+      ? selector.value
+      : "";
+
+  const camposRequeridos =
+    obtenerCamposRequeridos(
+      tipoActivo
+    );
+
+  const fotografiasGuardadas =
+    camposRequeridos.filter(
+      function(campo) {
+
+        return Boolean(
+          evidenciasUrls[campo]
+        );
+
+      }
+    );
+
+  const total =
+    camposRequeridos.length;
+
+  const guardadas =
+    fotografiasGuardadas.length;
+
+  if (!tipoActivo) {
+
+    contador.textContent =
+      "Seleccione el tipo de activo para calcular las fotografías.";
+
+    barra.style.width =
+      "0%";
+
+  } else {
+
+    contador.textContent =
+      guardadas +
+      " de " +
+      total +
+      " fotografías guardadas";
+
+    const porcentaje =
+      total > 0
+        ? Math.round(
+            guardadas / total * 100
+          )
+        : 0;
+
+    barra.style.width =
+      porcentaje + "%";
+
+  }
+
+  let registrosPendientes = [];
+
+  try {
+
+    registrosPendientes =
+      await obtenerFotosPendientes();
+
+  } catch (error) {
+
+    console.warn(
+      "No fue posible consultar las fotografías protegidas:",
+      error
+    );
+
+  }
+
+  /*
+    Si comenzó una actualización más reciente,
+    detener esta para evitar mostrar datos viejos.
+  */
+
+  if (
+    revisionActual !==
+    revisionPanelEvidencias
+  ) {
+    return;
+  }
+
+  const camposPendientes =
+    Array.from(
+      new Set(
+        registrosPendientes
+          .map(function(registro) {
+
+            return registro.campo;
+
+          })
+          .filter(function(campo) {
+
+            return (
+              campo &&
+              !evidenciasUrls[campo]
+            );
+
+          })
+      )
+    );
+
+  listaPendientes.innerHTML =
+    "";
+
+  if (camposPendientes.length === 0) {
+
+    contenedorPendientes.style.display =
+      "none";
+
+    return;
+
+  }
+
+  camposPendientes.forEach(
     function(campo) {
 
-      return !evidenciasUrls[campo];
+      const elemento =
+        document.createElement(
+          "li"
+        );
+
+      elemento.textContent =
+        nombresEvidencias[campo] ||
+        campo;
+
+      listaPendientes.appendChild(
+        elemento
+      );
 
     }
   );
+
+  contenedorPendientes.style.display =
+    "block";
 
 }
 
@@ -8792,12 +8909,77 @@ function consultarApiJsonp(url) {
 }
 
 /* =========================================
-   RECUPERAR SUBIDAS AL REGRESAR INTERNET
+   VERSIÓN DEL FORMULARIO
 ========================================= */
+
+const FORMULARIO_VERSION =
+  "FOTOS 3.1 · 18/08/2026";
+
+function mostrarVersionFormulario() {
+
+  const elemento =
+    document.getElementById(
+      "versionFormulario"
+    );
+
+  if (elemento) {
+
+    elemento.textContent =
+      "Versión " +
+      FORMULARIO_VERSION;
+
+  }
+
+}
+
+
+/* =========================================
+   ESTADO DE LA CONEXIÓN
+========================================= */
+
+function actualizarEstadoConexion() {
+
+  const aviso =
+    document.getElementById(
+      "avisoSinConexion"
+    );
+
+  if (!aviso) {
+    return;
+  }
+
+  if (navigator.onLine === false) {
+
+    aviso.style.display =
+      "block";
+
+  } else {
+
+    aviso.style.display =
+      "none";
+
+  }
+
+  actualizarPanelEvidencias();
+
+}
+
+
+window.addEventListener(
+  "offline",
+  function() {
+
+    actualizarEstadoConexion();
+
+  }
+);
+
 
 window.addEventListener(
   "online",
   function() {
+
+    actualizarEstadoConexion();
 
     setTimeout(function() {
 
@@ -8808,6 +8990,9 @@ window.addEventListener(
   }
 );
 
+
+mostrarVersionFormulario();
+actualizarEstadoConexion();
 cargarAuditoriaDesdeApi();
 
 </script>
