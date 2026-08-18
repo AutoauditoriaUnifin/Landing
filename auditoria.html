@@ -1055,6 +1055,7 @@ html.modo-ligero #videoCamaraInterna {
   font-size:clamp(14px, 3.8vw, 18px);
   font-weight:500;
   text-align:center;
+  transition:opacity .3s ease;
 }
 
 /* Panel del contador */
@@ -8913,7 +8914,7 @@ function consultarApiJsonp(url) {
 ========================================= */
 
 const FORMULARIO_VERSION =
-  "FOTOS 3.1 · 18/08/2026";
+  "Creado por Hazael";
 
 function mostrarVersionFormulario() {
 
@@ -8922,13 +8923,27 @@ function mostrarVersionFormulario() {
       "versionFormulario"
     );
 
-  if (elemento) {
-
-    elemento.textContent =
-      "Versión " +
-      FORMULARIO_VERSION;
-
+  if (!elemento) {
+    return;
   }
+
+  elemento.textContent =
+    "Creador " +
+    FORMULARIO_VERSION;
+
+  elemento.style.opacity = "1";
+
+  setTimeout(function() {
+
+    elemento.style.opacity = "0";
+
+    setTimeout(function() {
+
+      elemento.style.display = "none";
+
+    }, 300);
+
+  }, 2000);
 
 }
 
