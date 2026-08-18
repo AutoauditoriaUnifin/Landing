@@ -1336,6 +1336,65 @@ html.modo-ligero #videoCamaraInterna {
   }
 
 }
+
+/* =========================================
+   INSTRUCCIONES RESPONSIVAS DEL VIDEO
+========================================= */
+
+#instruccionesVideoActivo {
+  width:100%;
+  max-width:100%;
+  box-sizing:border-box;
+  font-size:23px;
+  line-height:1.5;
+  overflow-wrap:normal;
+  word-break:normal;
+}
+
+#instruccionesVideoActivo > b {
+  display:block;
+  margin-bottom:10px;
+  font-size:1.08em;
+}
+
+#instruccionesVideoActivo ul {
+  margin:8px 0 0;
+  padding-left:28px;
+}
+
+#instruccionesVideoActivo li {
+  margin-bottom:8px;
+}
+
+/* Teléfonos */
+
+@media (max-width:600px) {
+
+  #instruccionesVideoActivo {
+    font-size:clamp(17px, 4.8vw, 21px) !important;
+    line-height:1.45 !important;
+  }
+
+  #instruccionesVideoActivo ul {
+    padding-left:24px !important;
+  }
+
+}
+
+/* Teléfonos muy angostos */
+
+@media (max-width:360px) {
+
+  #instruccionesVideoActivo {
+    font-size:17px !important;
+  }
+
+  #instruccionesVideoActivo ul {
+    padding-left:21px !important;
+  }
+
+}
+
 </style>
 
 </head>
@@ -1894,13 +1953,12 @@ Tipo de activo
   </label>
 
   <div
-    style="
-      color:#374757;
-      font-size:27px;
-      line-height:1.55;
-      margin-top:15px;
-    "
-  >
+  id="instruccionesVideoActivo"
+  style="
+    color:#374757;
+    margin-top:15px;
+  "
+>
     <b>📹 Instrucciones:</b>
 
     <ul style="padding-left:32px;margin-bottom:0;">
