@@ -1259,7 +1259,8 @@ html.modo-ligero #videoCamaraInterna {
 #labelSerie,
 #labelQr,
 #labelOdometro,
-#labelContadorHoras {
+#labelContadorHoras,
+#labelVideoActivo {
   width:100%;
   max-width:100%;
   box-sizing:border-box;
@@ -1278,7 +1279,8 @@ html.modo-ligero #videoCamaraInterna {
 #labelSerie i,
 #labelQr i,
 #labelOdometro i,
-#labelContadorHoras i {
+#labelContadorHoras i,
+#labelVideoActivo i {
   font-size:1em !important;
   margin-right:8px !important;
 }
@@ -1292,7 +1294,8 @@ html.modo-ligero #videoCamaraInterna {
 #labelSerie .required-star,
 #labelQr .required-star,
 #labelOdometro .required-star,
-#labelContadorHoras .required-star {
+#labelContadorHoras .required-star,
+#labelVideoActivo .required-star {
   font-size:1.15em !important;
 }
 
@@ -1307,7 +1310,8 @@ html.modo-ligero #videoCamaraInterna {
   #labelSerie,
   #labelQr,
   #labelOdometro,
-  #labelContadorHoras {
+  #labelContadorHoras,
+  #labelVideoActivo {
     padding:14px 12px !important;
     font-size:clamp(20px, 6vw, 25px) !important;
     line-height:1.3 !important;
@@ -1326,12 +1330,12 @@ html.modo-ligero #videoCamaraInterna {
   #labelSerie,
   #labelQr,
   #labelOdometro,
-  #labelContadorHoras {
+  #labelContadorHoras,
+  #labelVideoActivo {
     font-size:20px !important;
   }
 
 }
-
 </style>
 
 </head>
@@ -1879,11 +1883,12 @@ Tipo de activo
   "
 >
   <label
-    style="
-      margin-top:0;
-      color:#374757;
-    "
-  >
+  id="labelVideoActivo"
+  style="
+    margin-top:0;
+    color:#374757;
+  "
+>
     Video del activo
     <span class="required-star">*</span>
   </label>
