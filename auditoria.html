@@ -1783,7 +1783,7 @@ Tipo de activo
   style="
     margin-top:28px;
     padding:22px;
-    background:#FFFFFF;
+    background:#EEF7FB;
     border-left:6px solid #118AB2;
     border-radius:12px;
   "
@@ -8077,10 +8077,10 @@ function mostrarEstadoVideo(
   const estilos = {
 
   cargando: {
-    fondo: "#FFFFFF",
-    color: "#374757",
-    borde: "#118AB2"
-  },
+  fondo: "#118AB2",
+  color: "#FFFFFF",
+  borde: "#118AB2"
+},
 
   correcto: {
   fondo: "#EFFBE9",
@@ -8923,8 +8923,26 @@ async function subirVideoProtegido(
     );
 
   if (boton) {
-    boton.disabled = true;
-  }
+
+  boton.disabled =
+    true;
+
+  boton.classList.remove(
+    "completada",
+    "cargando"
+  );
+
+  boton.style.background =
+    "#118AB2";
+
+  boton.style.color =
+    "#FFFFFF";
+
+  boton.innerHTML =
+    '<i class="fas fa-spinner fa-spin"></i>' +
+    " Preparando video...";
+
+}
 
   try {
 
