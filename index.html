@@ -651,6 +651,95 @@ select,
   font-family:'Rubik', Arial, sans-serif;
 }
 
+/* =========================================
+   CONTENIDO VISUAL DE LA CONSULTA
+========================================= */
+
+.intro-consulta {
+  width:100%;
+  margin:0 0 25px;
+  padding:20px;
+  background:#EEF7FB;
+  color:#374757;
+  border-left:7px solid #118AB2;
+  border-radius:14px;
+  text-align:center;
+  font-size:clamp(18px, 4.8vw, 23px);
+  line-height:1.5;
+}
+
+.etiqueta-segura {
+  display:inline-block;
+  margin-bottom:10px;
+  padding:7px 14px;
+  background:#8EDD65;
+  color:#374757;
+  border-radius:20px;
+  font-size:clamp(16px, 4vw, 19px);
+  font-weight:700;
+}
+
+.intro-consulta p {
+  margin:5px 0;
+}
+
+.titulo-metodo {
+  display:flex;
+  align-items:center;
+  gap:14px;
+  width:100%;
+  margin:25px 0 12px;
+  padding:15px 17px;
+  background:#EEF7FB;
+  color:#374757;
+  border-left:6px solid #118AB2;
+  border-radius:12px;
+}
+
+.numero-paso {
+  display:flex;
+  flex:0 0 42px;
+  width:42px;
+  height:42px;
+  align-items:center;
+  justify-content:center;
+  background:#118AB2;
+  color:#FFFFFF;
+  border-radius:50%;
+  font-size:21px;
+  font-weight:700;
+}
+
+.texto-paso strong {
+  display:block;
+  color:#374757;
+  font-size:clamp(21px, 5.5vw, 27px);
+  line-height:1.25;
+}
+
+.texto-paso small {
+  display:block;
+  margin-top:4px;
+  color:#617181;
+  font-size:clamp(16px, 4vw, 19px);
+  font-weight:400;
+  line-height:1.35;
+}
+
+.nota-seguridad {
+  width:100%;
+  margin-top:25px;
+  padding:17px;
+  background:#EFFBE9;
+  color:#374757;
+  border-left:6px solid #8EDD65;
+  border-radius:12px;
+  text-align:center;
+  font-size:clamp(17px, 4.5vw, 21px);
+  font-weight:600;
+  line-height:1.45;
+}
+
 </style>
 
 </head>
@@ -671,7 +760,38 @@ select,
 
 <h2>Consulta de Activos UNIFIN</h2>
 
-  <h3>Escanear QR</h3>
+<div class="intro-consulta">
+
+  <span class="etiqueta-segura">
+    ✓ Consulta segura
+  </span>
+
+  <p>
+    Consulte la información de su activo escaneando
+    el código QR o ingresando su número manualmente.
+  </p>
+
+  <p>
+    No necesita instalar ninguna aplicación.
+  </p>
+
+</div>
+
+  <div class="titulo-metodo">
+
+  <span class="numero-paso">1</span>
+
+  <div class="texto-paso">
+
+    <strong>Escanear código QR</strong>
+
+    <small>
+      Seleccione la cámara trasera de su teléfono.
+    </small>
+
+  </div>
+
+</div>
 
 <button
   type="button"
@@ -784,7 +904,21 @@ select,
 
   <hr>
 
-  <h3>Buscar Manualmente (Ingrese el número del QR)</h3>
+  <div class="titulo-metodo">
+
+  <span class="numero-paso">2</span>
+
+  <div class="texto-paso">
+
+    <strong>Buscar manualmente</strong>
+
+    <small>
+      Ingrese el número que aparece debajo del código QR.
+    </small>
+
+  </div>
+
+</div>
 
   <input
     type="text"
@@ -797,6 +931,10 @@ select,
   onclick="buscarManual()">
   🔍 Buscar Activo
 </button>
+
+<div class="nota-seguridad">
+  🔒 La información se consulta directamente en el sistema seguro de UNIFIN.
+</div>
 
 </div>
 
