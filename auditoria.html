@@ -1261,13 +1261,10 @@ html.modo-ligero #videoCamaraInterna {
 #labelOdometro,
 #labelContadorHoras,
 #labelVideoActivo {
-  width:100%;
-  max-width:100%;
+  width:100% !important;
+  max-width:100% !important;
+  min-width:0;
   box-sizing:border-box;
-  font-size:30px !important;
-  line-height:1.4 !important;
-  white-space:normal !important;
-  overflow-wrap:anywhere;
 }
 
 /* Mismo tamaño para los íconos */
@@ -1607,14 +1604,11 @@ Tipo de activo
 
   Foto frontal
 
-  <span style="
-    color:#FF8E72;
-    font-size:34px;
-    font-weight:700;
-    margin-left:5px;
-  ">
-    *
-  </span>
+  <span
+  class="required-star"
+  style="margin-left:5px;">
+  *
+</span>
 
 </div>
 
@@ -10781,11 +10775,14 @@ try {
     const sesionRecuperada =
   restaurarSesionLocal();
 
-if (
-  sesionRecuperada.tipoActivo
-) {
+if (sesionRecuperada.tipoActivo) {
 
   validarTipoActivo();
+
+  mostrarDeteccionTipo(
+    sesionRecuperada.tipoActivo,
+    descripcionActivoActual
+  );
 
 } else {
 
