@@ -1,5 +1,5 @@
 const CACHE_NAME =
-  "unifin-pwa-v1";
+  "unifin-pwa-v2";
 
 const ARCHIVOS_APP = [
 
