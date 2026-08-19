@@ -1167,6 +1167,22 @@ html.modo-ligero #videoCamaraInterna {
   }
 }
 
+/* =========================================
+   FOTOGRAFÍA PROTEGIDA PENDIENTE
+========================================= */
+
+.btnFoto.pendiente {
+  background:#FFD071 !important;
+  color:#374757 !important;
+}
+
+.estado-foto.pendiente {
+  display:block;
+  background:#FFF7E5;
+  color:#374757;
+  border-left-color:#FFD071;
+}
+
 </style>
 </head>
 <body>
@@ -2404,6 +2420,7 @@ let claveSesion = "";
 let descripcionActivoActual = "";
 
 let evidenciasUrls = {};
+let evidenciasProtegidas = {};
 
 /* =========================================
    FOTOGRAFÍAS PENDIENTES EN INDEXEDDB
@@ -3739,6 +3756,140 @@ async function obtenerFotosPendientes() {
 
 }
 
+/* =========================================
+   FOTOGRAFÍAS DISPONIBLES SIN INTERNET
+========================================= */
+
+function evidenciaDisponible(
+  campo
+) {
+
+  return Boolean(
+    evidenciasUrls[campo] ||
+    evidenciasProtegidas[campo]
+  );
+
+}
+
+
+function mostrarFotoProtegidaPendiente(
+  campo,
+  actualizarInterfaz
+) {
+
+  evidenciasProtegidas[campo] =
+    true;
+
+  const nombreEstado =
+    "estado" +
+    campo.charAt(0).toUpperCase() +
+    campo.slice(1);
+
+  const estado =
+    document.getElementById(
+      nombreEstado
+    );
+
+  if (estado) {
+
+    estado.textContent =
+      "🛡️ Fotografía protegida. Pendiente de subir.";
+
+    estado.classList.add(
+      "pendiente"
+    );
+
+    estado.style.display =
+      "block";
+
+  }
+
+  const boton =
+    obtenerBotonFotografia(
+      campo
+    );
+
+  if (boton) {
+
+    boton.classList.remove(
+      "cargando",
+      "completada"
+    );
+
+    boton.classList.add(
+      "pendiente"
+    );
+
+    boton.innerHTML =
+      '<i class="fas fa-shield-halved"></i> ' +
+      "Volver a tomar fotografía";
+
+  }
+
+  if (
+    actualizarInterfaz !== false
+  ) {
+
+    verificarFotosParaUbicacion();
+
+    actualizarGuiaVisual(
+      !restaurandoEvidencias
+    );
+
+    actualizarPanelEvidencias();
+
+  }
+
+}
+
+
+async function restaurarFotosProtegidasPendientes() {
+
+  let registros = [];
+
+  evidenciasProtegidas = {};
+
+  try {
+
+    registros =
+      await obtenerFotosPendientes();
+
+  } catch (error) {
+
+    console.warn(
+      "No fue posible restaurar las fotografías protegidas:",
+      error
+    );
+
+    return;
+
+  }
+
+  registros.forEach(
+    function(registro) {
+
+      if (
+        registro.campo &&
+        !evidenciasUrls[
+          registro.campo
+        ]
+      ) {
+
+        mostrarFotoProtegidaPendiente(
+          registro.campo,
+          false
+        );
+
+      }
+
+    }
+  );
+
+  verificarFotosParaUbicacion();
+  actualizarGuiaVisual(false);
+  actualizarPanelEvidencias();
+
+}
 
 /* =========================================
    LIMPIAR PENDIENTES DE LA AUDITORÍA
@@ -3772,8 +3923,10 @@ async function eliminarFotosPendientesAuditoria() {
 async function subirFotografiaPreparada(
   blob,
   campo,
-  fotoYaProtegida
-) {
+  fotoYaProtegida,
+  ejecutadoPorCola
+)
+{
 
   const boton =
     obtenerBotonFotografia(
@@ -3825,7 +3978,31 @@ async function subirFotografiaPreparada(
 
   if (protegidaLocalmente) {
 
-  actualizarPanelEvidencias();
+  mostrarFotoProtegidaPendiente(
+    campo
+  );
+
+}
+
+/*
+  Sin Internet, terminar inmediatamente.
+  La fotografía ya está protegida.
+*/
+
+if (
+  navigator.onLine === false
+) {
+
+  if (!protegidaLocalmente) {
+
+    throw new Error(
+      "No fue posible proteger la fotografía en este teléfono. " +
+      "No cierre la aplicación e intente tomarla nuevamente."
+    );
+
+  }
+
+  return "";
 
 }
 
@@ -3904,25 +4081,39 @@ async function subirFotografiaPreparada(
 
     if (protegidaLocalmente) {
 
-      const mensajeOriginal =
-        errorSubida &&
-        errorSubida.message
-          ? errorSubida.message
-          : "No fue posible subir la fotografía.";
+  mostrarFotoProtegidaPendiente(
+    campo
+  );
 
-      const errorProtegido =
-        new Error(
-          mensajeOriginal +
-          " La fotografía quedó protegida en el teléfono " +
-          "y se reintentará automáticamente."
-        );
+  /*
+    Cuando la cola automática falla,
+    detenerla para no saturar Internet.
+  */
 
-      errorProtegido.fotoPendiente =
-        true;
+  if (
+    ejecutadoPorCola === true
+  ) {
 
-      throw errorProtegido;
+    const errorProtegido =
+      new Error(
+        "La fotografía continúa protegida y pendiente de subir."
+      );
 
-    }
+    errorProtegido.fotoPendiente =
+      true;
+
+    throw errorProtegido;
+
+  }
+
+  /*
+    Cuando la captura normal falla,
+    permitir tomar la siguiente foto.
+  */
+
+  return "";
+
+}
 
     throw errorSubida;
 
@@ -4031,10 +4222,11 @@ async function reintentarFotosPendientes() {
       try {
 
         await subirFotografiaPreparada(
-          registro.blob,
-          registro.campo,
-          true
-        );
+  registro.blob,
+  registro.campo,
+  true,
+  true
+);
 
       } catch (errorSubida) {
 
@@ -4043,12 +4235,20 @@ async function reintentarFotosPendientes() {
           reintentos para no saturar la conexión.
         */
 
-        mostrarErrorFotografia(
-          registro.campo,
-          errorSubida
-        );
+        mostrarFotoProtegidaPendiente(
+  registro.campo,
+  false
+);
 
-        break;
+actualizarPanelEvidencias();
+
+console.warn(
+  "La fotografía continúa pendiente:",
+  registro.campo,
+  errorSubida
+);
+
+break;
 
       }
 
@@ -5427,6 +5627,16 @@ async function subirBlobCloudinary(
   campo
 ) {
 
+  if (
+  navigator.onLine === false
+) {
+
+  throw new Error(
+    "Sin conexión a Internet."
+  );
+
+}
+
   const urlCloudinary =
     "https://api.cloudinary.com/v1_1/" +
     CLOUDINARY_CLOUD_NAME +
@@ -5541,12 +5751,23 @@ async function subirBlobCloudinary(
       );
 
       ultimoError =
-        error;
+  error;
 
-      if (
-        intento <
-        MAX_INTENTOS
-      ) {
+/*
+  Si se perdió Internet,
+  no realizar más intentos.
+*/
+
+if (
+  navigator.onLine === false
+) {
+  break;
+}
+
+if (
+  intento <
+  MAX_INTENTOS
+) {
 
         const boton =
           document.querySelector(
@@ -5622,6 +5843,10 @@ throw new Error(
 
 function mostrarConfirmacionFoto(campo) {
 
+  delete evidenciasProtegidas[
+  campo
+];
+
   /*
     Si anteriormente apareció un error rojo
     para esta fotografía, ocultarlo porque
@@ -5643,10 +5868,14 @@ function mostrarConfirmacionFoto(campo) {
   if (estado) {
 
     estado.textContent =
-      "✅ Fotografía guardada correctamente";
+  "✅ Fotografía guardada correctamente";
 
-    estado.style.display =
-      "block";
+estado.classList.remove(
+  "pendiente"
+);
+
+estado.style.display =
+  "block";
 
   }
 
@@ -5657,8 +5886,14 @@ function mostrarConfirmacionFoto(campo) {
 
   if (boton) {
 
-    boton.classList.remove("cargando");
-    boton.classList.add("completada");
+    boton.classList.remove(
+  "cargando",
+  "pendiente"
+);
+
+boton.classList.add(
+  "completada"
+);
 
     boton.innerHTML =
       '<i class="fas fa-check"></i> Volver a tomar fotografía';
@@ -8010,20 +8245,29 @@ function obtenerCamposRequeridos(
 ========================================= */
 
 function obtenerEvidenciasFaltantes(
-  tipoActivo
+  tipoActivo,
+  exigirSubidas
 ) {
 
   return obtenerCamposRequeridos(
     tipoActivo
   ).filter(function(campo) {
 
-    return !evidenciasUrls[campo];
+    if (
+      exigirSubidas === true
+    ) {
+
+      return !evidenciasUrls[campo];
+
+    }
+
+    return !evidenciaDisponible(
+      campo
+    );
 
   });
 
 }
-
-
 /* =========================================
    ACTUALIZAR CONTADOR Y PENDIENTES
 ========================================= */
@@ -8084,8 +8328,9 @@ async function actualizarPanelEvidencias() {
       function(campo) {
 
         return Boolean(
-          evidenciasUrls[campo]
-        );
+  evidenciasUrls[campo] ||
+  evidenciasProtegidas[campo]
+);
 
       }
     );
@@ -8330,22 +8575,86 @@ if (
 
         }
 
-        const faltantes =
-          obtenerEvidenciasFaltantes(tipoActivo);
+        const faltantesCaptura =
+  obtenerEvidenciasFaltantes(
+    tipoActivo,
+    false
+  );
 
-        if (faltantes.length > 0) {
+if (
+  faltantesCaptura.length > 0
+) {
 
-          const nombres =
-            faltantes.map(function(campo) {
-              return nombresEvidencias[campo];
-            });
+  const nombres =
+    faltantesCaptura.map(
+      function(campo) {
 
-          throw new Error(
-            "Debe tomar las siguientes fotografías:<br><br>" +
-            nombres.join("<br>")
-          );
+        return nombresEvidencias[
+          campo
+        ];
 
-        }
+      }
+    );
+
+  throw new Error(
+    "Debe tomar las siguientes fotografías:<br><br>" +
+    nombres.join("<br>")
+  );
+
+}
+
+
+/*
+  Comprobar cuáles están protegidas
+  pero todavía no tienen URL.
+*/
+
+let pendientesSubida =
+  obtenerEvidenciasFaltantes(
+    tipoActivo,
+    true
+  );
+
+if (
+  pendientesSubida.length > 0
+) {
+
+  if (
+    navigator.onLine === false
+  ) {
+
+    throw new Error(
+      "Las fotografías están protegidas en este teléfono, " +
+      "pero todavía falta subirlas.<br><br>" +
+      "Conéctese a Internet y espere la carga automática."
+    );
+
+  }
+
+  /*
+    Subirlas una por una antes de enviar.
+  */
+
+  await reintentarFotosPendientes();
+
+  pendientesSubida =
+    obtenerEvidenciasFaltantes(
+      tipoActivo,
+      true
+    );
+
+  if (
+    pendientesSubida.length > 0
+  ) {
+
+    throw new Error(
+      "Algunas fotografías continúan pendientes de subir. " +
+      "Espere un momento e intente nuevamente."
+    );
+
+  }
+
+}
 
         actualizarProgreso(
   30,
@@ -8784,6 +9093,9 @@ if (
 }
 
 restaurarConfirmaciones();
+
+await restaurarFotosProtegidasPendientes();
+
 verificarFotosParaUbicacion();
 mostrarSesionRestaurada();
 actualizarGuiaVisual(false);
