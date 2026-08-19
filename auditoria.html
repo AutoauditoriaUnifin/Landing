@@ -9,6 +9,35 @@
     content="width=device-width, initial-scale=1.0"
   > 
 
+  <link
+  rel="manifest"
+  href="./manifest.webmanifest">
+
+<meta
+  name="theme-color"
+  content="#374757">
+
+<meta
+  name="mobile-web-app-capable"
+  content="yes">
+
+<meta
+  name="apple-mobile-web-app-capable"
+  content="yes">
+
+<meta
+  name="apple-mobile-web-app-status-bar-style"
+  content="default">
+
+<meta
+  name="apple-mobile-web-app-title"
+  content="UNIFIN">
+
+<link
+  rel="apple-touch-icon"
+  sizes="180x180"
+  href="./icon-180.png">
+
   <!-- Fuente -->
   <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;500;700&display=swap" rel="stylesheet">
 
@@ -1139,9 +1168,7 @@ html.modo-ligero #videoCamaraInterna {
 }
 
 </style>
-
 </head>
-
 <body>
   <div
   id="avisoSinConexion"
@@ -9011,3 +9038,89 @@ actualizarEstadoConexion();
 cargarAuditoriaDesdeApi();
 
 </script>
+<script>
+
+/* =========================================
+   REGISTRAR SERVICE WORKER
+========================================= */
+
+if (
+  "serviceWorker" in
+  navigator
+) {
+
+  window.addEventListener(
+    "load",
+    function() {
+
+      navigator.serviceWorker
+        .register(
+          "./service-worker.js",
+          {
+            scope:
+              "./"
+          }
+        )
+        .then(function(registro) {
+
+          console.log(
+            "Aplicación registrada:",
+            registro.scope
+          );
+
+        })
+        .catch(function(error) {
+
+          console.error(
+            "No fue posible registrar la aplicación:",
+            error
+          );
+
+        });
+
+    }
+  );
+
+}
+
+
+/* =========================================
+   ALMACENAMIENTO PERSISTENTE
+========================================= */
+
+window.addEventListener(
+  "load",
+  async function() {
+
+    if (
+      navigator.storage &&
+      navigator.storage.persist
+    ) {
+
+      try {
+
+        const persistente =
+          await navigator.storage.persist();
+
+        console.log(
+          "Almacenamiento persistente:",
+          persistente
+        );
+
+      } catch (error) {
+
+        console.warn(
+          "El navegador no permitió solicitar almacenamiento persistente.",
+          error
+        );
+
+      }
+
+    }
+
+  }
+);
+
+</script>
+</body>
+</html>
