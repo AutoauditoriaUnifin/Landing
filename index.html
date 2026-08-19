@@ -5,6 +5,35 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
+<link
+  rel="manifest"
+  href="./manifest.webmanifest">
+
+<meta
+  name="theme-color"
+  content="#374757">
+
+<meta
+  name="mobile-web-app-capable"
+  content="yes">
+
+<meta
+  name="apple-mobile-web-app-capable"
+  content="yes">
+
+<meta
+  name="apple-mobile-web-app-status-bar-style"
+  content="default">
+
+<meta
+  name="apple-mobile-web-app-title"
+  content="UNIFIN">
+
+<link
+  rel="apple-touch-icon"
+  sizes="180x180"
+  href="./icon-180.png">
+
 <title>Consulta QR UNIFIN</title>
  
 <script src="https://unpkg.com/html5-qrcode"></script>
@@ -740,6 +769,46 @@ select,
   line-height:1.45;
 }
 
+/* =========================================
+   INSTALAR APLICACIÓN
+========================================= */
+
+#panelInstalacionApp {
+  display:none;
+  width:100%;
+  margin:0 0 25px;
+  padding:18px;
+  background:#EFFBE9;
+  color:#374757;
+  border-left:7px solid #8EDD65;
+  border-radius:14px;
+  text-align:center;
+}
+
+#panelInstalacionApp strong {
+  display:block;
+  font-size:clamp(21px, 5.5vw, 27px);
+  line-height:1.3;
+}
+
+#panelInstalacionApp p {
+  margin:10px 0;
+  font-size:clamp(17px, 4.5vw, 21px);
+  line-height:1.45;
+}
+
+#btnInstalarApp {
+  margin-top:15px;
+  background:#118AB2;
+}
+
+#mensajeInstalacionApp {
+  margin-top:12px;
+  font-size:clamp(16px, 4.2vw, 19px);
+  font-weight:600;
+  line-height:1.45;
+}
+
 </style>
 
 </head>
@@ -772,8 +841,34 @@ select,
   </p>
 
   <p>
-    No necesita instalar ninguna aplicación.
+  Puede utilizar este portal desde el navegador
+  o instalarlo en su teléfono.
+</p>
+
+</div>
+
+<div
+  id="panelInstalacionApp"
+  aria-live="polite">
+
+  <strong>
+    📲 Instale la aplicación UNIFIN
+  </strong>
+
+  <p>
+    Acceda al lector y a sus auditorías directamente desde la pantalla de su teléfono.
   </p>
+
+  <button
+    type="button"
+    id="btnInstalarApp"
+    onclick="instalarAplicacion()">
+
+    Instalar aplicación
+
+  </button>
+
+  <div id="mensajeInstalacionApp"></div>
 
 </div>
 
@@ -1665,5 +1760,300 @@ async function consultarActivo(id) {
   </div>
 
 </div>
+<script>
+
+/* =========================================
+   REGISTRAR SERVICE WORKER
+========================================= */
+
+if (
+  "serviceWorker" in
+  navigator
+) {
+
+  window.addEventListener(
+    "load",
+    function() {
+
+      navigator.serviceWorker
+        .register(
+          "./service-worker.js",
+          {
+            scope:
+              "./"
+          }
+        )
+        .then(function(registro) {
+
+          console.log(
+            "Aplicación UNIFIN registrada:",
+            registro.scope
+          );
+
+        })
+        .catch(function(error) {
+
+          console.error(
+            "No fue posible registrar la aplicación:",
+            error
+          );
+
+        });
+
+    }
+  );
+
+}
+
+
+/* =========================================
+   INSTALACIÓN EN TELÉFONO
+========================================= */
+
+let eventoInstalacionPWA =
+  null;
+
+
+function aplicacionYaInstalada() {
+
+  return (
+
+    window.matchMedia(
+      "(display-mode: standalone)"
+    ).matches ||
+
+    window.navigator
+      .standalone === true
+
+  );
+
+}
+
+
+function esDispositivoIOS() {
+
+  return /iphone|ipad|ipod/i
+    .test(
+      window.navigator.userAgent
+    );
+
+}
+
+
+function esDispositivoAndroid() {
+
+  return /android/i
+    .test(
+      window.navigator.userAgent
+    );
+
+}
+
+
+function mostrarPanelInstalacion() {
+
+  if (
+    aplicacionYaInstalada()
+  ) {
+    return;
+  }
+
+  const panel =
+    document.getElementById(
+      "panelInstalacionApp"
+    );
+
+  if (panel) {
+    panel.style.display = "block";
+  }
+
+}
+
+
+window.addEventListener(
+  "beforeinstallprompt",
+  function(evento) {
+
+    evento.preventDefault();
+
+    eventoInstalacionPWA =
+      evento;
+
+    mostrarPanelInstalacion();
+
+    const boton =
+      document.getElementById(
+        "btnInstalarApp"
+      );
+
+    if (boton) {
+      boton.textContent =
+        "Instalar aplicación";
+    }
+
+  }
+);
+
+
+window.addEventListener(
+  "appinstalled",
+  function() {
+
+    eventoInstalacionPWA =
+      null;
+
+    const panel =
+      document.getElementById(
+        "panelInstalacionApp"
+      );
+
+    if (panel) {
+      panel.style.display = "none";
+    }
+
+  }
+);
+
+
+async function instalarAplicacion() {
+
+  const mensaje =
+    document.getElementById(
+      "mensajeInstalacionApp"
+    );
+
+  if (
+    eventoInstalacionPWA
+  ) {
+
+    eventoInstalacionPWA
+      .prompt();
+
+    const seleccion =
+      await eventoInstalacionPWA
+        .userChoice;
+
+    if (
+      seleccion.outcome ===
+      "accepted"
+    ) {
+
+      if (mensaje) {
+        mensaje.textContent =
+          "Aplicación instalada correctamente.";
+      }
+
+    } else {
+
+      if (mensaje) {
+        mensaje.textContent =
+          "La instalación fue cancelada. Puede intentarlo nuevamente desde el menú del navegador.";
+      }
+
+    }
+
+    eventoInstalacionPWA =
+      null;
+
+    return;
+
+  }
+
+  if (
+    esDispositivoIOS()
+  ) {
+
+    if (mensaje) {
+
+      mensaje.innerHTML =
+        "En Safari presione <b>Compartir</b>, después <b>Agregar a pantalla de inicio</b> y active <b>Abrir como app</b>.";
+
+    }
+
+    return;
+
+  }
+
+  if (mensaje) {
+
+    mensaje.innerHTML =
+      "Abra el menú <b>⋮</b> de Chrome y seleccione <b>Instalar aplicación</b> o <b>Agregar a pantalla principal</b>.";
+
+  }
+
+}
+
+
+window.addEventListener(
+  "load",
+  function() {
+
+    if (
+      aplicacionYaInstalada()
+    ) {
+      return;
+    }
+
+    /*
+      iPhone no utiliza
+      beforeinstallprompt.
+    */
+
+    if (
+      esDispositivoIOS()
+    ) {
+
+      mostrarPanelInstalacion();
+
+      const boton =
+        document.getElementById(
+          "btnInstalarApp"
+        );
+
+      if (boton) {
+        boton.textContent =
+          "Ver cómo instalar";
+      }
+
+      return;
+    }
+
+    /*
+      En Android mostrar ayuda
+      si Chrome no presenta el evento.
+    */
+
+    if (
+      esDispositivoAndroid()
+    ) {
+
+      setTimeout(function() {
+
+        if (
+          !eventoInstalacionPWA
+        ) {
+
+          mostrarPanelInstalacion();
+
+          const boton =
+            document.getElementById(
+              "btnInstalarApp"
+            );
+
+          if (boton) {
+            boton.textContent =
+              "Cómo instalar";
+          }
+
+        }
+
+      }, 2500);
+
+    }
+
+  }
+);
+
+</script>
 </body>
 </html>
