@@ -1,5 +1,4 @@
-const CACHE_NAME =
-  "unifin-pwa-v2";
+const CACHE_NAME = "unifin-pwa-v6";
 
 const ARCHIVOS_APP = [
 
