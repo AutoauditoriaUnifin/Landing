@@ -878,25 +878,6 @@ body {
     0 8px 20px rgba(31,53,87,.18);
 }
 
-/* Línea superior de marca */
-.carga-auditoria-contenido::before {
-  content:"";
-  position:absolute;
-  top:0;
-  left:0;
-  right:0;
-  height:7px;
-
-  background: linear-gradient(
-  90deg,
-  #118AB2 0%,
-  #118AB2 52%,
-  #3BA69C 72%,
-  #65C982 87%,
-  #8EDD65 100%
-);
-}
-
 .carga-auditoria-logo {
   display:block;
   width:min(230px, 78%);
@@ -965,10 +946,12 @@ body {
 }
 
 /* =========================================
-   FRANJA EJECUTIVA LANDING UNIFIN
+   FRANJA EJECUTIVA UNIFIN
+   IGUAL AL FORMULARIO
 ========================================= */
 
-.container {
+.container,
+.carga-auditoria-contenido {
   background:
     linear-gradient(
       90deg,
