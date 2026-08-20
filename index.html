@@ -822,6 +822,145 @@ body {
   background:#118AB2 !important;
   min-height:100vh;
 }
+
+/* =========================================
+   CARGA EJECUTIVA UNIFIN
+========================================= */
+
+#pantallaCargaAuditoria {
+  display:none;
+  position:fixed;
+  inset:0;
+  z-index:30000;
+
+  align-items:center;
+  justify-content:center;
+
+  padding:
+    max(22px, env(safe-area-inset-top))
+    max(18px, env(safe-area-inset-right))
+    max(22px, env(safe-area-inset-bottom))
+    max(18px, env(safe-area-inset-left));
+
+  background:
+    radial-gradient(
+      circle at top left,
+      rgba(255,255,255,.18),
+      transparent 38%
+    ),
+    linear-gradient(
+      145deg,
+      #118AB2 0%,
+      #0D6E8C 100%
+    );
+}
+
+.carga-auditoria-contenido {
+  position:relative;
+  overflow:hidden;
+
+  width:100%;
+  max-width:460px;
+
+  padding:
+    clamp(34px, 8vw, 48px)
+    clamp(22px, 6vw, 38px)
+    34px;
+
+  background:#FFFFFF;
+  border:1px solid rgba(255,255,255,.85);
+  border-radius:24px;
+
+  text-align:center;
+
+  box-shadow:
+    0 28px 65px rgba(31,53,87,.35),
+    0 8px 20px rgba(31,53,87,.18);
+}
+
+/* Línea superior de marca */
+.carga-auditoria-contenido::before {
+  content:"";
+  position:absolute;
+  top:0;
+  left:0;
+  right:0;
+  height:7px;
+
+  background:linear-gradient(
+    90deg,
+    #118AB2 0%,
+    #8EDD65 100%
+  );
+}
+
+.carga-auditoria-logo {
+  display:block;
+  width:min(230px, 78%);
+  height:auto;
+  margin:0 auto 30px;
+}
+
+.carga-auditoria-spinner {
+  width:58px;
+  height:58px;
+  margin:0 auto 24px;
+
+  border:6px solid #D8EAF1;
+  border-top-color:#118AB2;
+  border-right-color:#8EDD65;
+  border-radius:50%;
+
+  animation:girarCargaAuditoria .9s linear infinite;
+}
+
+.carga-auditoria-titulo {
+  color:#1F3557;
+  font-size:clamp(28px, 7vw, 38px);
+  font-weight:700;
+  line-height:1.2;
+  letter-spacing:-.3px;
+}
+
+.carga-auditoria-texto {
+  margin-top:14px;
+
+  color:#374757;
+  font-size:clamp(18px, 4.8vw, 23px);
+  font-weight:500;
+  line-height:1.45;
+}
+
+.carga-auditoria-seguridad {
+  display:inline-block;
+  margin-top:24px;
+  padding:8px 14px;
+
+  background:#EFFBE9;
+  color:#374757;
+  border-radius:20px;
+
+  font-size:14px;
+  font-weight:700;
+  letter-spacing:.6px;
+  text-transform:uppercase;
+}
+
+@media (max-width:480px) {
+
+  .carga-auditoria-contenido {
+    max-width:390px;
+    padding:36px 20px 28px;
+    border-radius:20px;
+  }
+
+  .carga-auditoria-logo {
+    width:min(210px, 75%);
+    margin-bottom:25px;
+  }
+
+}
+
 </style>
 
 </head>
@@ -1819,8 +1958,12 @@ async function consultarActivo(id) {
     </div>
 
     <div class="carga-auditoria-texto">
-      Cargando auditoría...
-    </div>
+  Preparando su autoauditoría...
+</div>
+
+<div class="carga-auditoria-seguridad">
+  Conexión segura
+</div>
 
   </div>
 
