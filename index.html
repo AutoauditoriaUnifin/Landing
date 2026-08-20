@@ -1254,6 +1254,32 @@ try {
 
     camaraActiva = true;
 
+    /*
+  Bajar automáticamente hasta la cámara
+  cuando el visor ya esté abierto.
+*/
+
+setTimeout(function() {
+
+  const visorCamara =
+    document.getElementById(
+      "reader"
+    );
+
+  if (
+    visorCamara &&
+    camaraActiva
+  ) {
+
+    visorCamara.scrollIntoView({
+      behavior: "smooth",
+      block: "center"
+    });
+
+  }
+
+}, 350);
+
   } catch (error) {
 
     camaraActiva = false;
