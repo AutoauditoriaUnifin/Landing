@@ -1123,9 +1123,36 @@ async function mostrarSelectorCamaras() {
       opcion.value =
         camara.id;
 
-      opcion.textContent =
-        camara.label ||
-        "Cámara " + (indice + 1);
+      const nombreCamara =
+  String(
+    camara.label || ""
+  ).toLowerCase();
+
+if (
+  nombreCamara.includes("back") ||
+  nombreCamara.includes("rear") ||
+  nombreCamara.includes("environment") ||
+  nombreCamara.includes("trasera")
+) {
+
+  opcion.textContent =
+    "Cámara trasera";
+
+} else if (
+  nombreCamara.includes("front") ||
+  nombreCamara.includes("user") ||
+  nombreCamara.includes("frontal")
+) {
+
+  opcion.textContent =
+    "Cámara frontal";
+
+} else {
+
+  opcion.textContent =
+    "Cámara " + (indice + 1);
+
+}
 
       selector.appendChild(opcion);
 
