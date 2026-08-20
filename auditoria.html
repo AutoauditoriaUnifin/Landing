@@ -1222,6 +1222,478 @@ body {
   }
 
 }
+
+/* =========================================
+   FORMULARIO EJECUTIVO UNIFIN
+========================================= */
+
+html {
+  background: #118AB2;
+}
+
+body {
+  min-height: 100vh;
+  color: #374757;
+
+  background:
+    radial-gradient(
+      circle at top left,
+      rgba(255,255,255,.18),
+      transparent 35%
+    ),
+    linear-gradient(
+      145deg,
+      #118AB2,
+      #0D6E8C
+    ) !important;
+}
+
+/* Tarjeta blanca principal */
+#tarjetaPrincipalFormulario {
+  position: relative;
+
+  width: min(96%, 980px);
+  max-width: 980px;
+
+  margin: 0 auto;
+  padding: clamp(30px, 5vw, 48px);
+
+  background: #FFFFFF;
+
+  border: 1px solid rgba(255,255,255,.85);
+  border-radius: 26px;
+
+  box-shadow:
+    0 30px 75px rgba(31,53,87,.32),
+    0 8px 24px rgba(31,53,87,.18);
+}
+
+/* Línea superior corporativa */
+#tarjetaPrincipalFormulario::before {
+  content: "";
+
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+
+  height: 7px;
+
+  background: linear-gradient(
+    90deg,
+    #118AB2,
+    #8EDD65
+  );
+
+  border-radius: 26px 26px 0 0;
+}
+
+/* Logo */
+#tarjetaPrincipalFormulario > div:first-child {
+  margin: 0 0 22px !important;
+  padding-top: 8px;
+  text-align: center;
+}
+
+#tarjetaPrincipalFormulario > div:first-child img {
+  display: block;
+
+  width: min(270px, 76%) !important;
+  max-width: 270px !important;
+  height: auto;
+
+  margin: 0 auto;
+}
+
+/* Contenido interior */
+#contenidoAuditoria {
+  width: 100%;
+  max-width: none;
+
+  margin: 0;
+  padding: 0;
+
+  background: transparent;
+  box-shadow: none;
+}
+
+/* Título principal */
+#tarjetaPrincipalFormulario h1 {
+  margin: 8px 0 32px !important;
+
+  color: #1F3557 !important;
+
+  font-size: clamp(
+    30px,
+    5vw,
+    44px
+  ) !important;
+
+  font-weight: 700;
+  line-height: 1.2;
+  text-align: center;
+}
+
+#tarjetaPrincipalFormulario h1::after {
+  content: "";
+
+  display: block;
+
+  width: 78px;
+  height: 5px;
+
+  margin: 17px auto 0;
+
+  background: #118AB2;
+  border-radius: 20px;
+}
+
+/* Información del activo */
+.info {
+  margin-bottom: 28px;
+  padding: clamp(20px, 4vw, 28px);
+
+  color: #374757;
+
+  background: linear-gradient(
+    135deg,
+    #EEF7FB,
+    #EEF2F5
+  );
+
+  border: 1px solid #D8EAF1;
+  border-left: 7px solid #118AB2;
+  border-radius: 16px;
+
+  box-shadow: 0 8px 22px rgba(55,71,87,.09);
+}
+
+.info p {
+  margin: 12px 0;
+
+  color: #374757;
+
+  font-size: clamp(
+    18px,
+    2.4vw,
+    23px
+  ) !important;
+
+  line-height: 1.5;
+}
+
+.info p strong {
+  color: #1F3557;
+  font-weight: 700;
+}
+
+/* Aviso del tipo seleccionado */
+#estadoInicial {
+  padding: 18px !important;
+  margin: 20px 0 !important;
+
+  color: #374757 !important;
+
+  background: #EEF7FB !important;
+
+  border: 1px solid #D8EAF1 !important;
+  border-left: 6px solid #118AB2 !important;
+  border-radius: 13px !important;
+
+  font-size: clamp(
+    18px,
+    2.3vw,
+    22px
+  ) !important;
+
+  line-height: 1.45;
+}
+
+/* Encabezados de fotografías */
+.evidencia-titulo {
+  width: 100%;
+
+  margin-top: 25px !important;
+  padding: 16px 18px !important;
+
+  color: #1F3557 !important;
+  background: #EEF7FB !important;
+
+  border-left: 6px solid #118AB2 !important;
+  border-radius: 12px !important;
+
+  font-size: clamp(
+    20px,
+    2.5vw,
+    26px
+  ) !important;
+
+  font-weight: 700 !important;
+  line-height: 1.35 !important;
+
+  box-shadow: 0 4px 12px rgba(55,71,87,.06);
+}
+
+.evidencia-titulo i {
+  color: #118AB2 !important;
+  margin-right: 10px;
+}
+
+/* Asteriscos obligatorios */
+.required-star {
+  color: #FF8E72 !important;
+  font-size: inherit !important;
+  font-weight: 700;
+}
+
+/* Etiquetas generales */
+label {
+  display: block;
+
+  margin-top: 24px;
+
+  color: #1F3557;
+
+  font-size: clamp(
+    19px,
+    2.4vw,
+    25px
+  ) !important;
+
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+/* Campos */
+select,
+textarea,
+input {
+  width: 100%;
+
+  padding: 16px 17px;
+
+  color: #374757;
+  background: #FFFFFF;
+
+  border: 2px solid #B8CDD8;
+  border-radius: 12px;
+
+  font-family: inherit;
+
+  font-size: clamp(
+    18px,
+    2.2vw,
+    22px
+  ) !important;
+
+  box-sizing: border-box;
+  transition:
+    border-color .2s ease,
+    box-shadow .2s ease;
+}
+
+select:focus,
+textarea:focus,
+input:focus {
+  outline: none;
+
+  border-color: #118AB2;
+
+  box-shadow:
+    0 0 0 4px
+    rgba(17,138,178,.15);
+}
+
+/* Botones principales */
+button,
+.btn,
+.btnFoto,
+#btnEnviar {
+  min-height: 60px;
+  padding: 16px 20px;
+
+  color: #FFFFFF;
+
+  background: linear-gradient(
+    135deg,
+    #118AB2,
+    #0D6E8C
+  );
+
+  border: none;
+  border-radius: 12px;
+
+  font-family: inherit;
+
+  font-size: clamp(
+    19px,
+    2.5vw,
+    24px
+  ) !important;
+
+  font-weight: 700;
+  line-height: 1.25;
+
+  box-shadow:
+    0 6px 15px
+    rgba(17,138,178,.22);
+
+  transition:
+    transform .15s ease,
+    box-shadow .2s ease;
+}
+
+button:hover,
+.btn:hover,
+.btnFoto:hover {
+  background: #0D6E8C;
+  box-shadow:
+    0 8px 18px
+    rgba(17,138,178,.27);
+}
+
+button:active,
+.btn:active,
+.btnFoto:active {
+  transform: scale(.985);
+}
+
+/* Estados de las fotografías */
+.btnFoto.completada {
+  color: #374757 !important;
+  background: #8EDD65 !important;
+}
+
+.btnFoto.pendiente {
+  color: #374757 !important;
+  background: #FFD071 !important;
+}
+
+.btnFoto.cargando {
+  color: #FFFFFF !important;
+  background: #8A98A6 !important;
+  pointer-events: none;
+}
+
+/* Confirmación de fotografía */
+.estado-foto {
+  margin-top: 12px;
+  padding: 14px 16px;
+
+  color: #374757;
+  background: #EFFBE9;
+
+  border-left: 6px solid #8EDD65;
+  border-radius: 10px;
+
+  font-size: clamp(
+    17px,
+    2.2vw,
+    21px
+  ) !important;
+
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+/* Resumen de evidencias */
+#panelResumenEvidencias {
+  margin: 28px 0;
+  padding: 20px !important;
+
+  color: #374757 !important;
+  background: #EEF7FB !important;
+
+  border: 1px solid #D8EAF1 !important;
+  border-left: 6px solid #118AB2 !important;
+  border-radius: 14px !important;
+
+  box-shadow: 0 5px 16px rgba(55,71,87,.08);
+}
+
+/* Pantalla de carga */
+#loading {
+  color: #374757;
+  background: rgba(255,255,255,.98);
+}
+
+/* =========================================
+   ADAPTACIÓN PARA TELÉFONOS
+========================================= */
+
+@media (max-width: 600px) {
+
+  body {
+    padding: 12px !important;
+  }
+
+  #tarjetaPrincipalFormulario {
+    width: 100%;
+    padding: 24px 14px 28px;
+
+    border-radius: 20px;
+
+    box-shadow:
+      0 18px 45px
+      rgba(31,53,87,.28);
+  }
+
+  #tarjetaPrincipalFormulario::before {
+    height: 6px;
+    border-radius: 20px 20px 0 0;
+  }
+
+  #tarjetaPrincipalFormulario > div:first-child img {
+    width: 70% !important;
+    max-width: 230px !important;
+  }
+
+  #tarjetaPrincipalFormulario h1 {
+    margin-bottom: 25px !important;
+    font-size: 30px !important;
+  }
+
+  .info {
+    padding: 18px 15px;
+    border-left-width: 6px;
+  }
+
+  .info p {
+    font-size: 18px !important;
+  }
+
+  .evidencia-titulo {
+    padding: 15px 13px !important;
+    font-size: 20px !important;
+  }
+
+  label {
+    font-size: 20px !important;
+  }
+
+  select,
+  textarea,
+  input {
+    padding: 15px 13px;
+    font-size: 18px !important;
+  }
+
+  button,
+  .btn,
+  .btnFoto,
+  #btnEnviar {
+    min-height: 58px;
+    padding: 15px 12px;
+
+    font-size: 20px !important;
+    line-height: 1.3;
+  }
+
+  .estado-foto {
+    font-size: 17px !important;
+  }
+}
+
 </style>
 </head>
 <body>
