@@ -3205,6 +3205,32 @@ div:first-child img {
 
 }
 
+/* =========================================
+   EVITAR DESBORDE DE LÍNEAS CORPORATIVAS
+========================================= */
+
+#tarjetaPrincipalFormulario,
+.camara-interna-panel {
+  position: relative;
+  overflow: hidden !important;
+  box-sizing: border-box;
+}
+
+/* Mantener las líneas dentro de las tarjetas */
+
+#tarjetaPrincipalFormulario::before,
+.camara-interna-panel::before {
+  top: 1px !important;
+  left: 1px !important;
+  right: 1px !important;
+
+  width: auto !important;
+  max-width: none !important;
+
+  box-sizing: border-box;
+  transform: none !important;
+}
+
 </style>
 </head>
 <body>
