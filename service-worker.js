@@ -6,7 +6,7 @@ const CACHE_PREFIX =
   "unifin-pwa-";
 
 const CACHE_VERSION =
-  "unifin-pwa-v7-20260821";
+  "unifin-pwa-v9-confirmacion-email";
 
 
 /* =========================================
