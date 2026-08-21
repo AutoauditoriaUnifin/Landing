@@ -2861,64 +2861,21 @@ async function consultarActivo(id) {
 <script>
 
 /* =========================================
-   ACTUALIZACIÓN DEL SERVICE WORKER
+   ACTUALIZACIÓN SILENCIOSA
 ========================================= */
 
-let registroActualizacionPWA =
-  null;
+function activarActualizacionSilenciosa(
+  worker
+) {
 
-let recargaPorActualizacion =
-  false;
-
-
-function mostrarAvisoActualizacion() {
-
-  const aviso =
-    document.getElementById(
-      "avisoActualizacionApp"
-    );
-
-  if (aviso) {
-    aviso.style.display = "flex";
-  }
-
-}
-
-
-async function actualizarAplicacion() {
-
-  const boton =
-    document.getElementById(
-      "btnActualizarApp"
-    );
-
-  if (boton) {
-
-    boton.disabled = true;
-    boton.textContent =
-      "Actualizando...";
-
-  }
-
-  recargaPorActualizacion =
-    true;
-
-  if (
-    registroActualizacionPWA &&
-    registroActualizacionPWA.waiting
-  ) {
-
-    registroActualizacionPWA
-      .waiting
-      .postMessage({
-        tipo:
-          "ACTIVAR_ACTUALIZACION"
-      });
-
+  if (!worker) {
     return;
   }
 
-  window.location.reload();
+  worker.postMessage({
+    tipo:
+      "ACTIVAR_ACTUALIZACION"
+  });
 
 }
 
@@ -2926,25 +2883,6 @@ async function actualizarAplicacion() {
 if (
   "serviceWorker" in navigator
 ) {
-
-  navigator.serviceWorker
-    .addEventListener(
-      "controllerchange",
-      function() {
-
-        if (
-          recargaPorActualizacion
-        ) {
-
-          recargaPorActualizacion =
-            false;
-
-          window.location.reload();
-
-        }
-
-      }
-    );
 
   window.addEventListener(
     "load",
@@ -2958,24 +2896,34 @@ if (
             .register(
               "./service-worker.js",
               {
-                scope:"./",
-                updateViaCache:"none"
+                scope: "./",
+                updateViaCache: "none"
               }
             );
-
-        registroActualizacionPWA =
-          registro;
 
         console.log(
           "Aplicación UNIFIN registrada:",
           registro.scope
         );
 
-        if (registro.waiting) {
+        /*
+          Si ya existe una actualización
+          esperando, activarla silenciosamente.
+        */
 
-          mostrarAvisoActualizacion();
+        if (
+          registro.waiting
+        ) {
+
+          activarActualizacionSilenciosa(
+            registro.waiting
+          );
 
         }
+
+        /*
+          Detectar una versión nueva.
+        */
 
         registro.addEventListener(
           "updatefound",
@@ -2999,7 +2947,9 @@ if (
                     .controller
                 ) {
 
-                  mostrarAvisoActualizacion();
+                  activarActualizacionSilenciosa(
+                    nuevoWorker
+                  );
 
                 }
 
@@ -3010,14 +2960,25 @@ if (
         );
 
         /*
-          Revisar periódicamente si GitHub
-          publicó una versión nueva.
+          Consultar cada hora si GitHub
+          publicó una actualización.
         */
 
         setInterval(
           function() {
 
-            registro.update();
+            registro
+              .update()
+              .catch(
+                function(error) {
+
+                  console.warn(
+                    "No fue posible comprobar actualizaciones:",
+                    error
+                  );
+
+                }
+              );
 
           },
           60 * 60 * 1000
@@ -3286,30 +3247,5 @@ window.addEventListener(
 );
 
 </script>
-<div
-  id="avisoActualizacionApp"
-  role="status"
-  aria-live="polite">
-
-  <div class="aviso-actualizacion-texto">
-
-    <strong>
-      Nueva versión disponible
-    </strong>
-
-    Actualice para obtener las mejoras más recientes.
-
-  </div>
-
-  <button
-    type="button"
-    id="btnActualizarApp"
-    onclick="actualizarAplicacion()">
-
-    Actualizar
-
-  </button>
-
-</div>
 </body>
 </html>
