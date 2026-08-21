@@ -6,8 +6,12 @@ const CACHE_PREFIX =
   "unifin-pwa-";
 
 const CACHE_VERSION =
-  "unifin-pwa-v6-20260820";
+  "unifin-pwa-v7-20260821";
 
+
+/* =========================================
+   ARCHIVOS DISPONIBLES SIN CONEXIÓN
+========================================= */
 
 const ARCHIVOS_BASE = [
 
@@ -18,7 +22,9 @@ const ARCHIVOS_BASE = [
   "./logoo.png",
   "./icon-180.png",
   "./icon-192.png",
-  "./icon-512.png"
+  "./icon-512.png",
+
+  "https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"
 
 ];
 
@@ -50,24 +56,40 @@ self.addEventListener(
                   await fetch(
                     ruta,
                     {
-                      cache:"reload"
+                      cache: "reload"
                     }
                   );
 
-                if (respuesta.ok) {
+                if (
+                  respuesta.ok ||
+                  respuesta.type === "opaque"
+                ) {
 
-                  await cache.put(
-                    ruta,
-                    respuesta
-                  );
+                  try {
+
+                    await cache.put(
+                      ruta,
+                      respuesta.clone()
+                    );
+
+                  } catch (errorCache) {
+
+                    console.warn(
+                      "No fue posible guardar en caché:",
+                      ruta,
+                      errorCache
+                    );
+
+                  }
 
                 }
 
               } catch (error) {
 
                 console.warn(
-                  "No se almacenó:",
-                  ruta
+                  "No se pudo descargar:",
+                  ruta,
+                  error
                 );
 
               }
@@ -85,7 +107,7 @@ self.addEventListener(
 
 
 /* =========================================
-   ACTIVAR ACTUALIZACIÓN
+   ACTIVAR ACTUALIZACIÓN SOLICITADA
 ========================================= */
 
 self.addEventListener(
@@ -98,7 +120,9 @@ self.addEventListener(
         "ACTIVAR_ACTUALIZACION"
     ) {
 
-      self.skipWaiting();
+      evento.waitUntil(
+        self.skipWaiting()
+      );
 
     }
 
@@ -117,12 +141,12 @@ self.addEventListener(
     evento.waitUntil(
       (async function() {
 
-        const nombres =
+        const nombresCache =
           await caches.keys();
 
         await Promise.all(
 
-          nombres.map(
+          nombresCache.map(
             function(nombre) {
 
               if (
@@ -156,7 +180,8 @@ self.addEventListener(
 
 
 /* =========================================
-   DOCUMENTOS: PRIMERO INTERNET
+   DOCUMENTOS HTML:
+   PRIMERO INTERNET Y DESPUÉS CACHÉ
 ========================================= */
 
 async function documentoDesdeInternet(
@@ -168,10 +193,31 @@ async function documentoDesdeInternet(
       solicitud.url
     );
 
+  /*
+    Solo manejar documentos de GitHub Pages.
+    No guardar páginas externas.
+  */
+
+  if (
+    url.origin !==
+    self.location.origin
+  ) {
+
+    return fetch(
+      solicitud
+    );
+
+  }
+
   const esFormulario =
     url.pathname.endsWith(
       "/auditoria.html"
     );
+
+  /*
+    Se guarda una sola copia del formulario,
+    sin AuditID ni Token en el nombre del caché.
+  */
 
   const rutaCanonica =
     esFormulario
@@ -183,18 +229,56 @@ async function documentoDesdeInternet(
       CACHE_VERSION
     );
 
+  const controlador =
+    new AbortController();
+
+  /*
+    Evita que la pantalla se quede cargando
+    indefinidamente cuando Internet falla.
+  */
+
+  const limiteTiempo =
+    setTimeout(
+      function() {
+
+        controlador.abort();
+
+      },
+      8000
+    );
+
   try {
 
     const respuesta =
       await fetch(
-        solicitud
+        solicitud,
+        {
+          signal:
+            controlador.signal
+        }
       );
 
-    if (respuesta.ok) {
+    if (!respuesta.ok) {
+
+      throw new Error(
+        "RESPUESTA_NO_DISPONIBLE"
+      );
+
+    }
+
+    try {
 
       await cache.put(
         rutaCanonica,
         respuesta.clone()
+      );
+
+    } catch (errorCache) {
+
+      console.warn(
+        "No fue posible actualizar el documento en caché:",
+        rutaCanonica,
+        errorCache
       );
 
     }
@@ -203,24 +287,38 @@ async function documentoDesdeInternet(
 
   } catch (error) {
 
-    const guardada =
+    /*
+      Si Internet falla, abrir la copia
+      instalada en el teléfono.
+    */
+
+    const documentoGuardado =
       await cache.match(
         rutaCanonica
       );
 
-    if (guardada) {
-      return guardada;
+    if (documentoGuardado) {
+
+      return documentoGuardado;
+
     }
 
     return new Response(
       "La aplicación no está disponible sin conexión.",
       {
-        status:503,
-        headers:{
+        status: 503,
+
+        headers: {
           "Content-Type":
             "text/plain; charset=UTF-8"
         }
       }
+    );
+
+  } finally {
+
+    clearTimeout(
+      limiteTiempo
     );
 
   }
@@ -229,11 +327,13 @@ async function documentoDesdeInternet(
 
 
 /* =========================================
-   RECURSOS ESTÁTICOS
+   RECURSOS ESTÁTICOS:
+   CACHÉ Y ACTUALIZACIÓN EN SEGUNDO PLANO
 ========================================= */
 
 async function recursoConCache(
-  solicitud
+  solicitud,
+  evento
 ) {
 
   const cache =
@@ -241,61 +341,87 @@ async function recursoConCache(
       CACHE_VERSION
     );
 
-  const guardada =
+  const recursoGuardado =
     await cache.match(
       solicitud
     );
 
-  const actualizacion =
-    fetch(
-      solicitud
-    )
-    .then(
-      async function(respuesta) {
+  const actualizarRecurso =
+    (async function() {
+
+      try {
+
+        const respuesta =
+          await fetch(
+            solicitud
+          );
 
         if (
           respuesta.ok ||
           respuesta.type === "opaque"
         ) {
 
-          await cache.put(
-            solicitud,
-            respuesta.clone()
-          );
+          try {
+
+            await cache.put(
+              solicitud,
+              respuesta.clone()
+            );
+
+          } catch (errorCache) {
+
+            console.warn(
+              "No fue posible actualizar el recurso:",
+              solicitud.url,
+              errorCache
+            );
+
+          }
 
         }
 
         return respuesta;
 
+      } catch (error) {
+
+        return null;
+
       }
-    )
-    .catch(function() {
 
-      return null;
+    })();
 
-    });
+  /*
+    Si ya existe una copia, mostrarla
+    inmediatamente y actualizarla después.
+  */
 
-  if (guardada) {
+  if (recursoGuardado) {
 
-    actualizacion.catch(
-      function() {}
+    evento.waitUntil(
+      actualizarRecurso.then(
+        function() {}
+      )
     );
 
-    return guardada;
+    return recursoGuardado;
 
   }
 
-  const nueva =
-    await actualizacion;
+  const recursoNuevo =
+    await actualizarRecurso;
 
-  if (nueva) {
-    return nueva;
+  if (recursoNuevo) {
+
+    return recursoNuevo;
+
   }
 
   return new Response(
     "",
     {
-      status:504
+      status: 504,
+      statusText:
+        "Recurso no disponible"
     }
   );
 
@@ -313,89 +439,108 @@ self.addEventListener(
     const solicitud =
       evento.request;
 
-    if (
-      solicitud.method !== "GET"
-    ) {
-      return;
-    }
-
-    const url =
-      new URL(
-        solicitud.url
-      );
-
     /*
-      Nunca guardar consultas del activo,
-      Cloudinary o información de auditorías.
-    */
+      El Service Worker no debe intervenir
+      en envíos POST.
+  */
 
-    if (
-      url.hostname.includes(
-        "script.google.com"
-      ) ||
-      url.hostname.includes(
-        "script.googleusercontent.com"
-      ) ||
-      url.hostname.includes(
-        "cloudinary.com"
-      )
-    ) {
-      return;
-    }
+  if (
+    solicitud.method !== "GET"
+  ) {
 
-    if (
-      solicitud.mode === "navigate"
-    ) {
-
-      evento.respondWith(
-        documentoDesdeInternet(
-          solicitud
-        )
-      );
-
-      return;
-    }
-
-    const recursoLocal =
-      url.origin ===
-      self.location.origin;
-
-    const recursoExternoPermitido = [
-
-      "unpkg.com",
-      "fonts.googleapis.com",
-      "fonts.gstatic.com"
-
-    ].includes(
-      url.hostname
-    );
-
-    const tipoPermitido = [
-
-      "style",
-      "script",
-      "font",
-      "image"
-
-    ].includes(
-      solicitud.destination
-    );
-
-    if (
-      tipoPermitido &&
-      (
-        recursoLocal ||
-        recursoExternoPermitido
-      )
-    ) {
-
-      evento.respondWith(
-        recursoConCache(
-          solicitud
-        )
-      );
-
-    }
+    return;
 
   }
-);
+
+  const url =
+    new URL(
+      solicitud.url
+    );
+
+  /*
+    Nunca guardar en caché:
+
+    - Consultas de Apps Script
+    - Respuestas privadas de auditorías
+    - Fotografías de Cloudinary
+    - Videos de Cloudinary
+  */
+
+  if (
+    url.hostname.includes(
+      "script.google.com"
+    ) ||
+    url.hostname.includes(
+      "script.googleusercontent.com"
+    ) ||
+    url.hostname.includes(
+      "cloudinary.com"
+    )
+  ) {
+
+    return;
+
+  }
+
+  /*
+    Navegaciones de index.html y
+    auditoria.html.
+  */
+
+  if (
+    solicitud.mode === "navigate"
+  ) {
+
+    evento.respondWith(
+      documentoDesdeInternet(
+        solicitud
+      )
+    );
+
+    return;
+
+  }
+
+  const recursoLocal =
+    url.origin ===
+    self.location.origin;
+
+  const recursoExternoPermitido = [
+
+    "unpkg.com",
+    "fonts.googleapis.com",
+    "fonts.gstatic.com"
+
+  ].includes(
+    url.hostname
+  );
+
+  const tipoPermitido = [
+
+    "style",
+    "script",
+    "font",
+    "image"
+
+  ].includes(
+    solicitud.destination
+  );
+
+  if (
+    tipoPermitido &&
+    (
+      recursoLocal ||
+      recursoExternoPermitido
+    )
+  ) {
+
+    evento.respondWith(
+      recursoConCache(
+        solicitud,
+        evento
+      )
+    );
+
+  }
+
+});
