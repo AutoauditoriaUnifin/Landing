@@ -24,7 +24,9 @@ const ARCHIVOS_BASE = [
   "./icon-192.png",
   "./icon-512.png",
 
-  "https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"
+  "https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js",
+
+  "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
 
 ];
 
@@ -507,13 +509,14 @@ self.addEventListener(
 
   const recursoExternoPermitido = [
 
-    "unpkg.com",
-    "fonts.googleapis.com",
-    "fonts.gstatic.com"
+  "unpkg.com",
+  "fonts.googleapis.com",
+  "fonts.gstatic.com",
+  "cdnjs.cloudflare.com"
 
-  ].includes(
-    url.hostname
-  );
+].includes(
+  url.hostname
+);
 
   const tipoPermitido = [
 
