@@ -11678,18 +11678,33 @@ if (
 
 restaurarConfirmaciones();
 
-await restaurarFotosProtegidasPendientes();
+/* =========================================
+   MOSTRAR FORMULARIO SIN ESPERAR INDEXEDDB
+========================================= */
 
 verificarFotosParaUbicacion();
 mostrarSesionRestaurada();
 actualizarGuiaVisual(false);
 
-    estadoInicial.style.display =
+estadoInicial.style.display =
   "none";
 
 contenido.style.display =
   "block";
 
+/* =========================================
+   RESTAURAR FOTOS EN SEGUNDO PLANO
+========================================= */
+
+restaurarFotosProtegidasPendientes()
+  .catch(function(error) {
+
+    console.warn(
+      "No fue posible restaurar las fotografías pendientes:",
+      error
+    );
+
+  });
 /*
   Esperar a que termine de dibujarse el
   formulario antes de revisar pendientes.
