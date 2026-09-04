@@ -2653,7 +2653,15 @@ function abrirAutoauditoria(evento, url) {
     evento.preventDefault();
   }
 
-  if (!url) {
+  const urlDestino =
+    String(url || "").trim();
+
+  if (!urlDestino) {
+
+    alert(
+      "No encontramos el enlace de validación."
+    );
+
     return false;
   }
 
@@ -2670,44 +2678,48 @@ function abrirAutoauditoria(evento, url) {
     "hidden";
 
   /*
-    Liberar la cámara y el lector QR
-    antes de abrir el formulario.
+    Liberar el lector QR sin bloquear
+    la navegación al formulario.
   */
 
   try {
 
-    const detencion =
-      detenerScanner();
-
     if (
-      detencion &&
-      typeof detencion.catch === "function"
+      typeof detenerScanner === "function"
     ) {
-      detencion.catch(function() {});
+
+      Promise
+        .resolve(
+          detenerScanner()
+        )
+        .catch(function(error) {
+
+          console.warn(
+            "No fue posible detener el lector:",
+            error
+          );
+
+        });
+
     }
 
   } catch (error) {
 
     console.warn(
-      "No fue necesario detener el lector.",
+      "El lector ya estaba detenido.",
       error
     );
 
   }
 
   /*
-    Reemplazar la landing por el formulario.
-    No se mantiene una segunda pestaña abierta.
+    Abrir el formulario inmediatamente.
   */
 
-  setTimeout(function() {
-
-    window.location.replace(url);
-
-  }, 450);
+  window.location.href =
+    urlDestino;
 
   return false;
-
 }
 
 async function consultarActivo(id) {
