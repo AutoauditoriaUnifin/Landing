@@ -2656,6 +2656,11 @@ function abrirAutoauditoria(evento, url) {
   const urlDestino =
     String(url || "").trim();
 
+    alert(
+  "URL QUE SE INTENTA ABRIR:\n\n" +
+  urlDestino
+);
+
   if (!urlDestino) {
 
     alert(
