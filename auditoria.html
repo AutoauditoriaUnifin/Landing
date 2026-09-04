@@ -1,8 +1,9 @@
 <!DOCTYPE html>
-<html>
-<head>
+<html lang="es-MX"><head>
 
   <base target="_top">
+
+  <title>Mi Activo UNIFIN</title>
 
   <meta
     name="viewport"
@@ -15,7 +16,7 @@
 
 <meta
   name="theme-color"
-  content="#118AB2">
+  content="#374757">
 <meta
   name="mobile-web-app-capable"
   content="yes">
@@ -30,7 +31,7 @@
 
 <meta
   name="apple-mobile-web-app-title"
-  content="UNIFIN">
+  content="Mi Activo">
 
 <link
   rel="apple-touch-icon"
@@ -80,7 +81,7 @@
 
 html {
   min-height: 100%;
-  background: var(--unifin-blue);
+  background: var(--unifin-charcoal);
   scroll-behavior: smooth;
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
@@ -97,17 +98,16 @@ body {
     max(16px, env(safe-area-inset-left));
 
   background:
-    radial-gradient(
-      circle at top left,
-      rgba(255, 255, 255, 0.18),
-      transparent 35%
-    ),
-    linear-gradient(
-      145deg,
-      var(--unifin-blue),
-      var(--unifin-blue-hover)
-    );
-
+  radial-gradient(
+    circle at top left,
+    rgba(255, 255, 255, 0.10),
+    transparent 35%
+  ),
+  linear-gradient(
+    145deg,
+    var(--unifin-charcoal),
+    var(--unifin-dark-blue)
+  );
   color: var(--unifin-charcoal);
 
   font-family:
@@ -960,16 +960,16 @@ body.camara-interna-activa {
     max(14px, env(safe-area-inset-left));
 
   background:
-    radial-gradient(
-      circle at top left,
-      rgba(255, 255, 255, 0.18),
-      transparent 38%
-    ),
-    linear-gradient(
-      145deg,
-      rgba(17, 138, 178, 0.98),
-      rgba(13, 110, 140, 0.99)
-    );
+  radial-gradient(
+    circle at top left,
+    rgba(255, 255, 255, 0.10),
+    transparent 38%
+  ),
+  linear-gradient(
+    145deg,
+    rgba(55, 71, 87, 0.99),
+    rgba(31, 53, 87, 0.99)
+  );
 
   box-sizing: border-box;
   overflow-y: auto;
@@ -1035,15 +1035,7 @@ body.camara-interna-activa {
 
   height: 8px;
 
-  background:
-    linear-gradient(
-      90deg,
-      var(--unifin-blue) 0%,
-      var(--unifin-blue) 52%,
-      #3BA69C 72%,
-      #65C982 87%,
-      var(--unifin-green) 100%
-    );
+  background: var(--unifin-blue);
 
   border-radius:
     20px
@@ -2400,15 +2392,7 @@ html.modo-ligero
 
   height: 9px;
 
-  background:
-    linear-gradient(
-      90deg,
-      #118AB2 0%,
-      #118AB2 52%,
-      #3BA69C 72%,
-      #65C982 87%,
-      #8EDD65 100%
-    );
+  background: var(--unifin-blue);
 
   border-radius:
     24px
@@ -3234,14 +3218,16 @@ div:first-child img {
 </style>
 </head>
 <body>
-  <div
+ <div
   id="avisoSinConexion"
   role="status"
   aria-live="assertive">
 
-  <i class="fas fa-wifi"></i>
+  <i class="fas fa-cloud-arrow-up"></i>
 
-  Sin conexión a Internet. Las fotografías se protegerán en este teléfono y se subirán automáticamente cuando regrese la conexión.
+  <strong>Sin conexión a Internet.</strong>
+  Tus fotografías permanecen protegidas en este teléfono.
+  Se subirán automáticamente cuando vuelva la conexión.
 
 </div>
 <div id="tarjetaPrincipalFormulario">
@@ -3269,7 +3255,7 @@ font-size:42px;
 font-weight:700;
 margin-bottom:30px;
 ">
-  Autoauditoría UNIFIN
+  Mi Activo UNIFIN
 </h1>
 
 <div id="versionFormulario"></div>
@@ -3287,7 +3273,7 @@ margin-bottom:30px;
     font-weight:700;
   ">
   <i class="fas fa-spinner fa-spin"></i>
-  Cargando autoauditoría...
+  Preparando la validación de tu activo...
 </div>
 
 <div id="errorInicial" style="display:none;"></div>
@@ -3298,7 +3284,10 @@ margin-bottom:30px;
 
   <p><strong>Cliente:</strong> <span id="datoCliente"></span></p>
   <p><strong>Activo:</strong> <span id="datoActivo"></span></p>
-  <p><strong>No. Serie:</strong> <span id="datoNumeroSerie"></span></p>
+  <p id="filaNumeroSerie">
+  <strong>No. Serie:</strong>
+  <span id="datoNumeroSerie"></span>
+</p>
   <p><strong>QR Number:</strong> <span id="datoQrNumber"></span></p>
   <p><strong>Anexo:</strong> <span id="datoAnexo"></span></p>
 
@@ -3399,12 +3388,16 @@ margin-bottom:30px;
 ========================= -->
 <div class="aviso-fotografias">
 
-  ⚠️ Después de tomar cada fotografía, espere hasta ver el mensaje:
+  <i class="fas fa-circle-info"
+     style="color:#118AB2;margin-right:7px;"></i>
+  Después de tomar cada fotografía, espere hasta ver el mensaje:
 
   <br><br>
 
   <span style="color:#374757;">
-    ✅ Fotografía guardada correctamente
+    <i class="fas fa-circle-check"
+       style="color:#5A9E3D;margin-right:7px;"></i>
+    Fotografía guardada correctamente
   </span>
 
   <br><br>
@@ -3412,7 +3405,6 @@ margin-bottom:30px;
   En ese momento la fotografía estará protegida aunque la página se actualice.
 
 </div>
-
 <div class="aviso-obligatorio">
 
   <span class="required-star">*</span>
@@ -3885,7 +3877,9 @@ margin-bottom:30px;
     overflow-wrap:anywhere;
   ">
 
-    📍 Ingrese su ubicación manualmente
+    <i class="fas fa-location-dot"
+   style="color:#118AB2;margin-right:7px;"></i>
+Ingrese su ubicación manualmente
 
     <br><br>
 
@@ -3893,7 +3887,7 @@ margin-bottom:30px;
       font-size:17px;
       font-weight:400;
     ">
-      La dirección será convertida en coordenadas aproximadas al enviar la autoauditoría.
+      La dirección será convertida en coordenadas aproximadas al enviar la validación.
     </span>
 
   </div>
@@ -4137,7 +4131,7 @@ margin-bottom:30px;
   style="display:none;">
 
   <i class="fas fa-paper-plane"></i>
-  Enviar autoauditoría
+Enviar validación
 
 </button>
 <!-- =========================
@@ -5782,8 +5776,11 @@ function mostrarFotoProtegidaPendiente(
 
   if (estado) {
 
-    estado.textContent =
-      "🛡️ Fotografía protegida. Pendiente de subir.";
+    estado.innerHTML =
+  '<i class="fas fa-clock" ' +
+    'style="color:#C58A26;margin-right:7px;"></i>' +
+  'Fotografía protegida. ' +
+  'Se subirá automáticamente cuando vuelva la conexión.';
 
     estado.classList.add(
       "pendiente"
@@ -5906,6 +5903,239 @@ async function eliminarFotosPendientesAuditoria() {
 
 }
 
+async function calcularNitidezImagen(blob) {
+
+  return new Promise(function(resolve, reject) {
+
+    const imagen = new Image();
+
+    const urlTemporal =
+      URL.createObjectURL(blob);
+
+    imagen.onload = function() {
+
+      try {
+
+        const maximo = 320;
+
+        let width =
+          imagen.naturalWidth;
+
+        let height =
+          imagen.naturalHeight;
+
+        if (
+          width > maximo ||
+          height > maximo
+        ) {
+
+          const escala =
+            Math.min(
+              maximo / width,
+              maximo / height
+            );
+
+          width =
+            Math.max(
+              1,
+              Math.round(
+                width * escala
+              )
+            );
+
+          height =
+            Math.max(
+              1,
+              Math.round(
+                height * escala
+              )
+            );
+
+        }
+
+        const canvas =
+          document.createElement(
+            "canvas"
+          );
+
+        canvas.width =
+          width;
+
+        canvas.height =
+          height;
+
+        const contexto =
+          canvas.getContext(
+            "2d",
+            {
+              willReadFrequently: true
+            }
+          );
+
+        if (!contexto) {
+
+          throw new Error(
+            "No fue posible analizar la fotografía."
+          );
+
+        }
+
+        contexto.drawImage(
+          imagen,
+          0,
+          0,
+          width,
+          height
+        );
+
+        const datosImagen =
+          contexto.getImageData(
+            0,
+            0,
+            width,
+            height
+          );
+
+        const datos =
+          datosImagen.data;
+
+        const gris =
+          new Float32Array(
+            width * height
+          );
+
+        for (
+          let i = 0;
+          i < datos.length;
+          i += 4
+        ) {
+
+          const indice =
+            i / 4;
+
+          gris[indice] =
+            (
+              datos[i] * 0.299 +
+              datos[i + 1] * 0.587 +
+              datos[i + 2] * 0.114
+            );
+
+        }
+
+        let suma =
+          0;
+
+        let sumaCuadrados =
+          0;
+
+        let cantidad =
+          0;
+
+        for (
+          let y = 1;
+          y < height - 1;
+          y++
+        ) {
+
+          for (
+            let x = 1;
+            x < width - 1;
+            x++
+          ) {
+
+            const centro =
+              y * width + x;
+
+            const laplaciano =
+              gris[centro - width] +
+              gris[centro + width] +
+              gris[centro - 1] +
+              gris[centro + 1] -
+              4 * gris[centro];
+
+            suma +=
+              laplaciano;
+
+            sumaCuadrados +=
+              laplaciano *
+              laplaciano;
+
+            cantidad++;
+
+          }
+
+        }
+
+        let nitidez =
+          0;
+
+        if (cantidad > 0) {
+
+          const promedio =
+            suma / cantidad;
+
+          nitidez =
+            (
+              sumaCuadrados /
+              cantidad
+            ) -
+            (
+              promedio *
+              promedio
+            );
+
+        }
+
+        URL.revokeObjectURL(
+          urlTemporal
+        );
+
+        canvas.width =
+          1;
+
+        canvas.height =
+          1;
+
+        resolve(
+          nitidez
+        );
+
+      } catch (error) {
+
+        URL.revokeObjectURL(
+          urlTemporal
+        );
+
+        reject(
+          error
+        );
+
+      }
+
+    };
+
+    imagen.onerror =
+      function() {
+
+        URL.revokeObjectURL(
+          urlTemporal
+        );
+
+        reject(
+          new Error(
+            "No fue posible analizar la fotografía."
+          )
+        );
+
+      };
+
+    imagen.src =
+      urlTemporal;
+
+  });
+
+}
+
 /* =========================================
    PROTEGER, SUBIR Y GUARDAR FOTOGRAFÍA
 ========================================= */
@@ -5986,9 +6216,9 @@ if (
   if (!protegidaLocalmente) {
 
     throw new Error(
-      "No fue posible proteger la fotografía en este teléfono. " +
-      "No cierre la aplicación e intente tomarla nuevamente."
-    );
+  "Esta fotografía no pudo guardarse en tu teléfono. " +
+  "Debes volver a tomarla antes de continuar."
+);
 
   }
 
@@ -6010,14 +6240,16 @@ if (
     if (protegidaLocalmente) {
 
       boton.innerHTML =
-        '<i class="fas fa-shield-halved"></i> ' +
-        "Fotografía protegida. Subiendo...";
+  '<i class="fas fa-shield-halved"></i> ' +
+  "Fotografía protegida. " +
+  '<i class="fas fa-spinner fa-spin"></i> ' +
+  "Subiendo...";
 
     } else {
 
       boton.innerHTML =
-        '<i class="fas fa-cloud-arrow-up"></i> ' +
-        "Subiendo fotografía...";
+        '<i class="fas fa-spinner fa-spin"></i> ' +
+"Subiendo fotografía...";
 
     }
 
@@ -6278,21 +6510,77 @@ function mostrarErrorFotografia(
 
   if (boton) {
 
-    boton.classList.remove(
-      "cargando"
+  boton.classList.remove(
+    "cargando"
+  );
+
+  const mensajeError =
+    error &&
+    error.message
+      ? String(error.message)
+      : "";
+
+  const esFotoBorrosa =
+    mensajeError.includes(
+      "parece estar borrosa"
     );
 
-    boton.innerHTML =
-      '<i class="fas fa-camera"></i> ' +
-      "Intentar nuevamente";
+  boton.innerHTML =
+    '<i class="fas fa-camera"></i> ' +
+    (
+      esFotoBorrosa
+        ? "Volver a tomar fotografía"
+        : "Intentar nuevamente"
+    );
+
+}
+
+  const mensajeError =
+  error && error.message
+    ? String(error.message)
+    : "No fue posible guardar la fotografía.";
+
+const esFotoBorrosa =
+  mensajeError.includes(
+    "parece estar borrosa"
+  );
+
+if (esFotoBorrosa) {
+
+  const mensaje =
+    document.getElementById("mensaje");
+
+  if (mensaje) {
+
+    mensaje.innerHTML =
+      '<div style="' +
+        'background:#FFF7E8;' +
+        'border-left:6px solid #C58A26;' +
+        'padding:16px;' +
+        'border-radius:10px;' +
+        'color:#374757;' +
+        'line-height:1.5;' +
+      '">' +
+
+        '<i class="fas fa-triangle-exclamation" ' +
+          'style="color:#C58A26;margin-right:8px;"></i>' +
+
+        '<strong>La fotografía está demasiado borrosa.</strong><br>' +
+
+        'Mantén el teléfono firme, asegúrate de tener buena iluminación ' +
+        'y vuelve a tomar la fotografía.' +
+
+      '</div>';
 
   }
 
+} else {
+
   mostrarError(
-    error && error.message
-      ? error.message
-      : "No fue posible guardar la fotografía."
+    mensajeError
   );
+
+}
 
   /*
     Identificar a qué fotografía pertenece
@@ -6329,32 +6617,31 @@ function ocultarErrorFotografia(
       "mensaje"
     );
 
-  if (!mensaje) {
+  if (
+    !mensaje
+  ) {
     return;
   }
 
-  /*
-    Solamente borrar el error si pertenece
-    a la fotografía que acaba de subirse.
-  */
+  const tipoMensaje =
+    mensaje.dataset.tipoMensaje;
+
+  const campoFoto =
+    mensaje.dataset.campoFoto;
 
   if (
-    mensaje.dataset.tipoMensaje ===
-      "fotografia" &&
-    mensaje.dataset.campoFoto ===
-      campo
+    tipoMensaje === "fotografia" &&
+    campoFoto === campo
   ) {
 
-    mensaje.innerHTML =
-      "";
+    mensaje.innerHTML = "";
 
-    mensaje.removeAttribute(
-      "data-tipo-mensaje"
-    );
+    mensaje.style.display =
+      "none";
 
-    mensaje.removeAttribute(
-      "data-campo-foto"
-    );
+    delete mensaje.dataset.tipoMensaje;
+
+    delete mensaje.dataset.campoFoto;
 
   }
 
@@ -6585,6 +6872,56 @@ mostrarMensajeCamaraInterna(
         calidad
       );
 
+      try {
+
+  const valorNitidez =
+    await calcularNitidezImagen(
+      blob
+    );
+
+  console.log(
+    "Nitidez de fotografía:",
+    campoCapturado,
+    valorNitidez
+  );
+
+  const UMBRAL_NITIDEZ =
+    70;
+
+  if (
+    valorNitidez <
+    UMBRAL_NITIDEZ
+  ) {
+
+    throw new Error(
+      "La fotografía parece estar borrosa. " +
+      "Mantén el teléfono firme, asegúrate de que haya buena iluminación " +
+      "y vuelve a tomarla."
+    );
+
+  }
+
+} catch (errorNitidez) {
+
+  if (
+    errorNitidez &&
+    errorNitidez.message &&
+    errorNitidez.message.includes(
+      "parece estar borrosa"
+    )
+  ) {
+
+    throw errorNitidez;
+
+  }
+
+  console.warn(
+    "No fue posible medir la nitidez:",
+    errorNitidez
+  );
+
+}
+
     if (
   !blob ||
   blob.size <= 0
@@ -6649,8 +6986,9 @@ canvas =
     if (!protegida) {
 
       throw new Error(
-        "No fue posible proteger la fotografía en el teléfono."
-      );
+  "Esta fotografía no pudo guardarse en tu teléfono. " +
+  "Debes volver a tomarla antes de continuar."
+);
 
     }
 
@@ -6659,9 +6997,11 @@ canvas =
     */
 
     mostrarMensajeCamaraInterna(
-      "✅ Fotografía protegida correctamente.",
-      false
-    );
+  '<i class="fas fa-circle-check" ' +
+  'style="color:#5A9E3D;margin-right:7px;"></i>' +
+  "Fotografía protegida correctamente.",
+  false
+);
 
     if (botonCapturar) {
 
@@ -6673,9 +7013,11 @@ canvas =
 
     if (botonFoto) {
 
-      botonFoto.innerHTML =
-        '<i class="fas fa-shield-halved"></i> ' +
-        "Fotografía protegida. Subiendo...";
+      boton.innerHTML =
+  '<i class="fas fa-shield-halved"></i> ' +
+  "Fotografía protegida. " +
+  '<i class="fas fa-spinner fa-spin"></i> ' +
+  "Subiendo...";
 
     }
 
@@ -7686,36 +8028,55 @@ async function subirBlobCloudinary(
 
       if (!respuesta.ok) {
 
-        let detalle =
-          "Error " +
-          respuesta.status;
+  let detalleTecnico =
+    "Error HTTP " +
+    respuesta.status;
 
-        try {
+  try {
 
-          const errorCloudinary =
-            await respuesta.json();
+    const errorCloudinary =
+      await respuesta.json();
 
-          if (
-            errorCloudinary.error &&
-            errorCloudinary.error.message
-          ) {
+    if (
+      errorCloudinary.error &&
+      errorCloudinary.error.message
+    ) {
 
-            detalle =
-              errorCloudinary.error.message;
+      detalleTecnico =
+        errorCloudinary.error.message;
 
-          }
+    }
 
-        } catch (error) {
+  } catch (error) {
 
-          // Conservar el código de error HTTP
+    /*
+      Si Cloudinary no devolvió JSON,
+      conservar solamente el código HTTP.
+    */
 
-        }
+  }
 
-        throw new Error(
-          detalle
-        );
+  console.warn(
+    "Cloudinary rechazó la fotografía:",
+    respuesta.status,
+    detalleTecnico
+  );
 
-      }
+  const errorSubida =
+    new Error(
+      "No pudimos procesar esta fotografía en este momento. " +
+      "La fotografía permanece protegida y se volverá a intentar automáticamente."
+    );
+
+  errorSubida.status =
+    respuesta.status;
+
+  errorSubida.esErrorCloudinary =
+    true;
+
+  throw errorSubida;
+
+}
 
       const resultado =
         await respuesta.json();
@@ -7857,8 +8218,10 @@ function mostrarConfirmacionFoto(campo) {
 
   if (estado) {
 
-    estado.textContent =
-  "✅ Fotografía guardada correctamente";
+    estado.innerHTML =
+  '<i class="fas fa-circle-check" ' +
+    'style="color:#5A9E3D;margin-right:7px;"></i>' +
+  'Fotografía guardada correctamente';
 
 estado.classList.remove(
   "pendiente"
@@ -7886,7 +8249,7 @@ boton.classList.add(
 );
 
     boton.innerHTML =
-      '<i class="fas fa-check"></i> Volver a tomar fotografía';
+      '<i class="fas fa-circle-check"></i> Volver a tomar fotografía'
 
   }
   verificarFotosParaUbicacion();
@@ -8239,14 +8602,18 @@ function mostrarSesionRestaurada() {
       '">' +
         (
           ubicacionManualLista
-            ? '✅ Ubicación manual recuperada correctamente' +
-              '<br><span style="' +
-                'font-size:17px;' +
-                'font-weight:400;' +
-              '">' +
-                'Se convertirá en coordenadas al enviar.' +
-              '</span>'
-            : '✅ Ubicación GPS recuperada correctamente'
+  ? '<i class="fas fa-circle-check" ' +
+      'style="color:#5A9E3D;margin-right:7px;"></i>' +
+    'Ubicación manual recuperada correctamente' +
+    '<br><span style="' +
+      'font-size:17px;' +
+      'font-weight:400;' +
+    '">' +
+      'Se convertirá en coordenadas al enviar.' +
+    '</span>'
+  : '<i class="fas fa-circle-check" ' +
+      'style="color:#5A9E3D;margin-right:7px;"></i>' +
+    'Ubicación GPS recuperada correctamente'
         ) +
       '</div>';
 
@@ -8987,12 +9354,14 @@ function mostrarDeteccionTipo(
   }
 
   mensaje.innerHTML =
-    "✅ Tipo seleccionado automáticamente: " +
-    nombres[tipo] +
-    "<br>" +
-    "<span style='font-weight:400;'>" +
-    "Puede cambiarlo si no es correcto." +
-    "</span>";
+  '<i class="fas fa-circle-check" ' +
+    'style="color:#5A9E3D;margin-right:7px;"></i>' +
+  "Tipo seleccionado automáticamente: " +
+  nombres[tipo] +
+  "<br>" +
+  "<span style='font-weight:400;'>" +
+  "Puede cambiarlo si no es correcto." +
+  "</span>";
 
   mensaje.style.display =
     "block";
@@ -9329,7 +9698,9 @@ function confirmarUbicacionManual() {
         'border-left:5px solid #8EDD65;' +
         'border-radius:10px;' +
       '">' +
-        '✅ Ubicación escrita guardada correctamente' +
+        ''<i class="fas fa-circle-check" ' +
+  'style="color:#5A9E3D;margin-right:7px;"></i>' +
+'Ubicación escrita guardada correctamente' +
       '</div>';
 
   }
@@ -9352,7 +9723,9 @@ function confirmarUbicacionManual() {
         'font-weight:700;' +
         'line-height:1.45;' +
       '">' +
-        '✅ Ubicación manual preparada' +
+        '<i class="fas fa-circle-check" ' +
+  'style="color:#5A9E3D;margin-right:7px;"></i>' +
+'Ubicación manual preparada' +
         '<br>' +
         '<span style="' +
           'font-size:17px;' +
@@ -9497,7 +9870,9 @@ async function getLocation() {
         'font-size:24px;' +
         'font-weight:700;' +
       '">' +
-        '❌ Este navegador no permite obtener la ubicación.' +
+        '<i class="fas fa-triangle-exclamation" ' +
+  'style="color:#FF8E72;margin-right:8px;"></i>' +
+'Este navegador no permite obtener la ubicación.' +
 '</div>';
 
 mostrarFormularioUbicacionManualYBajar();
@@ -9514,17 +9889,27 @@ return;
     ' Buscando ubicación...';
 
   estadoGPS.innerHTML =
-    '<div style="' +
-      'background:#EEF7FB;' +
-      'color:#374757;' +
-      'border-left:6px solid #118AB2;' +
-      'padding:16px;' +
-      'border-radius:10px;' +
-      'font-size:22px;' +
-      'font-weight:700;' +
+  '<div style="' +
+    'background:#EEF7FB;' +
+    'color:#374757;' +
+    'border-left:6px solid #118AB2;' +
+    'padding:16px;' +
+    'border-radius:10px;' +
+    'font-size:22px;' +
+    'font-weight:700;' +
+    'line-height:1.45;' +
+  '">' +
+    '<i class="fas fa-location-dot" ' +
+      'style="color:#118AB2;margin-right:8px;"></i>' +
+    'Buscando tu ubicación...' +
+    '<br>' +
+    '<span style="' +
+      'font-size:17px;' +
+      'font-weight:400;' +
     '">' +
-      '📍 Buscando una ubicación disponible...' +
-    '</div>';
+      'Esto puede tardar algunos segundos.' +
+    '</span>' +
+  '</div>';
 
   try {
 
@@ -9586,17 +9971,27 @@ return;
         ' Reintentando con GPS...';
 
       estadoGPS.innerHTML =
-        '<div style="' +
-          'background:#FFF7E5;' +
-          'color:#374757;' +
-          'border-left:6px solid #FFD071;' +
-          'padding:16px;' +
-          'border-radius:10px;' +
-          'font-size:22px;' +
-          'font-weight:700;' +
-        '">' +
-          '📡 Primer intento sin respuesta. Buscando con GPS...' +
-        '</div>';
+  '<div style="' +
+    'background:#FFF7E5;' +
+    'color:#374757;' +
+    'border-left:6px solid #FFD071;' +
+    'padding:16px;' +
+    'border-radius:10px;' +
+    'font-size:22px;' +
+    'font-weight:700;' +
+    'line-height:1.45;' +
+  '">' +
+    '<i class="fas fa-satellite-dish" ' +
+      'style="color:#C58A26;margin-right:8px;"></i>' +
+    'Estamos buscando una ubicación más precisa...' +
+    '<br>' +
+    '<span style="' +
+      'font-size:17px;' +
+      'font-weight:400;' +
+    '">' +
+      'Mantén activada la ubicación de tu teléfono.' +
+    '</span>' +
+  '</div>';
 
       await new Promise(function(resolve) {
 
@@ -9688,7 +10083,9 @@ const precisionMostrar =
         'font-size:24px;' +
         'font-weight:700;' +
       '">' +
-        '✅ Ubicación capturada correctamente' +
+        '<i class="fas fa-circle-check" ' +
+  'style="color:#4F9D69;margin-right:8px;"></i>' +
+'Ubicación capturada correctamente' +
         (
           precisionMostrar > 0
             ? '<br><span style="' +
@@ -9802,8 +10199,9 @@ const precisionMostrar =
         'font-weight:700;' +
         'line-height:1.45;' +
       '">' +
-        '❌ ' +
-        mensajeGPS +
+        '<i class="fas fa-triangle-exclamation" ' +
+  'style="color:#C58A26;margin-right:8px;"></i>' +
+mensajeGPS +
       '</div>';
 
     botonUbicacion.disabled =
@@ -9946,7 +10344,9 @@ async function ejecutarConReintentos(
           margin-top:15px;
         ">
 
-          ⚠️ Ocurrió un problema al ${nombreOperacion}.<br><br>
+          <i class="fas fa-triangle-exclamation"
+   style="color:#C58A26;margin-right:8px;"></i>
+Ocurrió un problema al ${nombreOperacion}.<br><br>
 
           Reintentando automáticamente
           (${intento + 1} de ${maxIntentos})...
@@ -10052,7 +10452,7 @@ async function enviarDatosAppsScript(formData) {
         reject(
           new Error(
             datos.error ||
-            "No fue posible guardar la autoauditoría."
+            "No fue posible guardar la validación."
           )
         );
         return;
@@ -10105,11 +10505,11 @@ async function enviarDatosAppsScript(formData) {
           limpiar();
 
           resolve({
-            success: true,
-            alreadyProcessed: true,
-            message:
-              "Autoauditoría enviada correctamente."
-          });
+  success: true,
+  alreadyProcessed: true,
+  message:
+    "Ya completaste la validación de este activo con éxito."
+});
 
         }
 
@@ -10553,8 +10953,8 @@ if (formulario) {
         true;
 
       botonEnviar.innerHTML =
-        '<i class="fas fa-spinner fa-spin"></i>' +
-        " Enviando autoauditoría...";
+  '<i class="fas fa-spinner fa-spin"></i>' +
+  " Enviando validación...";
 
       let temporizadorProgreso =
         null;
@@ -10808,7 +11208,7 @@ temporizadorProgreso = setInterval(function() {
     progresoVisual += 5;
 
     let textoProgreso =
-      "Guardando autoauditoría...";
+      "Guardando la validación...";
 
     if (progresoVisual >= 50) {
 
@@ -10841,7 +11241,7 @@ await ejecutarConReintentos(
     );
 
   },
-  "guardar la autoauditoría",
+  "guardar la validación",
   3
 );
 
@@ -10853,7 +11253,7 @@ temporizadorProgreso = null;
 
 actualizarProgreso(
   100,
-  "Autoauditoría completada."
+   "Validación completada."
 );
 
         localStorage.removeItem(
@@ -10886,22 +11286,42 @@ localStorage.removeItem(
           "none";
 
         document.getElementById("mensaje").innerHTML = `
-          <div style="
-  background:#91fc5b;
-  color:#374757;
-  padding:25px;
-  border-left:7px solid #8EDD65;
-  border-radius:12px;
-  font-size:25px;
-  font-weight:bold;
-  text-align:center;
-  margin-top:20px;
-">
-  ✅ Autoauditoría enviada correctamente.
-  <br><br>
-  Muchas gracias.
-</div>
-        `;
+  <div style="
+    background:#EFFBE9;
+    color:#374757;
+    padding:22px 24px;
+    border:1px solid rgba(142,221,101,0.55);
+    border-left:7px solid #8EDD65;
+    border-radius:12px;
+    font-size:22px;
+    font-weight:700;
+    line-height:1.5;
+    text-align:center;
+    margin-top:20px;
+  ">
+    <i
+      class="fas fa-circle-check"
+      style="
+        color:#5A9E3D;
+        font-size:28px;
+        margin-right:8px;
+      ">
+    </i>
+
+    Validación enviada correctamente.
+
+    <br>
+
+    <span style="
+      display:inline-block;
+      margin-top:8px;
+      font-size:18px;
+      font-weight:500;
+    ">
+      Gracias. Hemos recibido la información de tu activo.
+    </span>
+  </div>
+`;
         mostrarPantallaFinal();
 
       } catch (error) {
@@ -10926,7 +11346,7 @@ localStorage.removeItem(
 
     botonEnviar.innerHTML =
       '<i class="fas fa-paper-plane"></i>' +
-      " Enviar autoauditoría";
+      " Enviar validación";
 
   }
 
@@ -10944,7 +11364,7 @@ localStorage.removeItem(
 
   mostrarError(
           error.message ||
-          "No fue posible enviar la autoauditoría."
+          "No fue posible enviar la validación."
         );
 
       }
@@ -11075,7 +11495,7 @@ async function cargarAuditoriaDesdeApi() {
 
     if (!auditId || !token) {
       throw new Error(
-        "El enlace de la autoauditoría no es válido."
+        "El enlace de validación no es válido."
       );
     }
 
@@ -11092,11 +11512,78 @@ async function cargarAuditoriaDesdeApi() {
       );
 
     if (!resultado.success) {
-      throw new Error(
-        resultado.message ||
-        "No fue posible abrir la autoauditoría."
-      );
-    }
+
+  if (
+    resultado.code === "ALREADY_SUBMITTED"
+  ) {
+
+    estadoInicial.style.display =
+      "none";
+
+    contenido.style.display =
+      "none";
+
+    errorInicial.style.display =
+      "block";
+
+    errorInicial.innerHTML = `
+      <div style="
+        width:100%;
+        padding:22px 24px;
+        color:#374757;
+        background:#EEF7FB;
+        border:1px solid #D8EAF1;
+        border-left:7px solid #118AB2;
+        border-radius:12px;
+        font-size:21px;
+        font-weight:700;
+        line-height:1.5;
+        text-align:center;
+        margin-top:20px;
+      ">
+
+        <i
+          class="fas fa-circle-check"
+          style="
+            color:#118AB2;
+            font-size:29px;
+            margin-right:8px;
+          ">
+        </i>
+
+        Ya completaste la validación de este activo con éxito.
+
+        <br>
+
+        <span style="
+          display:inline-block;
+          margin-top:9px;
+          font-size:18px;
+          font-weight:500;
+        ">
+          No necesitas realizar ninguna acción adicional.
+        </span>
+
+      </div>
+
+      <button
+        type="button"
+        onclick="abrirEscaner()"
+        style="margin-top:18px;"
+      >
+        <i class="fas fa-qrcode"></i>
+        Escanear otro activo
+      </button>
+    `;
+
+    return;
+  }
+
+  throw new Error(
+    resultado.message ||
+    "No fue posible abrir la validación."
+  );
+}
 
     const audit =
       resultado.audit;
@@ -11113,8 +11600,35 @@ async function cargarAuditoriaDesdeApi() {
     document.getElementById("datoActivo").textContent =
       audit.activo || "Sin información";
 
-    document.getElementById("datoNumeroSerie").textContent =
-      audit.numeroSerie || "Sin información";
+    const numeroSerie =
+  String(audit.numeroSerie || "").trim();
+
+const filaNumeroSerie =
+  document.getElementById("filaNumeroSerie");
+
+const datoNumeroSerie =
+  document.getElementById("datoNumeroSerie");
+
+if (
+  numeroSerie &&
+  numeroSerie.toLowerCase() !== "sin información"
+) {
+
+  datoNumeroSerie.textContent =
+    numeroSerie;
+
+  filaNumeroSerie.style.display =
+    "";
+
+} else {
+
+  datoNumeroSerie.textContent =
+    "";
+
+  filaNumeroSerie.style.display =
+    "none";
+
+}
 
     document.getElementById("datoQrNumber").textContent =
       audit.qrNumber || "Sin información";
@@ -11196,15 +11710,17 @@ setTimeout(function() {
       "block";
 
     errorInicial.innerHTML =
-      '<div class="bloqueado">⚠️ ' +
-      escaparHtml(
-        error.message ||
-        "No fue posible abrir la autoauditoría."
-      ) +
-      '</div>' +
-      '<button type="button" onclick="abrirEscaner()">' +
-      '<i class="fas fa-qrcode"></i> Escanear otro activo' +
-      '</button>';
+  '<div class="bloqueado">' +
+    '<i class="fas fa-triangle-exclamation" ' +
+      'style="color:#C58A26;margin-right:8px;"></i>' +
+    escaparHtml(
+      error.message ||
+      "No fue posible abrir la validación."
+    ) +
+  '</div>' +
+  '<button type="button" onclick="abrirEscaner()">' +
+    '<i class="fas fa-qrcode"></i> Escanear otro activo' +
+  '</button>';
 
   }
 
