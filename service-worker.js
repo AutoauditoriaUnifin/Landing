@@ -6,7 +6,7 @@ const CACHE_PREFIX =
   "unifin-pwa-";
 
 const CACHE_VERSION =
-  "unifin-pwa-v9-confirmacion-email";
+  "unifin-pwa-v10-navegacion-directa";
 
 
 /* =========================================
@@ -490,18 +490,20 @@ self.addEventListener(
   */
 
   if (
-    solicitud.mode === "navigate"
-  ) {
+  solicitud.mode === "navigate"
+) {
 
-    evento.respondWith(
-      documentoDesdeInternet(
-        solicitud
-      )
-    );
+  /*
+    Las páginas HTML siempre se abren
+    directamente desde GitHub Pages.
 
-    return;
+    El Service Worker NO interviene
+    en index.html ni auditoria.html.
+  */
 
-  }
+  return;
+
+}
 
   const recursoLocal =
     url.origin ===
