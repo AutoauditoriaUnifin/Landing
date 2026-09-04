@@ -51,6 +51,10 @@
   href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700&display=swap"
   rel="stylesheet">
 
+<link
+  rel="stylesheet"
+  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+
 <style>
 
 /* =========================================
@@ -1417,17 +1421,14 @@ body {
   color:var(--unifin-charcoal);
 
   background:
-    linear-gradient(
-      90deg,
-      #118AB2 0%,
-      #118AB2 52%,
-      #3BA69C 72%,
-      #65C982 87%,
-      #8EDD65 100%
-    )
-    top center / 100% 7px
-    no-repeat,
-    #FFFFFF;
+  linear-gradient(
+    90deg,
+    var(--unifin-blue),
+    var(--unifin-blue)
+  )
+  top center / 100% 7px
+  no-repeat,
+  #FFFFFF;
 
   border:1px solid rgba(255,255,255,.92);
   border-radius:16px;
@@ -1521,22 +1522,38 @@ body {
 
 </div>
 
-<h2>Consulta de Activos UNIFIN</h2>
+<h2>Mi Activo UNIFIN</h2>
 
 <div class="intro-consulta">
 
   <span class="etiqueta-segura">
-    ✓ Consulta segura
-  </span>
+  <i class="fas fa-shield-halved"></i>
+  Validación segura
+</span>
 
-  <p>
-    Consulte la información de su activo escaneando
-    el código QR o ingresando su número manualmente.
+  <p style="
+    font-size:22px;
+    font-weight:700;
+    color:#1F3557;
+    margin-bottom:14px;
+  ">
+    Validación anual de tu activo
   </p>
 
   <p>
-  Puede utilizar este portal desde el navegador de su teléfono móvil.
-</p>
+    Como parte de tu contrato de arrendamiento,
+    UNIFIN realiza una verificación anual del estado de tu activo.
+  </p>
+
+  <p>
+    Este proceso es un requisito anual de tu contrato
+    y toma menos de 5 minutos.
+  </p>
+
+  <p>
+    Escanea el código QR de tu activo o ingresa
+    el número manualmente para comenzar.
+  </p>
 
 </div>
 
@@ -1545,8 +1562,9 @@ body {
   aria-live="polite">
 
   <strong>
-    📲 Instale la aplicación UNIFIN
-  </strong>
+  <i class="fas fa-mobile-screen-button"></i>
+  Instale la aplicación UNIFIN
+</strong>
 
   <p>
     Acceda al lector y a sus auditorías directamente desde la pantalla de su teléfono.
@@ -1585,7 +1603,10 @@ body {
   type="button"
   id="btnSeleccionarCamara"
   onclick="mostrarSelectorCamaras()">
-  📷 Seleccionar cámara
+
+  <i class="fas fa-camera"></i>
+  Seleccionar cámara
+
 </button>
 
 <div id="reader"></div>
@@ -1594,7 +1615,10 @@ body {
   type="button"
   id="btnReiniciarScanner"
   onclick="reiniciarScanner()">
-  🔄 Volver a Escanear
+
+  <i class="fas fa-rotate-right"></i>
+  Volver a Escanear
+
 </button>
 
 <!-- =========================================
@@ -1614,12 +1638,12 @@ body {
       class="modal-camara-titulo">
 
       <span
-        class="modal-camara-icono"
-        aria-hidden="true">
+  class="modal-camara-icono"
+  aria-hidden="true">
 
-        📷
+  <i class="fas fa-camera"></i>
 
-      </span>
+</span>
 
       Seleccione una cámara
 
@@ -1657,12 +1681,13 @@ body {
     <div class="modal-camara-acciones">
 
       <button
-        type="button"
-        onclick="abrirCamaraSeleccionada()">
+  type="button"
+  onclick="abrirCamaraSeleccionada()">
 
-        📷 Abrir cámara
+  <i class="fas fa-camera"></i>
+  Abrir cámara
 
-      </button>
+</button>
 
       <button
         type="button"
@@ -1707,11 +1732,17 @@ body {
   type="button"
   id="btnBuscarManual"
   onclick="buscarManual()">
-  🔍 Buscar Activo
+
+  <i class="fas fa-magnifying-glass"></i>
+  Buscar Activo
+
 </button>
 
 <div class="nota-seguridad">
-  🔒 La información se consulta directamente en el sistema seguro de UNIFIN.
+
+  <i class="fas fa-lock"></i>
+  La información se consulta directamente en el sistema seguro de UNIFIN.
+
 </div>
 
 </div>
@@ -2086,13 +2117,75 @@ if (
 
   } catch (error) {
 
-    selector.innerHTML =
-      '<option value="">No fue posible consultar las cámaras</option>';
+  console.error(
+    "Error al consultar cámaras:",
+    error
+  );
 
-    mensaje.textContent =
-      "Debe permitir el acceso a la cámara para continuar.";
+  selector.innerHTML =
+    '<option value="">No fue posible acceder a la cámara</option>';
+
+  const nombreError =
+    String(
+      error &&
+      (
+        error.name ||
+        error.message ||
+        error
+      ) ||
+      ""
+    ).toLowerCase();
+
+  if (
+    nombreError.includes("notallowed") ||
+    nombreError.includes("permission") ||
+    nombreError.includes("denied")
+  ) {
+
+    mensaje.innerHTML = `
+      <strong>No tenemos permiso para usar tu cámara.</strong>
+      <br><br>
+      Para continuar, permite el acceso a la cámara
+      desde la configuración de tu navegador
+      y vuelve a intentarlo.
+    `;
+
+  } else if (
+    nombreError.includes("notfound") ||
+    nombreError.includes("devicesnotfound")
+  ) {
+
+    mensaje.innerHTML = `
+      <strong>No encontramos una cámara disponible.</strong>
+      <br><br>
+      Verifica que tu dispositivo tenga una cámara
+      y que esté funcionando correctamente.
+    `;
+
+  } else if (
+    nombreError.includes("notreadable") ||
+    nombreError.includes("trackstart")
+  ) {
+
+    mensaje.innerHTML = `
+      <strong>La cámara está siendo utilizada por otra aplicación.</strong>
+      <br><br>
+      Cierra otras aplicaciones que estén usando la cámara
+      y vuelve a intentarlo.
+    `;
+
+  } else {
+
+    mensaje.innerHTML = `
+      <strong>No fue posible acceder a la cámara.</strong>
+      <br><br>
+      Revisa los permisos de cámara de tu navegador
+      y vuelve a intentarlo.
+    `;
 
   }
+
+}
 
 }
 
@@ -2207,17 +2300,113 @@ setTimeout(function() {
 
   } catch (error) {
 
-    camaraActiva = false;
+  camaraActiva = false;
 
-    document.getElementById("resultado").innerHTML = `
-      <div class="card">
-        ❌ No fue posible abrir la cámara seleccionada.
-        <br><br>
-        Verifique los permisos de la cámara.
-      </div>
-    `;
+  console.error(
+    "Error al abrir cámara:",
+    error
+  );
+
+  const nombreError =
+    String(
+      error &&
+      (
+        error.name ||
+        error.message ||
+        error
+      ) ||
+      ""
+    ).toLowerCase();
+
+  let titulo =
+    "No fue posible abrir la cámara.";
+
+  let detalle =
+    "Revisa los permisos de cámara de tu navegador y vuelve a intentarlo.";
+
+  if (
+    nombreError.includes("notallowed") ||
+    nombreError.includes("permission") ||
+    nombreError.includes("denied")
+  ) {
+
+    titulo =
+      "El permiso de cámara está desactivado.";
+
+    detalle =
+      "Permite el acceso a la cámara desde la configuración de tu navegador y vuelve a intentarlo.";
+
+  } else if (
+    nombreError.includes("notfound")
+  ) {
+
+    titulo =
+      "No encontramos la cámara seleccionada.";
+
+    detalle =
+      "Selecciona otra cámara disponible o revisa la cámara de tu dispositivo.";
+
+  } else if (
+    nombreError.includes("notreadable") ||
+    nombreError.includes("trackstart")
+  ) {
+
+    titulo =
+      "La cámara está ocupada.";
+
+    detalle =
+      "Cierra otras aplicaciones que estén utilizando la cámara y vuelve a intentarlo.";
 
   }
+
+  document.getElementById(
+    "resultado"
+  ).innerHTML = `
+
+    <div class="card">
+
+      <div style="
+        border-left:6px solid #C58A26;
+        background:#FFF7E8;
+        padding:18px;
+        border-radius:10px;
+        color:#374757;
+        line-height:1.6;
+      ">
+
+        <strong>
+          ${titulo}
+        </strong>
+
+        <br><br>
+
+        ${detalle}
+
+        <br><br>
+
+        <button
+          type="button"
+          onclick="mostrarSelectorCamaras()"
+          style="
+            background:#118AB2;
+            color:white;
+            border:none;
+            border-radius:10px;
+            padding:12px 18px;
+            font-weight:bold;
+            cursor:pointer;
+          "
+        >
+          Volver a intentar
+        </button>
+
+      </div>
+
+    </div>
+
+  `;
+
+}
 
 }
 
@@ -2556,8 +2745,12 @@ async function consultarActivo(id) {
       <div class="card">
 
         <h3>
-          ⚠️ Sin conexión a Internet
-        </h3>
+  <i
+    class="fas fa-triangle-exclamation"
+    style="color:#C58A26;margin-right:8px;">
+  </i>
+  Sin conexión a Internet
+</h3>
 
         <p style="text-align:center;">
           El código fue leído correctamente,
@@ -2566,12 +2759,13 @@ async function consultarActivo(id) {
         </p>
 
         <button
-          type="button"
-          onclick="reintentarUltimaConsulta()">
+  type="button"
+  onclick="reintentarUltimaConsulta()">
 
-          🔄 Reintentar consulta
+  <i class="fas fa-rotate-right"></i>
+  Reintentar consulta
 
-        </button>
+</button>
 
       </div>
     `;
@@ -2642,26 +2836,64 @@ async function consultarActivo(id) {
 
     if (!data.encontrado) {
 
-      resultado.innerHTML = `
-        <div class="card">
+  resultado.innerHTML = `
+    <div class="card">
 
-          <h3>
-            ⚠️ Activo no encontrado
-          </h3>
+      <div style="
+        background:#FFF7E8;
+        border-left:6px solid #C58A26;
+        padding:20px;
+        border-radius:12px;
+        color:#374757;
+        line-height:1.6;
+        text-align:center;
+      ">
 
-          <p style="text-align:center;">
-            Verifique el número del código QR
-            e intente nuevamente.
-          </p>
+        <i
+          class="fas fa-qrcode"
+          style="
+            color:#C58A26;
+            font-size:30px;
+            margin-bottom:12px;
+          ">
+        </i>
 
-          <button
-            type="button"
-            onclick="reiniciarScanner()">
+        <h3 style="
+          margin:0 0 12px;
+          color:#374757;
+        ">
+          No pudimos identificar este activo
+        </h3>
 
-            🔄 Volver a escanear
+        <p style="
+          margin:0;
+          font-size:17px;
+        ">
+          Revisa que el código QR esté completo,
+          limpio y visible.
+          <br><br>
+          También puedes ingresar el número
+          del QR manualmente.
+        </p>
 
-          </button>
+        <button
+          type="button"
+          onclick="reiniciarScanner()"
+          style="
+            margin-top:18px;
+            background:#118AB2;
+            color:#FFFFFF;
+            border:none;
+            border-radius:10px;
+            padding:12px 18px;
+            font-weight:bold;
+            cursor:pointer;
+          "
+        >
+          Intentar nuevamente
+        </button>
 
+      </div>
         </div>
       `;
 
@@ -2703,8 +2935,12 @@ async function consultarActivo(id) {
       <div class="card">
 
         <h3>
-          ✅ Activo encontrado
-        </h3>
+  <i
+    class="fas fa-circle-check"
+    style="color:#5A9E3D;margin-right:8px;">
+  </i>
+  Activo encontrado
+</h3>
 
         <p>
           <b>Cliente:</b>
@@ -2748,16 +2984,24 @@ async function consultarActivo(id) {
           </span>
         </p>
 
+        <p>
+  <b>Fecha límite:</b>
+  <span class="dato-activo">
+    ${datoSeguro(data.fechaLimite || "Por confirmar")}
+  </span>
+</p>
+
         ${botonAuditoria}
 
         <button
-          type="button"
-          class="btn-cancelar"
-          onclick="reiniciarScanner()">
+  type="button"
+  class="btn-cancelar"
+  onclick="reiniciarScanner()">
 
-          🔄 Consultar otro activo
+  <i class="fas fa-rotate-right"></i>
+  Consultar otro activo
 
-        </button>
+</button>
 
       </div>
     `;
@@ -2769,42 +3013,93 @@ async function consultarActivo(id) {
 
   } catch (error) {
 
-    const mensajeError =
-      error &&
-      error.name === "AbortError"
-        ? "La consulta tardó demasiado. Verifique su conexión e intente nuevamente."
-        : "No fue posible consultar el activo. Revise su conexión a Internet.";
+    let tituloError =
+  "No pudimos consultar el activo.";
 
-    resultado.innerHTML = `
-      <div class="card">
+let detalleError =
+  "Revisa tu conexión a Internet y vuelve a intentarlo.";
 
-        <h3>
-          ❌ No fue posible consultar el activo
-        </h3>
+if (
+  error &&
+  error.name === "AbortError"
+) {
 
-        <p style="text-align:center;">
-          ${escaparHTML(mensajeError)}
-        </p>
+  tituloError =
+    "La consulta está tardando demasiado.";
 
-        <button
-          type="button"
-          onclick="reintentarUltimaConsulta()">
+  detalleError =
+    "La conexión puede estar lenta. Verifica tu señal de Internet y vuelve a intentarlo.";
 
-          🔄 Reintentar consulta
+} else if (
+  error &&
+  error.message === "RESPUESTA_SERVIDOR"
+) {
 
-        </button>
+  tituloError =
+    "El servicio no está disponible en este momento.";
 
-        <button
-          type="button"
-          class="btn-cancelar"
-          onclick="reiniciarScanner()">
+  detalleError =
+    "No pudimos comunicarnos correctamente con el sistema de UNIFIN. Espera unos segundos y vuelve a intentarlo.";
 
-          Volver al lector
+}
 
-        </button>
+resultado.innerHTML = `
+  <div class="card">
 
-      </div>
-    `;
+    <div style="
+      background:#FFF7E8;
+      border-left:6px solid #C58A26;
+      padding:20px;
+      border-radius:12px;
+      color:#374757;
+      line-height:1.6;
+      text-align:center;
+    ">
+
+      <i
+        class="fas fa-triangle-exclamation"
+        style="
+          color:#C58A26;
+          font-size:30px;
+          margin-bottom:12px;
+        ">
+      </i>
+
+      <h3 style="
+        margin:0 0 12px;
+        color:#374757;
+      ">
+        ${escaparHTML(tituloError)}
+      </h3>
+
+      <p style="
+        margin:0;
+        font-size:17px;
+      ">
+        ${escaparHTML(detalleError)}
+      </p>
+
+      <button
+        type="button"
+        onclick="reintentarUltimaConsulta()"
+        style="
+          margin-top:18px;
+          background:#118AB2;
+          color:#FFFFFF;
+          border:none;
+          border-radius:10px;
+          padding:12px 18px;
+          font-weight:bold;
+          cursor:pointer;
+        "
+      >
+        Reintentar consulta
+      </button>
+
+    </div>
+
+  </div>
+`;
 
   } finally {
 
@@ -2844,11 +3139,11 @@ async function consultarActivo(id) {
     <div class="carga-auditoria-spinner"></div>
 
     <div class="carga-auditoria-titulo">
-      Autoauditoría UNIFIN
-    </div>
+  Mi Activo UNIFIN
+</div>
 
     <div class="carga-auditoria-texto">
-  Preparando su autoauditoría...
+  Preparando la validación de tu activo...
 </div>
 
 <div class="carga-auditoria-seguridad">
