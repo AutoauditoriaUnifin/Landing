@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es-MX">
 <head> 
 
 <meta charset="UTF-8">
@@ -27,14 +27,14 @@
 
 <meta
   name="apple-mobile-web-app-title"
-  content="UNIFIN">
+  content="Mi Activo">
 
 <link
   rel="apple-touch-icon"
   sizes="180x180"
   href="./icon-180.png">
 
-<title>Consulta QR UNIFIN</title>
+<title>Mi Activo UNIFIN</title>
  
 <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 
@@ -106,7 +106,7 @@ body {
     max(12px, env(safe-area-inset-left));
 
   color:var(--unifin-charcoal);
-  background:var(--unifin-blue);
+  background:var(--unifin-charcoal);
 
   font-family:'Rubik', Arial, sans-serif;
   font-size:18px;
@@ -480,7 +480,7 @@ hr {
   margin: 0 auto 16px;
   border: 6px solid #D6E8F0;
   border-top-color: var(--unifin-blue);
-  border-right-color: var(--unifin-green);
+border-right-color: var(--unifin-blue);
   border-radius: 50%;
   animation: girarUnifin 0.85s linear infinite;
 }
@@ -627,17 +627,14 @@ hr {
   color:var(--unifin-charcoal);
 
   background:
-    linear-gradient(
-      90deg,
-      #118AB2 0%,
-      #118AB2 52%,
-      #3BA69C 72%,
-      #65C982 87%,
-      #8EDD65 100%
-    )
-    top center / 100% 9px
-    no-repeat,
-    #FFFFFF;
+  linear-gradient(
+    90deg,
+    var(--unifin-blue),
+    var(--unifin-blue)
+  )
+  top center / 100% 9px
+  no-repeat,
+  #FFFFFF;
 
   background-clip:border-box;
 
@@ -894,9 +891,9 @@ hr {
   padding:7px 15px;
 
   color:var(--unifin-charcoal);
-  background:var(--unifin-light-green);
+  background:var(--unifin-light-blue);
 
-  border:1px solid rgba(142,221,101,.70);
+border:1px solid var(--unifin-border);
   border-radius:30px;
 
   font-size:clamp(15px, 3.8vw, 18px);
@@ -1002,14 +999,14 @@ hr {
   color:var(--unifin-charcoal);
 
   background:
-    linear-gradient(
-      145deg,
-      #FFFFFF,
-      var(--unifin-light-green)
-    );
+  linear-gradient(
+    145deg,
+    #FFFFFF,
+    var(--unifin-light-blue)
+  );
 
-  border:1px solid rgba(142,221,101,.55);
-  border-left:6px solid var(--unifin-green);
+border:1px solid var(--unifin-border);
+border-left:6px solid var(--unifin-blue);
   border-radius:var(--radio-tarjeta);
 
   box-shadow:
@@ -1237,13 +1234,24 @@ hr {
 #panelInstalacionApp {
   display:none !important;
 }
-/* Fondo exterior azul UNIFIN */
+/* Fondo exterior institucional UNIFIN */
 html {
-  background:#118AB2;
+  background:var(--unifin-charcoal);
 }
 
 body {
-  background:#118AB2 !important;
+  background:
+    radial-gradient(
+      circle at top left,
+      rgba(255,255,255,.10),
+      transparent 35%
+    ),
+    linear-gradient(
+      145deg,
+      var(--unifin-charcoal),
+      var(--unifin-dark-blue)
+    ) !important;
+
   min-height:100vh;
 }
 
@@ -1267,16 +1275,16 @@ body {
     max(18px, env(safe-area-inset-left));
 
   background:
-    radial-gradient(
-      circle at top left,
-      rgba(255,255,255,.18),
-      transparent 38%
-    ),
-    linear-gradient(
-      145deg,
-      #118AB2 0%,
-      #0D6E8C 100%
-    );
+  radial-gradient(
+    circle at top left,
+    rgba(255,255,255,.10),
+    transparent 38%
+  ),
+  linear-gradient(
+    145deg,
+    var(--unifin-charcoal) 0%,
+    var(--unifin-dark-blue) 100%
+  );
 }
 
 .carga-auditoria-contenido {
@@ -1315,8 +1323,8 @@ body {
   margin:0 auto 24px;
 
   border:6px solid #D8EAF1;
-  border-top-color:#118AB2;
-  border-right-color:#8EDD65;
+  border-top-color:var(--unifin-blue);
+border-right-color:var(--unifin-blue);
   border-radius:50%;
 
   animation:girarCargaAuditoria .9s linear infinite;
@@ -1378,17 +1386,14 @@ body {
   border: 1px solid rgba(255,255,255,.90);
 
   background:
-    linear-gradient(
-      90deg,
-      #118AB2 0%,
-      #118AB2 52%,
-      #3BA69C 72%,
-      #65C982 87%,
-      #8EDD65 100%
-    )
-    top center / 100% 9px
-    no-repeat,
-    #FFFFFF !important;
+  linear-gradient(
+    90deg,
+    var(--unifin-blue),
+    var(--unifin-blue)
+  )
+  top center / 100% 9px
+  no-repeat,
+  #FFFFFF;
 
   background-clip: border-box;
 }
@@ -1507,8 +1512,8 @@ body {
   </span>
 
   <span id="textoConexionLanding">
-    Comprobando conexión...
-  </span>
+  Verificando conexión...
+</span>
 
 </div>
 
@@ -1563,21 +1568,21 @@ body {
 
   <strong>
   <i class="fas fa-mobile-screen-button"></i>
-  Instale la aplicación UNIFIN
+  Instala Mi Activo UNIFIN
 </strong>
 
   <p>
-    Acceda al lector y a sus auditorías directamente desde la pantalla de su teléfono.
-  </p>
+  Accede al lector y a la validación de tus activos directamente desde la pantalla de tu teléfono.
+</p>
 
   <button
-    type="button"
-    id="btnInstalarApp"
-    onclick="instalarAplicacion()">
+  type="button"
+  id="btnInstalarApp"
+  onclick="instalarAplicacion()">
 
-    Instalar aplicación
+  Instalar Mi Activo
 
-  </button>
+</button>
 
   <div id="mensajeInstalacionApp"></div>
 
@@ -1589,10 +1594,10 @@ body {
 
   <div class="texto-paso">
 
-    <strong>Escanear código QR</strong>
+    <strong>Escanea el código QR</strong>
 
     <small>
-      Seleccione la cámara trasera de su teléfono.
+        Selecciona la cámara trasera de tu teléfono.
     </small>
 
   </div>
@@ -1605,7 +1610,7 @@ body {
   onclick="mostrarSelectorCamaras()">
 
   <i class="fas fa-camera"></i>
-  Seleccionar cámara
+Selecciona una cámara
 
 </button>
 
@@ -1617,7 +1622,7 @@ body {
   onclick="reiniciarScanner()">
 
   <i class="fas fa-rotate-right"></i>
-  Volver a Escanear
+Volver a escanear
 
 </button>
 
@@ -1645,24 +1650,24 @@ body {
 
 </span>
 
-      Seleccione una cámara
+      Selecciona una cámara
 
     </div>
 
     <div class="modal-camara-texto">
 
-      La cámara solamente se abrirá cuando presione
-      <strong>Abrir cámara</strong>.
+  La cámara solamente se abrirá cuando presiones
+  <strong>Abrir cámara</strong>.
 
-    </div>
+</div>
 
     <label
-      class="label-selector-camara"
-      for="selectorCamara">
+  class="label-selector-camara"
+  for="selectorCamara">
 
-      Cámara disponible
+  Selecciona la cámara
 
-    </label>
+</label>
 
     <select id="selectorCamara">
 
@@ -1712,10 +1717,10 @@ body {
 
   <div class="texto-paso">
 
-    <strong>Buscar manualmente</strong>
+    <strong>Busca tu activo manualmente</strong>
 
     <small>
-      Ingrese el número que aparece debajo del código QR.
+  Ingresa el número que aparece debajo del código QR.
     </small>
 
   </div>
@@ -1725,7 +1730,7 @@ body {
   <input
     type="text"
     id="txtID"
-    placeholder="Ingrese el número del QR"
+    placeholder="Ingresa el número del QR"
   >
 
   <button
@@ -1733,15 +1738,14 @@ body {
   id="btnBuscarManual"
   onclick="buscarManual()">
 
-  <i class="fas fa-magnifying-glass"></i>
-  Buscar Activo
-
+ <i class="fas fa-magnifying-glass"></i>
+Busca tu activo
 </button>
 
 <div class="nota-seguridad">
 
   <i class="fas fa-lock"></i>
-  La información se consulta directamente en el sistema seguro de UNIFIN.
+  Tus datos se consultan de forma segura para identificar tu activo.
 
 </div>
 
@@ -2036,14 +2040,15 @@ async function mostrarSelectorCamaras() {
       selector.innerHTML =
         '<option value="">No se encontraron cámaras</option>';
 
+      
       mensaje.textContent =
-        "No se encontró ninguna cámara disponible.";
+  "No encontramos ninguna cámara disponible.";
 
       return;
     }
 
     selector.innerHTML =
-      '<option value="">Seleccione una cámara</option>';
+  '<option value="">Selecciona una cámara</option>';
 
     camaras.forEach(function(camara, indice) {
 
@@ -2222,7 +2227,7 @@ async function abrirCamaraSeleccionada() {
   if (!cameraId) {
 
     mensaje.textContent =
-      "Seleccione una cámara antes de continuar.";
+  "Selecciona una cámara antes de continuar.";
 
     return;
   }
@@ -2918,15 +2923,15 @@ async function consultarActivo(id) {
               );
             ">
 
-            Iniciar Autoauditoría
+            Continuar con mi validación
 
           </a>
         `
         : `
           <div class="mensaje-enlace-no-disponible">
 
-            El enlace de la autoauditoría
-            no se encuentra disponible.
+            El enlace de validación
+no se encuentra disponible.
 
           </div>
         `;
