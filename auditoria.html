@@ -11508,9 +11508,14 @@ async function cargarAuditoriaDesdeApi() {
       "&_=" + Date.now();
 
     const resultado =
-      await consultarApiJsonp(
-        urlConsulta
-      );
+  await consultarApiJsonp(
+    urlConsulta
+  );
+
+alert(
+  "API RECIBIDA CORRECTAMENTE:\n\n" +
+  JSON.stringify(resultado)
+);
 
     if (!resultado.success) {
 
