@@ -2822,12 +2822,7 @@ div:first-child img {
   height: 100%;
 
   background:
-    linear-gradient(
-      90deg,
-      var(--unifin-blue),
-      #3BA69C,
-      var(--unifin-green)
-    );
+    var(--unifin-blue);
 
   border-radius: 20px;
 
@@ -6553,27 +6548,47 @@ if (esFotoBorrosa) {
 
   if (mensaje) {
 
-    mensaje.innerHTML =
-      '<div style="' +
-        'background:#FFF7E8;' +
-        'border-left:6px solid #C58A26;' +
-        'padding:16px;' +
-        'border-radius:10px;' +
-        'color:#374757;' +
-        'line-height:1.5;' +
-      '">' +
+  mensaje.innerHTML =
+    '<div style="' +
+      'background:#FFF7E8;' +
+      'border:1px solid #FFD071;' +
+      'border-left:6px solid #C58A26;' +
+      'padding:16px;' +
+      'border-radius:10px;' +
+      'color:#374757;' +
+      'line-height:1.5;' +
+    '">' +
 
-        '<i class="fas fa-triangle-exclamation" ' +
-          'style="color:#C58A26;margin-right:8px;"></i>' +
+      '<i class="fas fa-triangle-exclamation" ' +
+        'style="color:#C58A26;margin-right:8px;"></i>' +
 
-        '<strong>La fotografía está demasiado borrosa.</strong><br>' +
+      '<strong>La fotografía está demasiado borrosa.</strong><br>' +
 
-        'Mantén el teléfono firme, asegúrate de tener buena iluminación ' +
-        'y vuelve a tomar la fotografía.' +
+      'Mantén el teléfono firme, limpia el lente, ' +
+      'asegúrate de tener buena iluminación y vuelve a tomar la fotografía.' +
+    '</div>';
 
-      '</div>';
+  /*
+    Hacer visible el aviso aunque anteriormente
+    el contenedor haya sido ocultado.
+  */
+  mensaje.style.display =
+    "block";
 
-  }
+  /*
+    Llevar al usuario directamente al motivo
+    por el que la fotografía fue rechazada.
+  */
+  setTimeout(function() {
+
+    mensaje.scrollIntoView({
+      behavior: "smooth",
+      block: "center"
+    });
+
+  }, 150);
+
+}
 
 } else {
 
@@ -10153,9 +10168,10 @@ const precisionMostrar =
     ) {
 
       mensajeGPS =
-        "La ubicación está bloqueada para este navegador. " +
-        "Abra el enlace directamente en Chrome o Safari " +
-        "y permita el acceso a la ubicación.";
+  "No pudimos acceder a tu ubicación. " +
+  "Permite el acceso a la ubicación en tu navegador " +
+  "e inténtalo nuevamente. " +
+  "Si lo prefieres, puedes ingresar tu ubicación manualmente.";
 
     /*
       Código 2: ubicación no disponible.
@@ -10167,9 +10183,10 @@ const precisionMostrar =
     ) {
 
       mensajeGPS =
-        "El teléfono no pudo determinar la ubicación. " +
-        "Active la ubicación, el Wi-Fi y los datos móviles, " +
-        "y vuelva a intentarlo.";
+  "No pudimos determinar tu ubicación. " +
+  "Verifica que la ubicación de tu teléfono esté activada " +
+  "e inténtalo nuevamente. " +
+  "Si lo prefieres, puedes ingresar tu ubicación manualmente.";
 
     /*
       Código 3: tiempo agotado.
@@ -10181,9 +10198,10 @@ const precisionMostrar =
     ) {
 
       mensajeGPS =
-        "El GPS tardó demasiado en responder. " +
-        "Acérquese a una ventana o salga al exterior " +
-        "y vuelva a intentarlo.";
+  "La ubicación está tardando más de lo esperado. " +
+  "Verifica que la ubicación de tu teléfono esté activada " +
+  "e inténtalo nuevamente. " +
+  "Si lo prefieres, puedes ingresar tu ubicación manualmente.";
 
     }
 
@@ -11549,9 +11567,28 @@ async function cargarAuditoriaDesdeApi() {
       "none";
 
     errorInicial.style.display =
-      "block";
+  "block";
 
-    errorInicial.innerHTML = `
+/*
+  Este estado NO es un error.
+  Quitamos el cuadro salmón exterior.
+*/
+errorInicial.style.background =
+  "transparent";
+
+errorInicial.style.border =
+  "none";
+
+errorInicial.style.borderLeft =
+  "none";
+
+errorInicial.style.padding =
+  "0";
+
+errorInicial.style.boxShadow =
+  "none";
+
+errorInicial.innerHTML = `
       <div style="
         width:100%;
         padding:22px 24px;
