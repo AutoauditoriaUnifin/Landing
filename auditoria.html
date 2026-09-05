@@ -3285,7 +3285,12 @@ margin-bottom:30px;
   <span id="datoNumeroSerie"></span>
 </p>
   <p><strong>QR Number:</strong> <span id="datoQrNumber"></span></p>
-  <p><strong>Anexo:</strong> <span id="datoAnexo"></span></p>
+<p><strong>Anexo:</strong> <span id="datoAnexo"></span></p>
+
+<p id="filaFechaLimite" style="display:none;">
+  <strong>Fecha límite:</strong>
+  <span id="datoFechaLimite"></span>
+</p>
 
 
 </div>
@@ -4190,7 +4195,7 @@ Preparando envío...
 <script>
 
 const API_URL =
-  "https://script.google.com/macros/s/AKfycbxePWGm_UdrmP4Q0NlvbsFNClBNs-RZMAd2QOv6cz4pA07C_6dzWgMnOQistTQPFKx3Nw/exec";
+  "https://script.google.com/macros/s/AKfycbxtExVCWmFuCUd8hjlOA-HJMP6SuDagU1EeJXt_vVB7cVjAgEmzOdTShw-HRkxnqkNkgQ/exec";
 
   const CLOUDINARY_CLOUD_NAME = "b3bnfknd";
   const CLOUDINARY_UPLOAD_PRESET = "autoauditorias";
@@ -11706,13 +11711,50 @@ if (numeroSerieVacio) {
 }
 
     document.getElementById("datoQrNumber").textContent =
-      audit.qrNumber || "Sin información";
+  audit.qrNumber || "Sin información";
 
-    document.getElementById("datoAnexo").textContent =
-      audit.anexo || "Sin información";
+document.getElementById("datoAnexo").textContent =
+  audit.anexo || "Sin información";
 
-    auditIdActual =
-      audit.auditId;
+/* =========================================
+   MOSTRAR FECHA LÍMITE
+========================================= */
+
+const filaFechaLimite =
+  document.getElementById(
+    "filaFechaLimite"
+  );
+
+const datoFechaLimite =
+  document.getElementById(
+    "datoFechaLimite"
+  );
+
+const fechaLimite =
+  String(
+    audit.fechaLimite || ""
+  ).trim();
+
+if (fechaLimite) {
+
+  datoFechaLimite.textContent =
+    fechaLimite;
+
+  filaFechaLimite.style.display =
+    "";
+
+} else {
+
+  datoFechaLimite.textContent =
+    "";
+
+  filaFechaLimite.style.display =
+    "none";
+
+}
+
+auditIdActual =
+  audit.auditId;
 
     claveEvidencias =
       "evidenciasAutoauditoria_" +
