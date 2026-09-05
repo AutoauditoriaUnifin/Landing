@@ -11400,6 +11400,32 @@ function mostrarPantallaFinal() {
     envioFormularioEnProceso =
     false;
 
+    /*
+      Limpiar cualquier alerta o mensaje anterior.
+      Al finalizar correctamente no debe quedar
+      visible ningún estado rojo de error.
+    */
+    const mensajePrincipal =
+      document.getElementById("mensaje");
+
+    const estadoGPS =
+      document.getElementById("gpsStatus");
+
+    const mensajeUbicacionManual =
+      document.getElementById(
+        "mensajeUbicacionManual"
+      );
+
+    if (estadoGPS) {
+      estadoGPS.innerHTML = "";
+      estadoGPS.style.display = "none";
+    }
+
+    if (mensajeUbicacionManual) {
+      mensajeUbicacionManual.innerHTML = "";
+      mensajeUbicacionManual.style.display = "none";
+    }
+
     document
     .querySelectorAll(".paso-actual")
     .forEach(function(elemento) {
@@ -11608,24 +11634,37 @@ const filaNumeroSerie =
 const datoNumeroSerie =
   document.getElementById("datoNumeroSerie");
 
-if (
-  numeroSerie &&
-  numeroSerie.toLowerCase() !== "sin información"
-) {
+const numeroSerieNormalizado =
+  numeroSerie
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .trim();
 
-  datoNumeroSerie.textContent =
-    numeroSerie;
+const numeroSerieVacio =
+  !numeroSerie ||
+  numeroSerieNormalizado === "sin informacion" ||
+  numeroSerieNormalizado === "n/a" ||
+  numeroSerieNormalizado === "na" ||
+  numeroSerieNormalizado === "null" ||
+  numeroSerieNormalizado === "undefined" ||
+  numeroSerieNormalizado === "-";
 
-  filaNumeroSerie.style.display =
-    "";
-
-} else {
+if (numeroSerieVacio) {
 
   datoNumeroSerie.textContent =
     "";
 
   filaNumeroSerie.style.display =
     "none";
+
+} else {
+
+  datoNumeroSerie.textContent =
+    numeroSerie;
+
+  filaNumeroSerie.style.display =
+    "";
 
 }
 
