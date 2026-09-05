@@ -2985,12 +2985,24 @@ no se encuentra disponible.
           </span>
         </p>
 
-        <p>
-          <b>No. Serie:</b>
-          <span class="dato-activo">
-            ${datoSeguro(data.NoSerie)}
-          </span>
-        </p>
+        ${
+  data.NoSerie &&
+  String(data.NoSerie).trim() &&
+  String(data.NoSerie)
+    .trim()
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "") !== "sin informacion"
+    ? `
+      <p>
+        <b>No. Serie:</b>
+        <span class="dato-activo">
+          ${datoSeguro(data.NoSerie)}
+        </span>
+      </p>
+    `
+    : ""
+}
 
         <p>
           <b>QR Number:</b>
