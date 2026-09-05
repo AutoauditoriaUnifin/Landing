@@ -6998,8 +6998,6 @@ canvas =
     */
 
     mostrarMensajeCamaraInterna(
-  '<i class="fas fa-circle-check" ' +
-  'style="color:#5A9E3D;margin-right:7px;"></i>' +
   "Fotografía protegida correctamente.",
   false
 );
@@ -7014,13 +7012,13 @@ canvas =
 
     if (botonFoto) {
 
-      boton.innerHTML =
-  '<i class="fas fa-shield-halved"></i> ' +
-  "Fotografía protegida. " +
-  '<i class="fas fa-spinner fa-spin"></i> ' +
-  "Subiendo...";
+  botonFoto.innerHTML =
+    '<i class="fas fa-shield-halved"></i> ' +
+    "Fotografía protegida. " +
+    '<i class="fas fa-spinner fa-spin"></i> ' +
+    "Subiendo...";
 
-    }
+}
 
     /*
       Mostrar brevemente la confirmación.
@@ -11511,11 +11509,6 @@ async function cargarAuditoriaDesdeApi() {
   await consultarApiJsonp(
     urlConsulta
   );
-
-alert(
-  "API RECIBIDA CORRECTAMENTE:\n\n" +
-  JSON.stringify(resultado)
-);
 
     if (!resultado.success) {
 
