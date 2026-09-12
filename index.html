@@ -3005,12 +3005,20 @@ no se encuentra disponible.
           </span>
         </p>
 
-        <p>
-  <b>Fecha límite:</b>
-  <span class="dato-activo">
-    ${datoSeguro(data.fechaLimite || "Por confirmar")}
-  </span>
-</p>
+        ${
+  data.fechaLimite &&
+  String(data.fechaLimite).trim() &&
+  String(data.fechaLimite).trim().toLowerCase() !== "por confirmar"
+    ? `
+      <p>
+        <b>Fecha límite:</b>
+        <span class="dato-activo">
+          ${datoSeguro(data.fechaLimite)}
+        </span>
+      </p>
+    `
+    : ""
+}
 
         ${botonAuditoria}
 
