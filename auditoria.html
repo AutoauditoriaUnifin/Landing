@@ -11091,10 +11091,12 @@ if (
 
 }
 
+}
+
 /*
-  Todas las fotografías ya están subidas.
-  Quitar cualquier aviso anterior de
-  fotografías pendientes.
+  Si el proceso llegó hasta aquí,
+  ya no quedan fotografías pendientes.
+  Quitar cualquier aviso anterior.
 */
 const mensajeFotosPendientes =
   document.getElementById("mensaje");
@@ -11104,8 +11106,6 @@ if (mensajeFotosPendientes) {
   mensajeFotosPendientes.innerHTML = "";
   mensajeFotosPendientes.style.display =
     "none";
-
-}
 
 }
 
