@@ -6,7 +6,7 @@ const CACHE_PREFIX =
   "unifin-pwa-";
 
 const CACHE_VERSION =
-  "unifin-pwa-v10-navegacion-directa";
+  "unifin-pwa-v11-dominio-oficial";
 
 
 /* =========================================
