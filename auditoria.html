@@ -11075,21 +11075,37 @@ if (
   await reintentarFotosPendientes();
 
   pendientesSubida =
-    obtenerEvidenciasFaltantes(
-      tipoActivo,
-      true
-    );
+  obtenerEvidenciasFaltantes(
+    tipoActivo,
+    true
+  );
 
-  if (
-    pendientesSubida.length > 0
-  ) {
+if (
+  pendientesSubida.length > 0
+) {
 
-    throw new Error(
-      "Algunas fotografías continúan pendientes de subir. " +
-      "Espere un momento e intente nuevamente."
-    );
+  throw new Error(
+    "Algunas fotografías continúan pendientes de subir. " +
+    "Espere un momento e intente nuevamente."
+  );
 
-  }
+}
+
+/*
+  Todas las fotografías ya están subidas.
+  Quitar cualquier aviso anterior de
+  fotografías pendientes.
+*/
+const mensajeFotosPendientes =
+  document.getElementById("mensaje");
+
+if (mensajeFotosPendientes) {
+
+  mensajeFotosPendientes.innerHTML = "";
+  mensajeFotosPendientes.style.display =
+    "none";
+
+}
 
 }
 
