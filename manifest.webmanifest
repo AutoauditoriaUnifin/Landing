@@ -1,8 +1,8 @@
 {
   "id": "./",
-  "name": "Autoauditoría UNIFIN",
-  "short_name": "UNIFIN",
-  "description": "Consulta y autoauditoría de activos UNIFIN",
+  "name": "Mi Activo UNIFIN",
+  "short_name": "Mi Activo",
+  "description": "Consulta y validación de activos en Mi Activo UNIFIN",
   "lang": "es-MX",
   "start_url": "./",
   "scope": "./",
