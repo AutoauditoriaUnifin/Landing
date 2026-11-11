@@ -1792,6 +1792,7 @@ const modoAccesoLanding =
    APLICAR MODO DE ACCESO
 ========================================= */
 
+
 function aplicarModoAccesoLanding() {
 
   const zonaCamara =
@@ -1803,52 +1804,77 @@ function aplicarModoAccesoLanding() {
   const modal =
     document.getElementById("modalCamara");
 
-    // Obtener los textos y el campo de búsqueda manual.
-const titulosMetodo =
-  document.querySelectorAll(
-    "#zonaBusqueda .titulo-metodo"
-  );
+  const titulosMetodo =
+    document.querySelectorAll(
+      "#zonaBusqueda .titulo-metodo"
+    );
 
-const tituloBusquedaManual =
-  titulosMetodo.length > 1
-    ? titulosMetodo[1].querySelector("strong")
-    : null;
+  const tituloBusquedaManual =
+    titulosMetodo.length > 1
+      ? titulosMetodo[1].querySelector("strong")
+      : null;
 
-const detalleBusquedaManual =
-  titulosMetodo.length > 1
-    ? titulosMetodo[1].querySelector("small")
-    : null;
+  const detalleBusquedaManual =
+    titulosMetodo.length > 1
+      ? titulosMetodo[1].querySelector("small")
+      : null;
 
-const campoBusqueda =
-  document.getElementById("txtID");
+  const campoBusqueda =
+    document.getElementById("txtID");
 
   const instruccionAcceso =
-  document.getElementById("instruccionAccesoLanding");
+    document.getElementById("instruccionAccesoLanding");
 
+  // MODO NÚMERO DE SERIE
+  if (modoAccesoLanding === "serie") {
+
+    if (instruccionAcceso) {
+      instruccionAcceso.textContent =
+        "Ingresa el número de serie de tu activo para comenzar.";
+    }
+
+    if (tituloBusquedaManual) {
+      tituloBusquedaManual.textContent =
+        "Busca tu activo por número de serie";
+    }
+
+    if (detalleBusquedaManual) {
+      detalleBusquedaManual.textContent =
+        "Ingresa el número de serie para continuar";
+    }
+
+    if (campoBusqueda) {
+      campoBusqueda.placeholder =
+        "Ingresa el número de serie";
+    }
+
+    // Ocultar toda la sección de cámara.
+    if (zonaCamara) {
+      zonaCamara.hidden = true;
+      zonaCamara.style.display = "none";
+    }
+
+    if (lector) {
+      lector.innerHTML = "";
+      lector.style.display = "none";
+    }
+
+    if (modal) {
+      modal.style.display = "none";
+    }
+
+    console.log(
+      "UNIFIN: acceso por número de serie."
+    );
+
+    return;
+  }
+
+  // MODO QR
   if (instruccionAcceso) {
-  instruccionAcceso.textContent =
-    "Ingresa el número de serie de tu activo para comenzar.";
-}
-
-// Cambiar los textos según el modo seleccionado.
-if (modoAccesoLanding === "serie") {
-
-  if (tituloBusquedaManual) {
-    tituloBusquedaManual.textContent =
-      "Busca tu activo por número de serie";
+    instruccionAcceso.textContent =
+      "Escanea el código QR de tu activo o ingresa el número manualmente para comenzar.";
   }
-
-  if (detalleBusquedaManual) {
-    detalleBusquedaManual.textContent =
-      "Ingresa el número de serie para continuar";
-  }
-
-  if (campoBusqueda) {
-    campoBusqueda.placeholder =
-      "Ingresa el número de serie";
-  }
-
-} else {
 
   if (tituloBusquedaManual) {
     tituloBusquedaManual.textContent =
@@ -1865,36 +1891,6 @@ if (modoAccesoLanding === "serie") {
       "Ingresa los 8 dígitos del QR";
   }
 
-}
-
-  // MODO NÚMERO DE SERIE
-  if (modoAccesoLanding === "serie") {
-
-    // Ocultar toda la sección de cámara.
-    if (zonaCamara) {
-      zonaCamara.hidden = true;
-      zonaCamara.style.display = "none";
-    }
-
-    // Mantener el lector apagado.
-    if (lector) {
-      lector.innerHTML = "";
-      lector.style.display = "none";
-    }
-
-    // Cerrar cualquier selector de cámara.
-    if (modal) {
-      modal.style.display = "none";
-    }
-
-    console.log(
-      "UNIFIN: acceso por número de serie."
-    );
-
-    return;
-  }
-
-  // MODO QR
   if (zonaCamara) {
     zonaCamara.hidden = false;
     zonaCamara.style.display = "";
@@ -1905,7 +1901,6 @@ if (modoAccesoLanding === "serie") {
   );
 
 }
-
 
 /* =========================================
    EJECUTAR CONTROL DE ACCESO
