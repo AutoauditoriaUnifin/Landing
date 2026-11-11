@@ -1546,10 +1546,10 @@ border-right-color:var(--unifin-blue);
     y toma menos de 5 minutos.
   </p>
 
-  <p>
-    Escanea el código QR de tu activo o ingresa
-    el número manualmente para comenzar.
-  </p>
+  <p id="instruccionAccesoLanding">
+  Escanea el código QR de tu activo o ingresa
+  el número manualmente para comenzar.
+</p>
 
 </div>
 
@@ -1696,11 +1696,11 @@ Volver a escanear
 
       </button>
 
-      </div>
-
     </div>
 
   </div>
+
+</div>
 
 </div>
 
@@ -1821,6 +1821,14 @@ const detalleBusquedaManual =
 
 const campoBusqueda =
   document.getElementById("txtID");
+
+  const instruccionAcceso =
+  document.getElementById("instruccionAccesoLanding");
+
+  if (instruccionAcceso) {
+  instruccionAcceso.textContent =
+    "Ingresa el número de serie de tu activo para comenzar.";
+}
 
 // Cambiar los textos según el modo seleccionado.
 if (modoAccesoLanding === "serie") {
@@ -2788,7 +2796,7 @@ async function buscarManual() {
   const id =
     campo.value.trim();
 
- if (!id) {
+  if (!id) {
 
   if (modoAccesoLanding === "serie") {
 
