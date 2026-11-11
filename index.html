@@ -2788,16 +2788,21 @@ async function buscarManual() {
   const id =
     campo.value.trim();
 
-  if (!id) {
+ if (!id) {
 
-    campo.focus();
+  if (modoAccesoLanding === "serie") {
 
-    alert(
-      "Ingrese el número del código QR."
-    );
+    alert("Ingresa el número de serie del activo.");
 
-    return;
+  } else {
+
+    alert("Ingresa el número del código QR.");
+
   }
+
+  campo.focus();
+  return;
+}
 
   // Validar formato únicamente cuando el acceso es por QR.
 if (
