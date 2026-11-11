@@ -1579,6 +1579,8 @@ border-right-color:var(--unifin-blue);
 
 </div>
 
+  <div id="zonaEscanerQR">
+
   <div class="titulo-metodo">
 
   <span class="numero-paso">1</span>
@@ -1764,6 +1766,143 @@ Busca tu activo
 
 const API_URL =
   "https://script.google.com/macros/s/AKfycbwMkBJQvfRneHxzPuGNOBdUaKVYMdLIYhSIr4hBQAAd7QUOdGnZuuflY_MycdIWUSx3/exec";
+
+
+/* =========================================
+   CONTROL DE MODO DE ACCESO UNIFIN
+   QR O NÚMERO DE SERIE
+========================================= */
+
+// Detectar el parámetro de la dirección.
+const parametrosLanding =
+  new URLSearchParams(window.location.search);
+
+// Identificar el modo solicitado.
+const modoAccesoLanding =
+  String(
+    parametrosLanding.get("modo") || "qr"
+  ).trim().toLowerCase() === "serie"
+    ? "serie"
+    : "qr";
+
+
+/* =========================================
+   APLICAR MODO DE ACCESO
+========================================= */
+
+function aplicarModoAccesoLanding() {
+
+  const zonaCamara =
+    document.getElementById("zonaEscanerQR");
+
+  const lector =
+    document.getElementById("reader");
+
+  const modal =
+    document.getElementById("modalCamara");
+
+    // Obtener los textos y el campo de búsqueda manual.
+const titulosMetodo =
+  document.querySelectorAll(
+    "#zonaBusqueda .titulo-metodo"
+  );
+
+const tituloBusquedaManual =
+  titulosMetodo.length > 1
+    ? titulosMetodo[1].querySelector("strong")
+    : null;
+
+const detalleBusquedaManual =
+  titulosMetodo.length > 1
+    ? titulosMetodo[1].querySelector("small")
+    : null;
+
+const campoBusqueda =
+  document.getElementById("txtID");
+
+// Cambiar los textos según el modo seleccionado.
+if (modoAccesoLanding === "serie") {
+
+  if (tituloBusquedaManual) {
+    tituloBusquedaManual.textContent =
+      "Busca tu activo por número de serie";
+  }
+
+  if (detalleBusquedaManual) {
+    detalleBusquedaManual.textContent =
+      "Ingresa el número de serie para continuar";
+  }
+
+  if (campoBusqueda) {
+    campoBusqueda.placeholder =
+      "Ingresa el número de serie";
+  }
+
+} else {
+
+  if (tituloBusquedaManual) {
+    tituloBusquedaManual.textContent =
+      "Busca tu activo manualmente";
+  }
+
+  if (detalleBusquedaManual) {
+    detalleBusquedaManual.textContent =
+      "Ingresa los 8 dígitos del QR para continuar";
+  }
+
+  if (campoBusqueda) {
+    campoBusqueda.placeholder =
+      "Ingresa los 8 dígitos del QR";
+  }
+
+}
+
+  // MODO NÚMERO DE SERIE
+  if (modoAccesoLanding === "serie") {
+
+    // Ocultar toda la sección de cámara.
+    if (zonaCamara) {
+      zonaCamara.hidden = true;
+      zonaCamara.style.display = "none";
+    }
+
+    // Mantener el lector apagado.
+    if (lector) {
+      lector.innerHTML = "";
+      lector.style.display = "none";
+    }
+
+    // Cerrar cualquier selector de cámara.
+    if (modal) {
+      modal.style.display = "none";
+    }
+
+    console.log(
+      "UNIFIN: acceso por número de serie."
+    );
+
+    return;
+  }
+
+  // MODO QR
+  if (zonaCamara) {
+    zonaCamara.hidden = false;
+    zonaCamara.style.display = "";
+  }
+
+  console.log(
+    "UNIFIN: acceso mediante código QR."
+  );
+
+}
+
+
+/* =========================================
+   EJECUTAR CONTROL DE ACCESO
+========================================= */
+
+aplicarModoAccesoLanding();
+
 
 /* =========================================
    CONTROL DEL ESCÁNER QR
@@ -2000,6 +2139,17 @@ async function reintentarUltimaConsulta() {
 
 async function mostrarSelectorCamaras() {
 
+    // Bloquear cámaras cuando el acceso es por número de serie.
+  if (modoAccesoLanding === "serie") {
+    const modal = document.getElementById("modalCamara");
+
+    if (modal) {
+      modal.style.display = "none";
+    }
+
+    return;
+  }
+
   const modal =
     document.getElementById("modalCamara");
 
@@ -2205,6 +2355,12 @@ function cerrarSelectorCamaras() {
 ========================================= */
 
 async function abrirCamaraSeleccionada() {
+
+    // No permitir abrir la cámara en modo serie.
+  if (modoAccesoLanding === "serie") {
+    await detenerScanner();
+    return;
+  }
 
   const selector =
     document.getElementById("selectorCamara");
@@ -2534,7 +2690,38 @@ async function reiniciarScanner() {
     campoManual.value = "";
   }
 
+  
+if (modoAccesoLanding === "qr") {
+
+  const reader =
+    document.getElementById("reader");
+
+  if (reader) {
+    reader.innerHTML = "";
+    reader.style.display = "block";
+  }
+
   await mostrarSelectorCamaras();
+
+} else {
+
+  const reader =
+    document.getElementById("reader");
+
+  if (reader) {
+    reader.innerHTML = "";
+    reader.style.display = "none";
+  }
+
+  const modal =
+    document.getElementById("modalCamara");
+
+  if (modal) {
+    modal.style.display = "none";
+  }
+
+}
+
 
 }
 /* =========================================
@@ -2570,7 +2757,24 @@ async function onScanSuccess(decodedText) {
 
   }
 
-  consultarActivo(decodedText);
+  // Limpiar el contenido recibido del escáner.
+const codigoQR =
+  String(decodedText || "").trim();
+
+// Validar que el QR tenga exactamente 8 caracteres alfanuméricos.
+if (!/^[A-Z0-9]{8}$/i.test(codigoQR)) {
+
+  escaneoProcesado = false;
+
+  alert(
+    "El código QR no tiene el formato esperado. Debe contener exactamente 8 caracteres alfanuméricos."
+  );
+
+  return;
+}
+
+// Consultar el activo utilizando el código validado.
+consultarActivo(codigoQR);
 
 }
 
@@ -2592,6 +2796,19 @@ async function buscarManual() {
 
     return;
   }
+
+  // Validar formato únicamente cuando el acceso es por QR.
+if (
+  modoAccesoLanding === "qr" &&
+  !/^[A-Z0-9]{8}$/i.test(id)
+) {
+  alert(
+    "El código QR debe contener exactamente 8 caracteres alfanuméricos."
+  );
+
+  campo.focus();
+  return;
+}
 
   escaneoProcesado = true;
 
